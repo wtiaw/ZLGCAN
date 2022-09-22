@@ -13,6 +13,7 @@ SOURCES += \
     CustomWidget/DataEdit.cpp \
     ReceiveDataThread.cpp \
     Setting/settingconfig.cpp \
+    Windows/AutoSendConfigWindow.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -20,9 +21,11 @@ HEADERS += \
     CustomWidget/DataEdit.h \
     ReceiveDataThread.h \
     Setting/settingconfig.h \
+    Windows/AutoSendConfigWindow.h \
     mainwindow.h
 
 FORMS += \
+    Windows/AutoSendConfigWindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.

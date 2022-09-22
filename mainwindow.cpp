@@ -258,12 +258,14 @@ void MainWindow::On_OpenDevice()
 
     ResetMessageTable();
 
-    ui->OpenDevice->setEnabled(false);
-    ui->InitCAN->setEnabled(true);
-    ui->CloseDevice->setEnabled(true);
 
-    ui->DeviceNameComboBox->setEnabled(false);
-    ui->DeviceIDCamboBox->setEnabled(false);
+    ui->InitCAN->      setEnabled(true);
+    ui->CloseDevice->  setEnabled(true);
+
+    ui->OpenDevice->          setEnabled(false);
+    ui->DeviceNameComboBox->  setEnabled(false);
+    ui->DeviceIDCamboBox->    setEnabled(false);
+
     qDebug("设备：%s 打开成功",(DeviceDisplayName.c_str()));
 }
 
@@ -313,14 +315,14 @@ void MainWindow::On_InitCAN()
     qDebug("终端电阻：%s",property->GetValue(path));
 
 
-    ui->OpenCAN->setEnabled(true);
+    ui->OpenCAN->              setEnabled(true);
 
-    ui->InitCAN->           setEnabled(false);
-    ui->ChannelIDComboBox-> setEnabled(false);
-    ui->WorkingModeComboBox->setEnabled(false);
-    ui->ABitComboBox->setEnabled(false);
-    ui->DBitComboBox->setEnabled(false);
-    ui->ResistanceComboBox->setEnabled(false);
+    ui->InitCAN->              setEnabled(false);
+    ui->ChannelIDComboBox->    setEnabled(false);
+    ui->WorkingModeComboBox->  setEnabled(false);
+    ui->ABitComboBox->         setEnabled(false);
+    ui->DBitComboBox->         setEnabled(false);
+    ui->ResistanceComboBox->   setEnabled(false);
 }
 
 void MainWindow::On_OpenCAN()
@@ -332,9 +334,11 @@ void MainWindow::On_OpenCAN()
     }
 
     qDebug("启动通道成功");
-    ui->OpenCAN->setEnabled(false);
-    ui->Reset->setEnabled(true);
-    ui->Send->setEnabled(true);
+
+    ui->Reset->    setEnabled(true);
+    ui->Send->     setEnabled(true);
+
+    ui->OpenCAN->  setEnabled(false);
 
     if(bIsRunThread)
     {
@@ -354,31 +358,30 @@ void MainWindow::On_Reset()
     ReleaseIProperty(property);
 
     qDebug("复位通道成功");
-    ui->OpenCAN->setEnabled(true);
+    ui->OpenCAN->  setEnabled(true);
 
-    ui->Reset->setEnabled(false);
-    ui->Send->setEnabled(false);
+    ui->Reset->    setEnabled(false);
+    ui->Send->     setEnabled(false);
 
     ReceiveThread->Pause();
 }
 
 void MainWindow::On_CloseDevice()
 {
-    ui->OpenDevice->setEnabled(true);
-    ui->InitCAN->setEnabled(false);
-    ui->OpenCAN->setEnabled(false);
-    ui->Reset->setEnabled(false);
-    ui->CloseDevice->setEnabled(false);
-    ui->Send->setEnabled(false);
+    ui->OpenDevice->           setEnabled(true);
+    ui->DeviceNameComboBox->   setEnabled(true);
+    ui->DeviceIDCamboBox->     setEnabled(true);
+    ui->ChannelIDComboBox->    setEnabled(true);
+    ui->WorkingModeComboBox->  setEnabled(true);
+    ui->ABitComboBox->         setEnabled(true);
+    ui->DBitComboBox->         setEnabled(true);
+    ui->ResistanceComboBox->   setEnabled(true);
 
-    ui->DeviceNameComboBox->setEnabled(true);
-    ui->DeviceIDCamboBox->setEnabled(true);
-
-    ui->ChannelIDComboBox->setEnabled(true);
-    ui->WorkingModeComboBox->setEnabled(true);
-    ui->ABitComboBox->setEnabled(true);
-    ui->DBitComboBox->setEnabled(true);
-    ui->ResistanceComboBox->setEnabled(true);
+    ui->InitCAN->              setEnabled(false);
+    ui->OpenCAN->              setEnabled(false);
+    ui->Reset->                setEnabled(false);
+    ui->CloseDevice->          setEnabled(false);
+    ui->Send->                 setEnabled(false);
 
     ReceiveThread->Stop();
     bIsRunThread = false;
