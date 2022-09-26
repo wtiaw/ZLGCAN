@@ -1,5 +1,5 @@
-#ifndef RECEIVEDATATHREAD_H
-#define RECEIVEDATATHREAD_H
+#ifndef QRECEIVETHREAD_H
+#define QRECEIVETHREAD_H
 
 #include "mainwindow.h"
 #include <QTimer>
@@ -7,12 +7,12 @@
 #include <QThread>
 #include <QMutex>
 
-class ReceiveDataThread : public QThread
+class QReceiveThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit ReceiveDataThread(QObject *parent = nullptr);
-    ~ReceiveDataThread();
+    explicit QReceiveThread(QObject *parent = nullptr);
+    ~QReceiveThread();
 
     void run() override;
 
@@ -36,4 +36,4 @@ private:
     bool bIsPause;
 };
 
-#endif // RECEIVEDATATHREAD_H
+#endif // QRECEIVETHREAD_H

@@ -1,6 +1,7 @@
 #ifndef AUTOSENDCONFIGWINDOW_H
 #define AUTOSENDCONFIGWINDOW_H
 
+#include "Setting/QAutoMessageConfig.h"
 #include <QWidget>
 
 namespace Ui {
@@ -16,7 +17,14 @@ public:
     ~AutoSendConfigWindow();
 
 private:
+    void Init();
+
+    void CreateItem();
+
+private:
     Ui::AutoSendConfigWindow *ui;
+
+    QAutoMessageConfig* AutoMessageConfig;
 };
 
 #endif // AUTOSENDCONFIGWINDOW_H

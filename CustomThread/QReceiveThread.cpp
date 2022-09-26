@@ -1,18 +1,18 @@
-#include "ReceiveDataThread.h"
+#include "QReceiveThread.h"
 #include "qdebug.h"
 
-ReceiveDataThread::ReceiveDataThread(QObject *parent)
+QReceiveThread::QReceiveThread(QObject *parent)
     : QThread{parent}
 {
     mainWindow = qobject_cast<MainWindow*>(parent);
 }
 
-ReceiveDataThread::~ReceiveDataThread()
+QReceiveThread::~QReceiveThread()
 {
     Stop();
 }
 
-void ReceiveDataThread::run()
+void QReceiveThread::run()
 {
     qDebug() << "当前子线程ID:" << QThread::currentThreadId();
     qDebug() << "开始执行线程";
@@ -29,28 +29,28 @@ void ReceiveDataThread::run()
     }
 }
 
-void ReceiveDataThread::Stop()
+void QReceiveThread::Stop()
 {
     requestInterruption();
     quit();
     wait();
 }
 
-void ReceiveDataThread::Pause()
+void QReceiveThread::Pause()
 {
     bIsPause = true;
 
     qDebug() <<"当前子线程ID:" << QThread::currentThreadId() << "Pause";
 }
 
-void ReceiveDataThread::Resume()
+void QReceiveThread::Resume()
 {
     bIsPause = false;
 
     qDebug() <<"当前子线程ID:" << QThread::currentThreadId() << "Resume";
 }
 
-void ReceiveDataThread::Test()
+void QReceiveThread::Test()
 {
     qDebug() << "经过时间:" << ElapsedTimer->elapsed();
 }

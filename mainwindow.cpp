@@ -1,8 +1,9 @@
 #include "mainwindow.h"
 #include "CustomWidget/DataEdit.h"
 #include "ui_mainwindow.h"
+#include "CustomThread/QReceiveThread.h"
+#include "CustomThread/QTransmitThread.h"
 #include "QTextCodec"
-#include "ReceiveDataThread.h"
 #include <QRegExp>
 #include "QRegularExpressionValidator"
 #include <QDateTime>
@@ -15,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ReceiveThread = new ReceiveDataThread(this);
+    ReceiveThread = new QReceiveThread(this);
+//    TransmitThread = new QTransmitThread(this);
 
     Init();
 }
@@ -26,6 +28,11 @@ MainWindow::~MainWindow()
 
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dhandle);
+}
+
+int MainWindow::GetCanTypeFromUI()
+{
+    return ui->MessageFrameTypeComboBox->currentIndex();
 }
 
 void MainWindow::Init()
@@ -66,12 +73,13 @@ void MainWindow::InitButtonFunc()
 
 
     //Button
-    connect(ui->OpenDevice,  SIGNAL(clicked()), this, SLOT(On_OpenDevice()));
-    connect(ui->InitCAN,     SIGNAL(clicked()), this, SLOT(On_InitCAN()));
-    connect(ui->OpenCAN,     SIGNAL(clicked()), this, SLOT(On_OpenCAN()));
-    connect(ui->Reset,       SIGNAL(clicked()), this, SLOT(On_Reset()));
-    connect(ui->CloseDevice, SIGNAL(clicked()), this, SLOT(On_CloseDevice()));
-    connect(ui->Send,        SIGNAL(clicked()), this, SLOT(On_SendMessage()));
+    connect(ui->OpenDevice,     SIGNAL(clicked()), this, SLOT(On_OpenDevice()));
+    connect(ui->InitCAN,        SIGNAL(clicked()), this, SLOT(On_InitCAN()));
+    connect(ui->OpenCAN,        SIGNAL(clicked()), this, SLOT(On_OpenCAN()));
+    connect(ui->Reset,          SIGNAL(clicked()), this, SLOT(On_Reset()));
+    connect(ui->CloseDevice,    SIGNAL(clicked()), this, SLOT(On_CloseDevice()));
+    connect(ui->Send,           SIGNAL(clicked()), this, SLOT(On_SendMessage()));
+    connect(ui->ConfigAutoSend, SIGNAL(clicked()), this, SLOT(On_OpenAutoSendConfigWindow()));
 
     //ComboBox
     connect(ui->ChannelIDComboBox,        SIGNAL(currentIndexChanged(int)), this, SLOT(On_ChannelIDChanged(int)));
@@ -88,7 +96,7 @@ void MainWindow::InitButtonFunc()
 
 void MainWindow::ReadConfig()
 {
-    SettingConfig = new class SettingConfig;
+    SettingConfig = new class QDeviceSettingConfig;
 
     SettingConfig->ReadConfig();
 }
@@ -97,7 +105,7 @@ void MainWindow::InitDeviceNameComboBox()
 {
     ui->DeviceNameComboBox->clear();
 
-    for (const auto &i : SettingConfig::DeviceName) {
+    for (const auto &i : QDeviceSettingConfig::DeviceName) {
         ui->DeviceNameComboBox->addItem(i.Display);
     }
 
@@ -120,7 +128,7 @@ void MainWindow::InitChannelWorkingModeComboBox()
 {
     ui->WorkingModeComboBox->clear();
 
-    for (const auto &i : SettingConfig::ChannelWorkingMode) {
+    for (const auto &i : QDeviceSettingConfig::ChannelWorkingMode) {
         ui->WorkingModeComboBox->addItem(i.Display);
     }
 
@@ -132,7 +140,7 @@ void MainWindow::InitChannelABitComboBox()
 {
     ui->ABitComboBox->clear();
 
-    for (const auto &i : SettingConfig::ChannelABitBaudRate) {
+    for (const auto &i : QDeviceSettingConfig::ChannelABitBaudRate) {
         ui->ABitComboBox->addItem(i.Display);
     }
 
@@ -144,7 +152,7 @@ void MainWindow::InitChannelDBitComboBox()
 {
     ui->DBitComboBox->clear();
 
-    for (const auto &i : SettingConfig::ChannelDBitBaudRate) {
+    for (const auto &i : QDeviceSettingConfig::ChannelDBitBaudRate) {
         ui->DBitComboBox->addItem(i.Display);
     }
 
@@ -156,7 +164,7 @@ void MainWindow::InitChannelResistanceComboBox()
 {
     ui->ResistanceComboBox->clear();
 
-    for (const auto &i : SettingConfig::ChannelResistanceEnable) {
+    for (const auto &i : QDeviceSettingConfig::ChannelResistanceEnable) {
         ui->ResistanceComboBox->addItem(i.Display);
     }
 
@@ -168,7 +176,7 @@ void MainWindow::InitMessageFrameTypeComboBox()
 {
     ui->MessageFrameTypeComboBox->clear();
 
-    for (const auto &i : SettingConfig::MessageFrameType) {
+    for (const auto &i : QDeviceSettingConfig::MessageFrameType) {
         ui->MessageFrameTypeComboBox->addItem(i.Display);
     }
 
@@ -180,7 +188,7 @@ void MainWindow::InitMessageTransmitTypeComboBox()
 {
     ui->MessageTransmitComboBox->clear();
 
-    for (const auto &i : SettingConfig::MessageTransmitType) {
+    for (const auto &i : QDeviceSettingConfig::MessageTransmitType) {
         ui->MessageTransmitComboBox->addItem(i.Display);
     }
 
@@ -238,8 +246,8 @@ void MainWindow::InitMessageDLC()
 void MainWindow::On_OpenDevice()
 {
     SDevice ConfigDevice = SettingConfig->GetDevice();
-    std::string DeviceDisplayName = (SettingConfig::DeviceName[ConfigDevice.Name].Display).toStdString();
-    int DeviceName = SettingConfig::DeviceName[ConfigDevice.Name].Value;
+    std::string DeviceDisplayName = (QDeviceSettingConfig::DeviceName[ConfigDevice.Name].Display).toStdString();
+    int DeviceName = QDeviceSettingConfig::DeviceName[ConfigDevice.Name].Value;
     int DeviceID = ConfigDevice.ID;
 
     dhandle = ZCAN_OpenDevice(DeviceName, DeviceID, 0);
@@ -295,7 +303,7 @@ void MainWindow::On_InitCAN()
     memset(&cfg, 0, sizeof(cfg));
     cfg.can_type = TYPE_CANFD;  //CANFD设备为TYPE_CANFD
     cfg.can.filter = 0;
-    cfg.can.mode = SettingConfig::ChannelWorkingMode[ConfigChannel.WorkingMode].Value; //正常模式, 1为只听模式
+    cfg.can.mode = QDeviceSettingConfig::ChannelWorkingMode[ConfigChannel.WorkingMode].Value; //正常模式, 1为只听模式
     cfg.can.acc_code = 0;
     cfg.can.acc_mask = 0xffffffff;
     chHandle = ZCAN_InitCAN(dhandle, ConfigChannel.ID, &cfg);
@@ -390,13 +398,19 @@ void MainWindow::On_CloseDevice()
     ZCAN_CloseDevice(dhandle);
 
     SDevice ConfigDevice = SettingConfig->GetDevice();
-    std::string DeviceDisplayName = (SettingConfig::DeviceName[ConfigDevice.Name].Display).toStdString();
+    std::string DeviceDisplayName = (QDeviceSettingConfig::DeviceName[ConfigDevice.Name].Display).toStdString();
     qDebug("设备：%s 关闭",(DeviceDisplayName.c_str()));
 }
 
 void MainWindow::On_OpenAutoSendConfigWindow()
 {
+    if(!AutoSendConfig)
+    {
+        AutoSendConfig = new AutoSendConfigWindow();
+        AutoSendConfig->setWindowTitle("配置自动发送报文");
+    }
 
+    AutoSendConfig->show();
 }
 
 void MainWindow::On_ChannelIDChanged(int index)
@@ -488,11 +502,11 @@ bool MainWindow::SetBaudRate()
     char path[50] = { 0 };
     sprintf_s(path, "%d/canfd_abit_baud_rate", ConfigChannel.ID);
     char value[10] = { 0 };
-    sprintf_s(value, "%d", SettingConfig::ChannelABitBaudRate[ConfigChannel.ABitBaudRate].Value);
+    sprintf_s(value, "%d", QDeviceSettingConfig::ChannelABitBaudRate[ConfigChannel.ABitBaudRate].Value);
     int ret_a = property->SetValue(path, value);
 
     sprintf_s(path, "%d/canfd_dbit_baud_rate", ConfigChannel.ID);
-    sprintf_s(value, "%d", SettingConfig::ChannelDBitBaudRate[ConfigChannel.DBitBaudRate].Value);
+    sprintf_s(value, "%d", QDeviceSettingConfig::ChannelDBitBaudRate[ConfigChannel.DBitBaudRate].Value);
     int ret_d = property->SetValue(path, value);
     return 1 == (ret_a&&ret_d);
 }
@@ -516,20 +530,15 @@ bool MainWindow::SetResistance()
     char path[50] = { 0 };
     sprintf_s(path, "%d/initenal_resistance", ConfigChannel.ID);
     char value[10] = { 0 };
-    sprintf_s(value, "%d", SettingConfig::ChannelResistanceEnable[ConfigChannel.Resistance].Value);
+    sprintf_s(value, "%d", QDeviceSettingConfig::ChannelResistanceEnable[ConfigChannel.Resistance].Value);
     return property->SetValue(path, value);
 }
 
 void MainWindow::On_SendMessage()
 {
-    switch (ui->MessageFrameTypeComboBox->currentIndex()) {
-    case 0:
-        TransmitCAN();
-        break;
-    case 1:
-        TransmitCANFD();
-        break;
-    }
+//    QTransmitThread* TransmitThread = new QTransmitThread(this);
+//    TransmitThread->start();
+    TransmitData();
 }
 
 void MainWindow::ReceiveData()
@@ -547,6 +556,18 @@ void MainWindow::ReceiveData()
     {
         len = ZCAN_ReceiveFD(chHandle, canfd_data, 100, 50);
         AddTableData(canfd_data, len);
+    }
+}
+
+void MainWindow::TransmitData()
+{
+    switch (ui->MessageFrameTypeComboBox->currentIndex()) {
+    case 0:
+        TransmitCAN();
+        break;
+    case 1:
+        TransmitCANFD();
+        break;
     }
 }
 
@@ -628,6 +649,9 @@ void MainWindow::AddTableData(const ZCAN_Transmit_Data *data, UINT len)
 
         AddTableData(InTableData);
     }
+
+//    TransmitThread->quit();
+//    TransmitThread->wait();
 }
 
 void MainWindow::AddTableData(const ZCAN_TransmitFD_Data *data, UINT len)
@@ -654,6 +678,9 @@ void MainWindow::AddTableData(const ZCAN_TransmitFD_Data *data, UINT len)
 
         AddTableData(InTableData);
     }
+
+//    TransmitThread->quit();
+//    TransmitThread->wait();
 }
 
 void MainWindow::AddTableData(TableData& InTableData)
@@ -665,7 +692,7 @@ void MainWindow::AddTableData(TableData& InTableData)
     qint64 intervalTimeMS = StartTime.msecsTo(time);
 
     ui->MessageTable->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeMS/1000.0, 'f', 3)));
-    ui->MessageTable->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16)));
+    ui->MessageTable->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16).toUpper()));
 
     switch (InTableData.EventType) {
     case FrameType::CAN:
@@ -685,7 +712,7 @@ void MainWindow::AddTableData(TableData& InTableData)
         break;
     }
 
-    ui->MessageTable->setItem(rowIndex, 4, new QTableWidgetItem(QString::number(InTableData.DLC, 16)));
+    ui->MessageTable->setItem(rowIndex, 4, new QTableWidgetItem(QString::number(InTableData.DLC)));
     ui->MessageTable->setItem(rowIndex, 5, new QTableWidgetItem(InTableData.Data));
 
     ui->MessageTable->scrollToBottom();
@@ -695,50 +722,18 @@ void MainWindow::TransmitCAN()
 {
     ZCAN_Transmit_Data can_data;
 
-    canid_t CANID     = GetLineTextValue(ui->DataID).toInt();
-    BYTE DLC          = GetLineTextValue(ui->DLCEdit).toInt();
-    BYTE TransmitType = ui->MessageTransmitComboBox->currentIndex();
+    GetViewCanFrame(can_data);
 
-    memset(&can_data, 0, sizeof(can_data));
-    can_data.frame.can_id = CANID;         // CAN ID
-    can_data.frame.can_dlc = DLC;          // CAN 数据长度
-    can_data.transmit_type = TransmitType; //发送模式
-    for (int i = 0; i < DLC; ++i)
-    {
-        can_data.frame.data[i] = GetDataFromEdit(i);
-    }
-    ZCAN_Transmit_Data* pData = new ZCAN_Transmit_Data[1];
-    for (int i=0; i<1; ++i)
-    {
-        memcpy_s(&pData[i], sizeof(ZCAN_Transmit_Data), &can_data, sizeof(can_data));
-    }
-    auto result = ZCAN_Transmit(chHandle, pData, 1);
-    AddTableData(pData,1);
+    auto result = ZCAN_Transmit(chHandle, &can_data, 1);
+    AddTableData(&can_data,1);
 }
 
 void MainWindow::TransmitCANFD()
 {
     ZCAN_TransmitFD_Data canfd_data;
 
-    canid_t CANID = GetLineTextValue(ui->DataID).toInt(nullptr, 16);
-    BYTE DLC = GetLineTextValue(ui->DLCEdit).toInt();
-    BYTE TransmitType = ui->MessageTransmitComboBox->currentIndex();
+    GetViewCanFrame(canfd_data);
 
-    memset(&canfd_data, 0, sizeof(canfd_data));
-    canfd_data.frame.can_id = MAKE_CAN_ID(CANID, 0, 0, 0); // CANFD ID
-    canfd_data.frame.len = DLC;      // CANFD 数据长度
-    canfd_data.transmit_type = TransmitType;
-    canfd_data.frame.flags = 1;
-
-    for (int i = 0; i < DLC; ++i)
-    {
-        canfd_data.frame.data[i] = GetDataFromEdit(i);
-    }
-//    ZCAN_TransmitFD_Data* pData = new ZCAN_TransmitFD_Data[1];
-//    for (int i=0; i<1; ++i)
-//    {
-//        memcpy_s(&pData[i], sizeof(ZCAN_TransmitFD_Data), &canfd_data, sizeof(canfd_data));
-//    }
     auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1);
     AddTableData(&canfd_data,1);
 }
@@ -863,7 +858,7 @@ BYTE MainWindow::GetDataFromEdit(int Index)
 
 void MainWindow::GetViewCanFrame(ZCAN_Transmit_Data &can_data)
 {
-    canid_t CANID     = GetLineTextValue(ui->DataID).toInt();
+    canid_t CANID     = GetLineTextValue(ui->DataID).toInt(nullptr ,16);
     BYTE DLC          = GetLineTextValue(ui->DLCEdit).toInt();
     BYTE TransmitType = ui->MessageTransmitComboBox->currentIndex();
 

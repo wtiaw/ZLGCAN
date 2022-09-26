@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 #include "CustomWidget/DataEdit.h"
-#include "Setting/settingconfig.h"
+#include "Setting/QDeviceSettingConfig.h"
+#include "Windows/AutoSendConfigWindow.h"
 #include "qdatetime.h"
 #include "qlineedit.h"
 
@@ -25,7 +26,7 @@ struct TableData
     canid_t         FrameID;
     FrameType       EventType;
     DirectionType   DirType;
-    uint            DLC;
+    BYTE            DLC;
     QString         Data;
 };
 
@@ -41,8 +42,23 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    DEVICE_HANDLE GetDeviceHandle(){ return dhandle; }
+    CHANNEL_HANDLE GetChannelHandle(){ return chHandle; }
+    IProperty* GetProperty(){ return property; }
+
+    int GetCanTypeFromUI();
+
 public slots:
     void ReceiveData();
+    void TransmitData();
+
+    //MeaasgeTable
+    void AddTableData(const ZCAN_Transmit_Data* data, UINT len);
+    void AddTableData(const ZCAN_TransmitFD_Data* data, UINT len);
+
+    //从面板获取CAN数据
+    void GetViewCanFrame(ZCAN_Transmit_Data& can_data);
+    void GetViewCanFrame(ZCAN_TransmitFD_Data& canfd_data);
 
 private:
     void ReadConfig();
@@ -77,39 +93,25 @@ private:
     //MeaasgeTable
     void AddTableData(const ZCAN_Receive_Data* data, UINT len);
     void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
-    void AddTableData(const ZCAN_Transmit_Data* data, UINT len);
-    void AddTableData(const ZCAN_TransmitFD_Data* data, UINT len);
     void AddTableData(TableData& InTableData);
 
     //TransmitMeaasge
     void TransmitCAN();
     void TransmitCANFD();
 
-    /*
-     * @biref 检查DLC输入格式
-     **/
+    //检查DLC输入格式
     bool ChackDLCData();
 
-    /*
-     * @biref 根据 DLC 生成 Data输入格
-     **/
+    //根据 DLC 生成 Data输入格
     void CreateDataEdit();
 
-    /*
-     * @biref 获取Edit文本信息
-     **/
+    //获取Edit文本信息
     QString GetLineTextValue(const QLineEdit* InLineEdit);
 
-    /*
-     * @biref 获取DATA数据
-     **/
+    //获取DATA数据
     BYTE GetDataFromEdit(int Index);
 
-    /*
-     * @biref 从面板获取CAN数据
-     **/
-    void GetViewCanFrame(ZCAN_Transmit_Data& can_data);
-    void GetViewCanFrame(ZCAN_TransmitFD_Data& canfd_data);
+
 
 private slots:
     //ButtonClick
@@ -137,8 +139,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    AutoSendConfigWindow* AutoSendConfig;
 
-    SettingConfig* SettingConfig;
+    QDeviceSettingConfig* SettingConfig;
 
 private:
     bool bInit = false;
@@ -152,6 +155,7 @@ private:
     CHANNEL_HANDLE chHandle;
     IProperty* property;
 
-    class ReceiveDataThread* ReceiveThread;
+    class QReceiveThread*  ReceiveThread;
+//    class QTransmitThread* TransmitThread;
 };
 #endif // MAINWINDOW_H
