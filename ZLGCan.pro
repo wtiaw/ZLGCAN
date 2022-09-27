@@ -10,21 +10,33 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    CustomThread/QReceiveThread.cpp \
+    CustomThread/QTransmitThread.cpp \
     CustomWidget/DataEdit.cpp \
-    ReceiveDataThread.cpp \
-    Setting/settingconfig.cpp \
+    CustomWidget/ToolBox.cpp \
+    CustomWidget/ToolPage.cpp \
+    Setting/QAutoMessageConfig.cpp \
+    Setting/QDeviceSettingConfig.cpp \
+    Setting/QSettingConfigBase.cpp \
     Windows/AutoSendConfigWindow.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    CustomThread/QReceiveThread.h \
+    CustomThread/QTransmitThread.h \
     CustomWidget/DataEdit.h \
-    ReceiveDataThread.h \
-    Setting/settingconfig.h \
+    CustomWidget/ToolBox.h \
+    CustomWidget/ToolPage.h \
+    Setting/QAutoMessageConfig.h \
+    Setting/QDeviceSettingConfig.h \
+    Setting/QSettingConfigBase.h \
     Windows/AutoSendConfigWindow.h \
     mainwindow.h
 
 FORMS += \
+    CustomWidget/ToolBox.ui \
+    CustomWidget/ToolPage.ui \
     Windows/AutoSendConfigWindow.ui \
     mainwindow.ui
 
@@ -40,3 +52,6 @@ DEPENDPATH += $$PWD/zlgcan_x64
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/zlgcan_x64/zlgcan.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/zlgcan_x64/libzlgcan.a
+
+RESOURCES += \
+    Icon.qrc

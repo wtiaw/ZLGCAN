@@ -5,7 +5,6 @@
 #include "CustomWidget/DataEdit.h"
 #include "Setting/QDeviceSettingConfig.h"
 #include "Windows/AutoSendConfigWindow.h"
-#include "qdatetime.h"
 #include "qlineedit.h"
 
 enum FrameType
@@ -22,7 +21,7 @@ enum DirectionType
 
 struct TableData
 {
-    qint64          ElapsedTime;
+    UINT64          TimeStamp;
     canid_t         FrameID;
     FrameType       EventType;
     DirectionType   DirType;
@@ -55,10 +54,6 @@ public slots:
     //MeaasgeTable
     void AddTableData(const ZCAN_Transmit_Data* data, UINT len);
     void AddTableData(const ZCAN_TransmitFD_Data* data, UINT len);
-
-    //从面板获取CAN数据
-    void GetViewCanFrame(ZCAN_Transmit_Data& can_data);
-    void GetViewCanFrame(ZCAN_TransmitFD_Data& canfd_data);
 
 private:
     void ReadConfig();
@@ -111,7 +106,8 @@ private:
     //获取DATA数据
     BYTE GetDataFromEdit(int Index);
 
-
+    void ConstructCANFrame(ZCAN_Transmit_Data& can_data);
+    void ConstructCANFDFrame(ZCAN_TransmitFD_Data& can_data);
 
 private slots:
     //ButtonClick
@@ -135,7 +131,10 @@ private slots:
     void On_DataIDChanged(const QString &arg1);
     void On_DLCChanged(const QString &arg1);
 
+    void On_AutoSendMessage();
 
+    void On_MessageTableScrollPressed();
+    void On_MessageTableScrollReleased();
 
 private:
     Ui::MainWindow *ui;
@@ -146,10 +145,13 @@ private:
 private:
     bool bInit = false;
     bool bIsRunThread = false;
+    bool bIsDragged = false;
 
     QVector<DataEdit*> DataEdits;
 
-    QDateTime StartTime;
+    UINT64 RStartTime = 0;
+    UINT64 TStartTime = 0;
+    UINT64 temp = 0;
 
     DEVICE_HANDLE dhandle;
     CHANNEL_HANDLE chHandle;

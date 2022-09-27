@@ -1,9 +1,9 @@
-#ifndef SETTINGCONFIG_H
-#define SETTINGCONFIG_H
+#ifndef QDEVICESETTINGCONFIG_H
+#define QDEVICESETTINGCONFIG_H
 
 #include <QObject>
 #include "zlgcan.h"
-#include "QSettings"
+#include "Setting/QSettingConfigBase.h"
 
 #define DeviceNamePath               "/Device/Name"
 #define DeviceIDPath                 "/Device/ID"
@@ -44,11 +44,11 @@ struct SChannel
 
 
 
-class SettingConfig : public QObject
+class QDeviceSettingConfig : public QSettingConfigBase
 {
     Q_OBJECT
 public:
-    explicit SettingConfig(QObject *parent = nullptr);
+    explicit QDeviceSettingConfig(QObject *parent = nullptr);
 
     static QVector<DisplayAndValue<int>> DeviceName;
 
@@ -64,18 +64,16 @@ public:
     SChannel& GetChannel(){ return Channel; }
 
 
-    void ReadConfig();
-    void InitConfig();
-
-    void SaveConfig(std::string key, int Value);
+    virtual void ReadConfig() override;
+    virtual void InitConfig() override;
 
 signals:
 private:
-    QString qstrConfigPath;
-    QSettings *psetting = nullptr;
+
+
 
     SDevice Device;
     SChannel Channel;
 };
 
-#endif // SETTINGCONFIG_H
+#endif // QDEVICESETTINGCONFIG_H

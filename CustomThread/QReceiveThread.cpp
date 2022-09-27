@@ -25,7 +25,7 @@ void QReceiveThread::run()
         if(!bIsPause){
             emit AddTableData();
         }
-        msleep(10);
+        msleep(15);
     }
 }
 
