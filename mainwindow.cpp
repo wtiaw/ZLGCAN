@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "CustomWidget/DataEdit.h"
+#include "Windows/ACRForm.h"
+#include "Windows/AutoSendConfigWindow.h"
 #include "ui_mainwindow.h"
 #include "CustomThread/QReceiveThread.h"
 #include "QTextCodec"
@@ -8,6 +10,8 @@
 #include <QDateTime>
 #include <QSpacerItem>
 #include <QScrollBar>
+#include <QStandardItemModel>
+#include "Library/QWidgetLibrary.h"
 
 #define TMP_BUFFER_LEN 1000
 
@@ -16,8 +20,11 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     ReceiveThread = new QReceiveThread(this);
-//    TransmitThread = new QTransmitThread(this);
+
+    UpdateDeltaTableTable = new QTimer;
+    connect(UpdateDeltaTableTable, &QTimer::timeout,this, &MainWindow::On_UpdateDeltaTableTableTimeOut);
 
     Init();
 }
@@ -25,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+
+//    AutoSendConfig->exit();
+//    delete AutoSendConfig;
 
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dhandle);
@@ -95,8 +105,10 @@ void MainWindow::InitButtonFunc()
     connect(ui->DataID,  SIGNAL(textChanged(const QString)), this, SLOT(On_DataIDChanged(const QString)));
     connect(ui->DLCEdit, SIGNAL(textChanged(const QString)), this, SLOT(On_DLCChanged(const QString)));
 
-    connect(ui->MessageTable->verticalScrollBar(), SIGNAL(sliderPressed()),  this, SLOT(On_MessageTableScrollPressed()));
-    connect(ui->MessageTable->verticalScrollBar(), SIGNAL(sliderReleased()), this, SLOT(On_MessageTableScrollReleased()));
+    for(auto i : Tables){
+        connect(i->verticalScrollBar(), SIGNAL(sliderPressed()),  this, SLOT(On_MessageTableScrollPressed()));
+        connect(i->verticalScrollBar(), SIGNAL(sliderReleased()), this, SLOT(On_MessageTableScrollReleased()));
+    }
 }
 
 void MainWindow::ReadConfig()
@@ -108,13 +120,7 @@ void MainWindow::ReadConfig()
 
 void MainWindow::InitDeviceNameComboBox()
 {
-    ui->DeviceNameComboBox->clear();
-
-    for (const auto &i : QDeviceSettingConfig::DeviceName) {
-        ui->DeviceNameComboBox->addItem(i.Display);
-    }
-
-    ui->DeviceNameComboBox->setCurrentIndex(SettingConfig->GetDevice().Name);
+    QWidgetLibrary::InitMessageFrameTypeComboBox(ui->DeviceNameComboBox);
 }
 
 void MainWindow::InitDeviceIDComboBox()
@@ -203,49 +209,40 @@ void MainWindow::InitMessageTransmitTypeComboBox()
 
 void MainWindow::InitMessageTable()
 {
-    auto MessageTable = ui->MessageTable;
+    for(int i = 0; i < 2; i++){
+        QMessageTableWidget* MessageTable = new QMessageTableWidget(this);
+        Tables.append(MessageTable);
 
-    MessageTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    MessageTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    MessageTable->setSortingEnabled( false );
-    MessageTable->verticalHeader()->hide();
-    MessageTable->setWordWrap( false );
-    MessageTable->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-    MessageTable->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    MessageTable->setShowGrid( false );
-    MessageTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    MessageTable->horizontalHeader()->setHighlightSections( false );
-    MessageTable->setAlternatingRowColors( true );   // alternative colors
-    MessageTable->setFrameShape(QFrame::NoFrame);
+        ui->TableContainer->layout()->addWidget(MessageTable);
 
-    // column width
-    MessageTable->setColumnWidth(0, 50);
-    MessageTable->setColumnWidth(1, 50);
-    MessageTable->setColumnWidth(2, 60);
-    MessageTable->setColumnWidth(3, 50);
-    MessageTable->setColumnWidth(4, 50);
-    MessageTable->setColumnWidth(5, 200);
+        if(i == 1){
+            MessageTable->hide();
+
+            QStringList header;
+
+            header<<"Time(ms)"<<"ID"<<"Type"<<"Dir"<<"DLC"<<"Data";
+            MessageTable->setHorizontalHeaderLabels(header);
+        }
+    }
 }
 
 void MainWindow::ResetMessageTable()
 {
-    while(ui->MessageTable->rowCount()){
-        ui->MessageTable->removeRow(0);
+    for(auto i :Tables){
+        while(i->rowCount()){
+            i->removeRow(0);
+        }
     }
 }
 
 void MainWindow::InitMessageID()
 {
-    QRegularExpression regx("[A-Fa-f0-9]{1,4}");
-    QValidator* validator = new QRegularExpressionValidator(regx, ui->DataID);
-    ui->DataID->setValidator(validator);
+    QWidgetLibrary::InitMessageID(ui->DataID);
 }
 
 void MainWindow::InitMessageDLC()
 {
-    QRegularExpression regx("[0-9]{1,2}");
-    QValidator* validator = new QRegularExpressionValidator(regx, ui->DLCEdit);
-    ui->DLCEdit->setValidator(validator);
+    QWidgetLibrary::InitMessageDLC(ui->DLCEdit);
 }
 
 void MainWindow::On_OpenDevice()
@@ -340,6 +337,11 @@ void MainWindow::On_InitCAN()
     ui->ABitComboBox->         setEnabled(false);
     ui->DBitComboBox->         setEnabled(false);
     ui->ResistanceComboBox->   setEnabled(false);
+
+//    property->SetValue("0/filter_mode", "0"); // 标准帧
+//    property->SetValue("0/filter_start", "0x740");  // 起始 ID
+//    property->SetValue("0/filter_end", "0x748");  // 结束 ID
+//    property->SetValue("0/filter_ack", "0");
 }
 
 void MainWindow::On_OpenCAN()
@@ -367,6 +369,8 @@ void MainWindow::On_OpenCAN()
 
         bIsRunThread = true;
     }
+
+    UpdateDeltaTableTable->start(10);
 }
 
 void MainWindow::On_Reset()
@@ -408,12 +412,13 @@ void MainWindow::On_CloseDevice()
     SDevice ConfigDevice = SettingConfig->GetDevice();
     std::string DeviceDisplayName = (QDeviceSettingConfig::DeviceName[ConfigDevice.Name].Display).toStdString();
     qDebug("设备：%s 关闭",(DeviceDisplayName.c_str()));
+
+    UpdateDeltaTableTable->stop();
 }
 
 void MainWindow::On_OpenAutoSendConfigWindow()
 {
-    if(!AutoSendConfig)
-    {
+    if(!AutoSendConfig){
         AutoSendConfig = new AutoSendConfigWindow();
         AutoSendConfig->setWindowTitle("配置自动发送报文");
     }
@@ -499,6 +504,24 @@ void MainWindow::On_DLCChanged(const QString &arg1)
     if(ChackDLCData() || ui->DLCEdit->text() == "")
     {
         CreateDataEdit();
+    }
+}
+
+void MainWindow::On_UpdateDeltaTableTableTimeOut()
+{
+    if(!Tables[1]) return;
+
+    for(auto& i : Tables[1]->MessageIDMap){
+        i.Count++;
+
+        int rowIndex  = i.TableIndex;
+
+        for(int j = 0; j < Tables[1]->columnCount() - 1; j++){
+            int color = 0 + i.Count;
+            Tables[1]->item(rowIndex, j)->setForeground(QColor(color, color, color, 255));
+        }
+
+        i.Count = i.Count >= 200 ? 200 : i.Count;
     }
 }
 
@@ -722,13 +745,19 @@ void MainWindow::AddTableData(const ZCAN_TransmitFD_Data *data, UINT len)
 
 void MainWindow::AddTableData(TableData& InTableData)
 {
-    int rowIndex = ui->MessageTable->rowCount();//当前表格的行数
-    ui->MessageTable->insertRow(rowIndex);//在最后一行的后面插入一行
+    AddTotalTablData(Tables[0], InTableData);
+    AddDeltaTablData(Tables[1], InTableData);
+}
+
+int MainWindow::AddTotalTablData(QMessageTableWidget *MessageTableWidget, TableData &InTableData)
+{
+    int rowIndex = MessageTableWidget->rowCount();//当前表格的行数
+    MessageTableWidget->insertRow(rowIndex);//在最后一行的后面插入一行
 
     UINT64 intervalTimeMS;
     switch (InTableData.DirType) {
     case DirectionType::Receive:
-        ui->MessageTable->setItem(rowIndex, 3, new QTableWidgetItem("Rx"));
+        MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Rx"));
 
         if(RStartTime == 0)
         {
@@ -743,7 +772,7 @@ void MainWindow::AddTableData(TableData& InTableData)
 
         break;
     case DirectionType::Transmit:
-        ui->MessageTable->setItem(rowIndex, 3, new QTableWidgetItem("Tx"));
+        MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Tx"));
 
         if(TStartTime == 0)
         {
@@ -756,23 +785,49 @@ void MainWindow::AddTableData(TableData& InTableData)
     }
 
 
-    ui->MessageTable->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeMS/1000.0, 'f', 3)));
-    ui->MessageTable->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16).toUpper()));
+    MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeMS/1000.0, 'f', 3)));
+    MessageTableWidget->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16).toUpper()));
 
     switch (InTableData.EventType) {
     case FrameType::CAN:
-        ui->MessageTable->setItem(rowIndex, 2, new QTableWidgetItem("CAN"));
+        MessageTableWidget->setItem(rowIndex, 2, new QTableWidgetItem("CAN"));
         break;
     case FrameType::CANFD:
-        ui->MessageTable->setItem(rowIndex, 2, new QTableWidgetItem("CAN FD"));
+        MessageTableWidget->setItem(rowIndex, 2, new QTableWidgetItem("CAN FD"));
         break;
     }
 
-    ui->MessageTable->setItem(rowIndex, 4, new QTableWidgetItem(QString::number(InTableData.DLC)));
-    ui->MessageTable->setItem(rowIndex, 5, new QTableWidgetItem(InTableData.Data));
+    MessageTableWidget->setItem(rowIndex, 4, new QTableWidgetItem(QString::number(InTableData.DLC)));
+    MessageTableWidget->setItem(rowIndex, 5, new QTableWidgetItem(InTableData.Data));
 
-    if(!bIsDragged)
-        ui->MessageTable->scrollToBottom();
+    if(!bIsDragged && ui->EnableScroll->isChecked())
+        MessageTableWidget->scrollToBottom();
+
+    return rowIndex;
+}
+
+void MainWindow::AddDeltaTablData(QMessageTableWidget *MessageTableWidget, TableData &InTableData)
+{
+    const MessageKeyInfo& KeyInfo = MessageKeyInfo(InTableData.FrameID, InTableData.DirType);
+
+    if(MessageTableWidget->MessageIDMap.contains(KeyInfo))
+    {
+        int rowIndex  = MessageTableWidget->MessageIDMap[KeyInfo].TableIndex;
+        UINT64 TimeStamp = MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeMS;
+
+        double temp = InTableData.TimeStamp - TimeStamp;
+        MessageTableWidget->item(rowIndex, 0)->setText(QString::number(temp/(KeyInfo.directionType == DirectionType::Transmit ? 1 : 1000),'f', 2));
+        MessageTableWidget->item(rowIndex, 5)->setText(InTableData.Data);
+
+        MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeMS = InTableData.TimeStamp;
+        MessageTableWidget->MessageIDMap[KeyInfo].Count = 0;
+    }
+    else
+    {
+        int rowIndex = AddTotalTablData(MessageTableWidget, InTableData);
+
+        MessageTableWidget->MessageIDMap.insert(KeyInfo, MessageValueInfo(InTableData.TimeStamp, rowIndex));
+    }
 }
 
 void MainWindow::TransmitCAN()
@@ -832,68 +887,7 @@ bool MainWindow::ChackDLCData()
 
 void MainWindow::CreateDataEdit()
 {
-    QVector<DataEdit*>().swap(DataEdits);
-    while (QLayoutItem* child = ui->DataContainer->takeAt(0))
-    {
-        //setParent为NULL，防止删除之后界面不消失
-        if(child->widget())
-        {
-            child->widget()->setParent(NULL);
-        }
-
-        delete child;
-    }
-
-    int DataLength =  GetLineTextValue(ui->DLCEdit).toInt();
-    int RowCount = DataLength / 8;
-    if(DataLength % 8 == 0){
-        RowCount -= 1;
-    }
-
-    //在（0,0）生产 “数据(0x)” 文本
-    QLabel* Datalab = new QLabel();
-    Datalab->setText(QString("数据(0x)"));
-    Datalab->setAlignment(Qt::AlignCenter);
-    ui->DataContainer->addWidget(Datalab,0,0);
-
-    for(int i = 0; i < (DataLength > 8 ? 8 : DataLength); i++){
-        QLabel* IndexLab = new QLabel();
-        IndexLab->setText(QString("%1").arg(i));
-        IndexLab->setAlignment(Qt::AlignCenter);
-        ui->DataContainer->addWidget(IndexLab,0,i + 1);
-    }
-
-    QSpacerItem* Hor = new QSpacerItem(10,10,QSizePolicy::Expanding);
-    ui->DataContainer->addItem(Hor, 0, (DataLength > 8 ? 8 : DataLength) + 1);
-
-
-    int RowRemainDataLength = DataLength;
-    DataEdit* Prebt = nullptr;
-
-    for(int i = 0; i < RowCount + 1; i++)
-    {
-        QLabel* IndexLab = new QLabel();
-        IndexLab->setText(QString("%1").arg(i));
-        IndexLab->setAlignment(Qt::AlignCenter);
-        ui->DataContainer->addWidget(IndexLab, i + 1, 0);
-
-        for(int j = 1; j < (RowRemainDataLength > 8 ? 8 : RowRemainDataLength) + 1; j++){
-            DataEdit* bt = new DataEdit();
-
-            if(Prebt){
-                Prebt->SetNextEdit(bt);
-            }
-            Prebt = bt;
-
-            bt->setPlaceholderText("00");
-            bt->setAlignment(Qt::AlignCenter);
-            ui->DataContainer->addWidget(bt, i + 1, j);
-
-            DataEdits.append(bt);
-        }
-        RowRemainDataLength -= 8;
-        if(RowRemainDataLength < 0) RowRemainDataLength = 0;
-    }
+    QWidgetLibrary::CreateDataEdit(ui->DataContainer, ui->DLCEdit, DataEdits);
 }
 
 QString MainWindow::GetLineTextValue(const QLineEdit *InLineEdit)
@@ -913,7 +907,7 @@ BYTE MainWindow::GetDataFromEdit(int Index)
     }
     else
     {
-        return DataEdits[Index]->text().toInt(nullptr,16);
+        return DataEdits[Index]->text().toInt(nullptr, 16);
     }
 }
 
@@ -925,8 +919,8 @@ void MainWindow::ConstructCANFrame(ZCAN_Transmit_Data &can_data)
 
     memset(&can_data, 0, sizeof(can_data));
     can_data.frame.can_id   =  MAKE_CAN_ID(CANID, 0, 0, 0);         // CAN ID
-    can_data.frame.can_dlc  =  DLC;          // CAN 数据长度
-    can_data.transmit_type  =  TransmitType; //发送模式
+    can_data.frame.can_dlc  =  DLC;                                 // CAN 数据长度
+    can_data.transmit_type  =  TransmitType;                        //发送模式
 
     for (int i = 0; i < DLC; ++i)
     {
@@ -944,10 +938,35 @@ void MainWindow::ConstructCANFDFrame(ZCAN_TransmitFD_Data& canfd_data)
     canfd_data.frame.can_id   =  MAKE_CAN_ID(CANID, 0, 0, 0);    // CANFD ID
     canfd_data.frame.len      =  DLC;                            // CANFD 数据长度
     canfd_data.transmit_type  =  TransmitType;
-    canfd_data.frame.flags    =  1;
+//    canfd_data.frame.flags    =  1;
 
     for (int i = 0; i < DLC; ++i)
     {
         canfd_data.frame.data[i] = GetDataFromEdit(i);
     }
 }
+
+
+void MainWindow::on_ChangeTable_clicked(bool checked)
+{
+    if(checked)
+    {
+       Tables[0]->hide();
+       Tables[1]->show();
+    }
+    else
+    {
+        Tables[0]->show();
+        Tables[1]->hide();
+    }
+}
+
+
+void MainWindow::on_actionACR_triggered()
+{
+    if(!ACRFromWindow)
+        ACRFromWindow = new ACRForm;
+
+    ACRFromWindow->show();
+}
+

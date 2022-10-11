@@ -3,21 +3,10 @@
 
 #include <QMainWindow>
 #include "CustomWidget/DataEdit.h"
+#include "CustomWidget/TableWidget/QMessageTableWidget.h"
 #include "Setting/QDeviceSettingConfig.h"
-#include "Windows/AutoSendConfigWindow.h"
 #include "qlineedit.h"
 
-enum FrameType
-{
-    CAN,
-    CANFD,
-};
-
-enum DirectionType
-{
-    Transmit,
-    Receive,
-};
 
 struct TableData
 {
@@ -89,6 +78,8 @@ private:
     void AddTableData(const ZCAN_Receive_Data* data, UINT len);
     void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
     void AddTableData(TableData& InTableData);
+    int  AddTotalTablData(QMessageTableWidget* MessageTableWidget, TableData& InTableData);
+    void AddDeltaTablData(QMessageTableWidget* MessageTableWidget, TableData& InTableData);
 
     //TransmitMeaasge
     void TransmitCAN();
@@ -131,14 +122,22 @@ private slots:
     void On_DataIDChanged(const QString &arg1);
     void On_DLCChanged(const QString &arg1);
 
+    //Timer
+    void On_UpdateDeltaTableTableTimeOut();
+
     void On_AutoSendMessage();
 
     void On_MessageTableScrollPressed();
     void On_MessageTableScrollReleased();
 
+    void on_ChangeTable_clicked(bool checked);
+
+    void on_actionACR_triggered();
+
 private:
     Ui::MainWindow *ui;
-    AutoSendConfigWindow* AutoSendConfig;
+    class AutoSendConfigWindow* AutoSendConfig;
+    class ACRForm* ACRFromWindow;
 
     QDeviceSettingConfig* SettingConfig;
 
@@ -148,6 +147,7 @@ private:
     bool bIsDragged = false;
 
     QVector<DataEdit*> DataEdits;
+    QVector<QMessageTableWidget*> Tables;
 
     UINT64 RStartTime = 0;
     UINT64 TStartTime = 0;
@@ -158,6 +158,7 @@ private:
     IProperty* property;
 
     class QReceiveThread*  ReceiveThread;
-//    class QTransmitThread* TransmitThread;
+
+    class QTimer* UpdateDeltaTableTable;
 };
 #endif // MAINWINDOW_H

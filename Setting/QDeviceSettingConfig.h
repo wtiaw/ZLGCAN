@@ -69,9 +69,6 @@ public:
 
 signals:
 private:
-
-
-
     SDevice Device;
     SChannel Channel;
 };

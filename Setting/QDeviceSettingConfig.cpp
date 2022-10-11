@@ -1,5 +1,7 @@
 #include "QDeviceSettingConfig.h"
 #include "QFileInfo"
+#include <QJsonObject>
+#include <QJsonDocument>
 #include <iostream>
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::DeviceName = {
@@ -53,38 +55,105 @@ QDeviceSettingConfig::QDeviceSettingConfig(QObject *parent)
     : QSettingConfigBase{parent}
 {
     //路径
-    ConfigFilePath = QDir::currentPath()+QString("/CanSetting.config");
+    ConfigFilePath = "/DeviceSetting.json";
 }
 
 void QDeviceSettingConfig::ReadConfig()
 {
     QSettingConfigBase::ReadConfig();
 
-    if(!psetting)
-        psetting = new QSettings(ConfigFilePath,QSettings::IniFormat);
+    QFile file(ConfigDirPath + ConfigFilePath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        qDebug() << "can't open error!";
+        return;
+    }
 
+    // 读取文件的全部内容
+    QTextStream stream(&file);
+    QString str = stream.readAll();
 
-    Device.Name = psetting->value(DeviceNamePath).toInt();
-    Device.ID = psetting->value(DeviceIDPath).toUInt();
+    file.close();
 
-    Channel.ID = psetting->value(ChannelIDPath).toUInt();
-    Channel.WorkingMode = psetting->value(ChannelWorkingModePath).toInt();
-    Channel.ABitBaudRate = psetting->value(ChannelABitBaudRatePath).toInt();
-    Channel.DBitBaudRate = psetting->value(ChannelDBitBaudRatePath).toInt();
-    Channel.Resistance = psetting->value(ChannelResistancePath).toInt();
+    // QJsonParseError类用于在JSON解析期间报告错误。
+    QJsonParseError jsonError;
+    // 将json解析为UTF-8编码的json文档，并从中创建一个QJsonDocument。
+    // 如果解析成功，返回QJsonDocument对象，否则返回null
+    QJsonDocument doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
+    // 判断是否解析失败
+    if (jsonError.error != QJsonParseError::NoError && !doc.isNull()) {
+        qDebug() << "Json格式错误！" << jsonError.error;
+        return;
+    }
+
+    QJsonObject rootObj = doc.object();
+
+    QJsonValue interestValue  = rootObj.value("Channel");
+    if (interestValue.type() == QJsonValue::Object) {
+        QJsonObject ChannelObj = interestValue.toObject();
+
+        QJsonValue ChannelABitBaudRateValue = ChannelObj.value("ChannelABitBaudRate");
+        Channel.ABitBaudRate = ChannelABitBaudRateValue.toInt();
+        qDebug() << "ChannelABitBaudRate = " << ChannelABitBaudRateValue.toInt();
+
+        QJsonValue ChannelDBitBaudRate = ChannelObj.value("ChannelDBitBaudRate");
+        Channel.DBitBaudRate = ChannelDBitBaudRate.toInt();
+        qDebug() << "ChannelDBitBaudRate = " << ChannelDBitBaudRate.toInt();
+
+        QJsonValue ChannelID = ChannelObj.value("ChannelID");
+        Channel.ID = ChannelID.toInt();
+        qDebug() << "ChannelID = " << ChannelID.toInt();
+
+        QJsonValue ChannelResistance = ChannelObj.value("ChannelResistance");
+        Channel.Resistance = ChannelResistance.toInt();
+        qDebug() << "ChannelResistance = " << ChannelResistance.toInt();
+
+        QJsonValue ChannelWorkingMode = ChannelObj.value("ChannelWorkingMode");
+        Channel.WorkingMode = ChannelWorkingMode.toInt();
+        qDebug() << "ChannelWorkingMode = " << ChannelWorkingMode.toInt();
+    }
+
+    interestValue  = rootObj.value("Device");
+    if (interestValue.type() == QJsonValue::Object) {
+        QJsonObject ChannelObj = interestValue.toObject();
+
+        QJsonValue DeviceID = ChannelObj.value("DeviceID");
+        Device.ID = DeviceID.toInt();
+        qDebug() << "DeviceID = " << DeviceID.toInt();
+
+        QJsonValue DeviceName = ChannelObj.value("DeviceName");
+        Device.Name = DeviceName.toInt();
+        qDebug() << "DeviceName = " << DeviceName.toInt();
+
+    }
 }
 
 void QDeviceSettingConfig::InitConfig()
 {
-    if(!psetting)
-        psetting = new QSettings(ConfigFilePath,QSettings::IniFormat);
+    QJsonObject DeviceObj;
+    DeviceObj.insert("DeviceName", 0);
+    DeviceObj.insert("DeviceID", 0);
 
-    SaveConfig(DeviceNamePath, 0);
-    SaveConfig(DeviceIDPath,   0);
+    QJsonObject ChannelObj;
+    ChannelObj.insert("ChannelID", 0);
+    ChannelObj.insert("ChannelWorkingMode", 0);
+    ChannelObj.insert("ChannelABitBaudRate", 4);
+    ChannelObj.insert("ChannelDBitBaudRate", 6);
+    ChannelObj.insert("ChannelResistance", 1);
 
-    SaveConfig(ChannelIDPath, 0);
-    SaveConfig(ChannelWorkingModePath, 0);
-    SaveConfig(ChannelABitBaudRatePath, 4);
-    SaveConfig(ChannelDBitBaudRatePath, 6);
-    SaveConfig(ChannelResistancePath, 1);
+    QJsonObject rootObject;
+    rootObject.insert("Channel", ChannelObj);
+    rootObject.insert("Device", DeviceObj);
+
+
+    // 将json对象里的数据转换为字符串
+    QJsonDocument doc;
+    // 将object设置为本文档的主要对象
+    doc.setObject(rootObject);
+
+    QFile file(ConfigDirPath + ConfigFilePath);
+    file.open(QIODevice::WriteOnly|QIODevice::Truncate);
+
+    QTextStream stream(&file);
+    stream << doc.toJson();
+    file.close();
 }

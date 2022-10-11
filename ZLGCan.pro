@@ -12,12 +12,17 @@ CONFIG += c++17
 SOURCES += \
     CustomThread/QReceiveThread.cpp \
     CustomThread/QTransmitThread.cpp \
+    CustomWidget/CheckBox/QDrawerCheckBox.cpp \
     CustomWidget/DataEdit.cpp \
+    CustomWidget/Frame/QStackedWidget.cpp \
+    CustomWidget/TableWidget/QMessageTableWidget.cpp \
     CustomWidget/ToolBox.cpp \
     CustomWidget/ToolPage.cpp \
+    Library/QWidgetLibrary.cpp \
     Setting/QAutoMessageConfig.cpp \
     Setting/QDeviceSettingConfig.cpp \
     Setting/QSettingConfigBase.cpp \
+    Windows/ACRForm.cpp \
     Windows/AutoSendConfigWindow.cpp \
     main.cpp \
     mainwindow.cpp
@@ -25,18 +30,26 @@ SOURCES += \
 HEADERS += \
     CustomThread/QReceiveThread.h \
     CustomThread/QTransmitThread.h \
+    CustomWidget/CheckBox/QDrawerCheckBox.h \
     CustomWidget/DataEdit.h \
+    CustomWidget/Frame/QStackedWidget.h \
+    CustomWidget/TableWidget/QMessageTableWidget.h \
     CustomWidget/ToolBox.h \
     CustomWidget/ToolPage.h \
+    Data/FromeStruct.h \
+    Library/QWidgetLibrary.h \
     Setting/QAutoMessageConfig.h \
     Setting/QDeviceSettingConfig.h \
     Setting/QSettingConfigBase.h \
+    Windows/ACRForm.h \
     Windows/AutoSendConfigWindow.h \
     mainwindow.h
 
 FORMS += \
+    CustomWidget/Frame/QStackedWidget.ui \
     CustomWidget/ToolBox.ui \
     CustomWidget/ToolPage.ui \
+    Windows/ACRForm.ui \
     Windows/AutoSendConfigWindow.ui \
     mainwindow.ui
 

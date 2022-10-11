@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/Icon">
+        <file>Resourse/Collapsed.png</file>
+        <file>Resourse/Expanded.png</file>
+        <file>Resourse/Collapsed_Disable.png</file>
+        <file>Resourse/Expanded_Disable.png</file>
+    </qresource>
+</RCC>
