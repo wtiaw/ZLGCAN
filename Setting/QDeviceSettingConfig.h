@@ -64,8 +64,9 @@ public:
     SChannel& GetChannel(){ return Channel; }
 
 
-    virtual void ReadConfig() override;
+    virtual void ReadConfig(QJsonDocument& doc, QJsonObject& RootObject) override;
     virtual void InitConfig() override;
+    virtual void SaveConfig(QString ObjectName, QString key, int Value);
 
 signals:
 private:

@@ -4,6 +4,8 @@
 #include <QObject>
 #include "QSettings"
 #include "QDir"
+#include <qjsonobject>
+#include <QJsonDocument>
 
 class QSettingConfigBase : public QObject
 {
@@ -11,10 +13,12 @@ class QSettingConfigBase : public QObject
 public:
     explicit QSettingConfigBase(QObject *parent = nullptr);
 
-    virtual void ReadConfig();
+    virtual void ReadConfig(QJsonDocument& doc, QJsonObject& RootObject);
     virtual void InitConfig();
+    virtual void SaveConfig(QString ObjectName, QString key, int Value);
 
-    void SaveConfig(std::string key, int Value);
+    template <typename ValueType>
+    void Save(QString FileName, QString ObjectName, QString key, ValueType Value);
 signals:
 
 protected:
@@ -23,5 +27,40 @@ protected:
 
     QSettings *psetting = nullptr;
 };
+
+template<typename ValueType>
+void QSettingConfigBase::Save(QString FileName, QString ObjectName, QString key, ValueType Value)
+{
+    QJsonObject RootObject;
+    QJsonDocument doc;
+
+    ReadConfig(doc, RootObject);
+    QJsonValue interestValue = RootObject.value(ObjectName);
+    if (interestValue.type() == QJsonValue::Object)
+    {
+        QJsonObject interestObject = interestValue.toObject();
+
+        interestObject[key] = Value;
+
+        RootObject[ObjectName] = interestObject;
+    }
+
+    // 将object设置为本文档的主要对象
+    doc.setObject(RootObject);
+
+    // 重写打开文件，覆盖原有文件，达到删除文件全部内容的效果
+    QFile writeFile(FileName);
+    if (!writeFile.open(QFile::WriteOnly | QFile::Truncate)) {
+        qDebug() << "can't open error!";
+        return;
+    }
+
+    // 将修改后的内容写入文件
+    QTextStream wirteStream(&writeFile);
+    wirteStream << doc.toJson();		// 写入文件
+    writeFile.close();					// 关闭文件
+
+    ReadConfig(doc, RootObject);
+}
 
 #endif // QSETTINGCONFIGBASE_H

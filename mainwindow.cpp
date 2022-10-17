@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    setAttribute(Qt::WA_QuitOnClose, true);
+
     ui->setupUi(this);
 
     ReceiveThread = new QReceiveThread(this);
@@ -115,7 +117,9 @@ void MainWindow::ReadConfig()
 {
     SettingConfig = new class QDeviceSettingConfig;
 
-    SettingConfig->ReadConfig();
+    QJsonObject temp;
+    QJsonDocument doc;
+    SettingConfig->ReadConfig(doc, temp);
 }
 
 void MainWindow::InitDeviceNameComboBox()
@@ -217,11 +221,6 @@ void MainWindow::InitMessageTable()
 
         if(i == 1){
             MessageTable->hide();
-
-            QStringList header;
-
-            header<<"Time(ms)"<<"ID"<<"Type"<<"Dir"<<"DLC"<<"Data";
-            MessageTable->setHorizontalHeaderLabels(header);
         }
     }
 }
@@ -232,6 +231,8 @@ void MainWindow::ResetMessageTable()
         while(i->rowCount()){
             i->removeRow(0);
         }
+
+        i->MessageIDMap.clear();
     }
 }
 
@@ -433,7 +434,7 @@ void MainWindow::On_ChannelIDChanged(int index)
     SChannel& ConfigChannel = SettingConfig->GetChannel();
     ConfigChannel.ID = index;
 
-    SettingConfig->SaveConfig(ChannelIDPath, index);
+    SettingConfig->SaveConfig("Channel", "ChannelID", index);
 }
 
 void MainWindow::On_WorkingModeChanged(int index)
@@ -443,7 +444,7 @@ void MainWindow::On_WorkingModeChanged(int index)
     SChannel& ConfigChannel = SettingConfig->GetChannel();
     ConfigChannel.WorkingMode = index;
 
-    SettingConfig->SaveConfig(ChannelWorkingModePath, index);
+    SettingConfig->SaveConfig("Channel", "ChannelWorkingMode", index);
 }
 
 void MainWindow::On_ABitChanged(int index)
@@ -453,7 +454,7 @@ void MainWindow::On_ABitChanged(int index)
     SChannel& ConfigChannel = SettingConfig->GetChannel();
     ConfigChannel.ABitBaudRate = index;
 
-    SettingConfig->SaveConfig(ChannelABitBaudRatePath, index);
+    SettingConfig->SaveConfig("Channel", "ChannelABitBaudRate", index);
 }
 
 void MainWindow::On_DBitChanged(int index)
@@ -463,7 +464,7 @@ void MainWindow::On_DBitChanged(int index)
     SChannel& ConfigChannel = SettingConfig->GetChannel();
     ConfigChannel.DBitBaudRate = index;
 
-    SettingConfig->SaveConfig(ChannelDBitBaudRatePath, index);
+    SettingConfig->SaveConfig("Channel", "ChannelDBitBaudRate", index);
 }
 
 void MainWindow::On_ResistanceChanged(int index)
@@ -473,7 +474,7 @@ void MainWindow::On_ResistanceChanged(int index)
     SChannel& ConfigChannel = SettingConfig->GetChannel();
     ConfigChannel.Resistance = index;
 
-    SettingConfig->SaveConfig(ChannelResistancePath, index);
+    SettingConfig->SaveConfig("Channel", "ChannelResistance", index);
 }
 
 void MainWindow::On_MessageFrameTypeChanged(int index)
@@ -534,15 +535,6 @@ void MainWindow::On_AutoSendMessage()
     auto_can.enable = 1; // 使能此索引，每条可单独设置
     auto_can.interval = 700;  // 定时发送间隔 100ms
     ConstructCANFrame(auto_can.obj); // 构造 CAN 报文
-
-//    ZCAN_AUTO_TRANSMIT_OBJ auto_can1;
-
-//    memset(&auto_can1, 0, sizeof(auto_can1));
-//    auto_can1.index = 1;  // 定时列表索引 0
-//    auto_can1.enable = 1; // 使能此索引，每条可单独设置
-//    auto_can1.interval = 700;  // 定时发送间隔 100ms
-//    ConstructCANFrame(auto_can1.obj); // 构造 CAN 报文
-//    auto_can1.obj.transmit_type = 2;
 
     GetProperty()->SetValue("0/auto_send", (const char*)&auto_can);
 //    GetProperty()->SetValue("0/auto_send", (const char*)&auto_can1);
@@ -785,7 +777,7 @@ int MainWindow::AddTotalTablData(QMessageTableWidget *MessageTableWidget, TableD
     }
 
 
-    MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeMS/1000.0, 'f', 3)));
+    MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeMS/1000.0, 'f', 6)));
     MessageTableWidget->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16).toUpper()));
 
     switch (InTableData.EventType) {
@@ -816,7 +808,7 @@ void MainWindow::AddDeltaTablData(QMessageTableWidget *MessageTableWidget, Table
         UINT64 TimeStamp = MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeMS;
 
         double temp = InTableData.TimeStamp - TimeStamp;
-        MessageTableWidget->item(rowIndex, 0)->setText(QString::number(temp/(KeyInfo.directionType == DirectionType::Transmit ? 1 : 1000),'f', 2));
+        MessageTableWidget->item(rowIndex, 0)->setText(QString::number(temp/(KeyInfo.directionType == DirectionType::Transmit ? 1000 : 1000000),'f', 6));
         MessageTableWidget->item(rowIndex, 5)->setText(InTableData.Data);
 
         MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeMS = InTableData.TimeStamp;
@@ -965,7 +957,7 @@ void MainWindow::on_ChangeTable_clicked(bool checked)
 void MainWindow::on_actionACR_triggered()
 {
     if(!ACRFromWindow)
-        ACRFromWindow = new ACRForm;
+        ACRFromWindow = new ACRForm(this, Qt::Window);
 
     ACRFromWindow->show();
 }

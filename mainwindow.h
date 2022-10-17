@@ -30,8 +30,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    DEVICE_HANDLE GetDeviceHandle(){ return dhandle; }
-    CHANNEL_HANDLE GetChannelHandle(){ return chHandle; }
+    DEVICE_HANDLE& GetDeviceHandle(){ return dhandle; }
+    CHANNEL_HANDLE& GetChannelHandle(){ return chHandle; }
     IProperty* GetProperty(){ return property; }
 
     int GetCanTypeFromUI();
@@ -160,5 +160,7 @@ private:
     class QReceiveThread*  ReceiveThread;
 
     class QTimer* UpdateDeltaTableTable;
+
+
 };
 #endif // MAINWINDOW_H

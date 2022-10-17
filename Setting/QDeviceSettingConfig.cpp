@@ -1,8 +1,8 @@
 #include "QDeviceSettingConfig.h"
 #include "QFileInfo"
 #include <QJsonObject>
-#include <QJsonDocument>
 #include <iostream>
+
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::DeviceName = {
         DisplayAndValue("USBCANFD_200U", ZCAN_USBCANFD_200U)
@@ -58,9 +58,9 @@ QDeviceSettingConfig::QDeviceSettingConfig(QObject *parent)
     ConfigFilePath = "/DeviceSetting.json";
 }
 
-void QDeviceSettingConfig::ReadConfig()
+void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObject)
 {
-    QSettingConfigBase::ReadConfig();
+    QSettingConfigBase::ReadConfig(doc, RootObject);
 
     QFile file(ConfigDirPath + ConfigFilePath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -78,16 +78,16 @@ void QDeviceSettingConfig::ReadConfig()
     QJsonParseError jsonError;
     // 将json解析为UTF-8编码的json文档，并从中创建一个QJsonDocument。
     // 如果解析成功，返回QJsonDocument对象，否则返回null
-    QJsonDocument doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
+    doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
     // 判断是否解析失败
     if (jsonError.error != QJsonParseError::NoError && !doc.isNull()) {
         qDebug() << "Json格式错误！" << jsonError.error;
         return;
     }
 
-    QJsonObject rootObj = doc.object();
+    RootObject = doc.object();
 
-    QJsonValue interestValue  = rootObj.value("Channel");
+    QJsonValue interestValue  = RootObject.value("Channel");
     if (interestValue.type() == QJsonValue::Object) {
         QJsonObject ChannelObj = interestValue.toObject();
 
@@ -112,7 +112,7 @@ void QDeviceSettingConfig::ReadConfig()
         qDebug() << "ChannelWorkingMode = " << ChannelWorkingMode.toInt();
     }
 
-    interestValue  = rootObj.value("Device");
+    interestValue  = RootObject.value("Device");
     if (interestValue.type() == QJsonValue::Object) {
         QJsonObject ChannelObj = interestValue.toObject();
 
@@ -156,4 +156,9 @@ void QDeviceSettingConfig::InitConfig()
     QTextStream stream(&file);
     stream << doc.toJson();
     file.close();
+}
+
+void QDeviceSettingConfig::SaveConfig(QString ObjectName, QString Key, int Value)
+{
+    Save(ConfigDirPath + ConfigFilePath, ObjectName, Key, Value);
 }

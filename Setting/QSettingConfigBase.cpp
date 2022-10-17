@@ -6,7 +6,7 @@ QSettingConfigBase::QSettingConfigBase(QObject *parent)
     ConfigDirPath = QDir::currentPath() + "/Config";
 }
 
-void QSettingConfigBase::ReadConfig()
+void QSettingConfigBase::ReadConfig(QJsonDocument& doc, QJsonObject& RootObject)
 {
     QDir dir(ConfigDirPath);
     if(!dir.exists()){
@@ -28,7 +28,9 @@ void QSettingConfigBase::InitConfig()
 
 }
 
-void QSettingConfigBase::SaveConfig(std::string key, int Value)
+void QSettingConfigBase::SaveConfig(QString ObjectName, QString key, int Value)
 {
-    psetting->setValue(key, Value);
+
 }
+
+

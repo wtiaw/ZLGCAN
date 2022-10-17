@@ -9,7 +9,7 @@ class QAutoMessageConfig : public QSettingConfigBase
 public:
     explicit QAutoMessageConfig(QObject *parent = nullptr);
 
-    virtual void ReadConfig() override;
+    virtual void ReadConfig(QJsonDocument& doc, QJsonObject& RootObject) override;
     virtual void InitConfig() override;
 };
 
