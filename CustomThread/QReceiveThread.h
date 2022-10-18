@@ -20,12 +20,18 @@ public:
     void Pause();
     void Resume();
 
+private:
+    void ReceiveData(CHANNEL_HANDLE ChannelHandle);
+
 private slots:
     void Test();
 
-private:
+public:
 signals:
     void AddTableData();
+
+    void AddCANTableData(const ZCAN_Receive_Data* data, UINT len);
+    void AddCANFDTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
 
 private:
     QTimer* Timer;

@@ -30,8 +30,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    DEVICE_HANDLE& GetDeviceHandle(){ return dhandle; }
-    CHANNEL_HANDLE& GetChannelHandle(){ return chHandle; }
+    DEVICE_HANDLE GetDeviceHandle() const { return dhandle; }
+    CHANNEL_HANDLE GetChannelHandle() const { return chHandle; }
     IProperty* GetProperty(){ return property; }
 
     int GetCanTypeFromUI();
@@ -43,6 +43,8 @@ public slots:
     //MeaasgeTable
     void AddTableData(const ZCAN_Transmit_Data* data, UINT len);
     void AddTableData(const ZCAN_TransmitFD_Data* data, UINT len);
+    void AddTableData(const ZCAN_Receive_Data* data, UINT len);
+    void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
 
 private:
     void ReadConfig();
@@ -75,8 +77,7 @@ private:
     bool SetResistance();
 
     //MeaasgeTable
-    void AddTableData(const ZCAN_Receive_Data* data, UINT len);
-    void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
+
     void AddTableData(TableData& InTableData);
     int  AddTotalTablData(QMessageTableWidget* MessageTableWidget, TableData& InTableData);
     void AddDeltaTablData(QMessageTableWidget* MessageTableWidget, TableData& InTableData);
