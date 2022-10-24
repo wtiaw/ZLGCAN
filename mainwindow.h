@@ -6,17 +6,7 @@
 #include "CustomWidget/TableWidget/QMessageTableWidget.h"
 #include "Setting/QDeviceSettingConfig.h"
 #include "qlineedit.h"
-
-
-struct TableData
-{
-    UINT64          TimeStamp;
-    canid_t         FrameID;
-    FrameType       EventType;
-    DirectionType   DirType;
-    BYTE            DLC;
-    QString         Data;
-};
+#include "Library/QCANLibrary.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,6 +26,10 @@ public:
 
     int GetCanTypeFromUI();
 
+    //TransmitMeaasge
+    void TransmitCAN(ZCAN_Transmit_Data can_data);
+    void TransmitCANFD(ZCAN_TransmitFD_Data canfd_data);
+
 public slots:
     void ReceiveData();
     void TransmitData();
@@ -45,6 +39,8 @@ public slots:
     void AddTableData(const ZCAN_TransmitFD_Data* data, UINT len);
     void AddTableData(const ZCAN_Receive_Data* data, UINT len);
     void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
+
+    void AddTableData(const TableData& InTableData);
 
 private:
     void ReadConfig();
@@ -78,13 +74,12 @@ private:
 
     //MeaasgeTable
 
-    void AddTableData(TableData& InTableData);
-    int  AddTotalTablData(QMessageTableWidget* MessageTableWidget, TableData& InTableData);
-    void AddDeltaTablData(QMessageTableWidget* MessageTableWidget, TableData& InTableData);
 
-    //TransmitMeaasge
-    void TransmitCAN();
-    void TransmitCANFD();
+    int  AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
+    void AddDeltaTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
+    int  AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
+
+
 
     //检查DLC输入格式
     bool ChackDLCData();
@@ -134,6 +129,8 @@ private slots:
     void on_ChangeTable_clicked(bool checked);
 
     void on_actionACR_triggered();
+
+    void on_comboBox_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;

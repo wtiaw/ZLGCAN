@@ -2,12 +2,24 @@
 #define ACRFORM_H
 
 #include "mainwindow.h"
+#include "qtimer.h"
 #include "typedef.h"
 #include <QWidget>
 
 namespace Ui {
 class ACRForm;
 }
+
+enum EMessageTimer
+{
+    Message_406,
+    Message_121,
+    Message_1C2,
+    Message_50,
+    Message_288,
+    Message_2D2,
+    Message_2F7,
+};
 
 class ACRForm : public QWidget
 {
@@ -17,10 +29,19 @@ public:
     explicit ACRForm(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~ACRForm();
 
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data *CANData, void (ACRForm::* Function)() = nullptr);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data &CANData, void (ACRForm::* Function)() = nullptr);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data *CANFDData, void (ACRForm::* Function)() = nullptr);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data &CANFDData, void (ACRForm::* Function)() = nullptr);
+
+    void StopTimer();
+
 private:
     void ConstructCAN(ZCAN_Transmit_Data &can_data, BYTE DLC, BYTE Data[], BYTE TransmitType);
 
     BYTE can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
+
+    void Send121();
 
 private slots:
     void on_pushButton_clicked();
@@ -31,6 +52,8 @@ private slots:
 
 private:
     Ui::ACRForm *ui;
+
+    QMap<EMessageTimer, QTimer*> MessageTimerContainer;
 
     MainWindow* mainWindow;
 
@@ -67,6 +90,15 @@ private:
         0x45, 0x58, 0x0B, 0x16, 0x31, 0x2C, 0x97, 0x8A, 0xAD, 0xB0, 0xE3,
         0xFE, 0xD9, 0xC4
       };
+
+    ZCAN_TransmitFD_Data canfd_data_406;
+    ZCAN_TransmitFD_Data canfd_data_121;
+    ZCAN_TransmitFD_Data canfd_data_1C2;
+    ZCAN_TransmitFD_Data canfd_data_50;
+    ZCAN_TransmitFD_Data canfd_data_288;
+    ZCAN_TransmitFD_Data canfd_data_2D2;
+    ZCAN_TransmitFD_Data canfd_data_2F7;
+    int Count_121;
 };
 
 #endif // ACRFORM_H

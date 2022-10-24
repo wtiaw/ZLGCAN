@@ -124,7 +124,7 @@ void MainWindow::ReadConfig()
 
 void MainWindow::InitDeviceNameComboBox()
 {
-    QWidgetLibrary::InitMessageFrameTypeComboBox(ui->DeviceNameComboBox);
+    ui->DeviceNameComboBox->addItem("USBCANFD");
 }
 
 void MainWindow::InitDeviceIDComboBox()
@@ -213,13 +213,13 @@ void MainWindow::InitMessageTransmitTypeComboBox()
 
 void MainWindow::InitMessageTable()
 {
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < 3; i++){
         QMessageTableWidget* MessageTable = new QMessageTableWidget(this);
         Tables.append(MessageTable);
 
         ui->TableContainer->layout()->addWidget(MessageTable);
 
-        if(i == 1){
+        if(i != 0){
             MessageTable->hide();
         }
     }
@@ -385,6 +385,11 @@ void MainWindow::On_Reset()
     ui->Send->     setEnabled(false);
 
     ReceiveThread->Pause();
+
+    if(ACRFromWindow)
+    {
+        ACRFromWindow->StopTimer();
+    }
 }
 
 void MainWindow::On_CloseDevice()
@@ -415,6 +420,10 @@ void MainWindow::On_CloseDevice()
     qDebug("设备：%s 关闭",(DeviceDisplayName.c_str()));
 
     UpdateDeltaTableTable->stop();
+    if(ACRFromWindow)
+    {
+        ACRFromWindow->StopTimer();
+    }
 }
 
 void MainWindow::On_OpenAutoSendConfigWindow()
@@ -593,8 +602,6 @@ bool MainWindow::SetResistance()
 
 void MainWindow::On_SendMessage()
 {
-//    QTransmitThread* TransmitThread = new QTransmitThread(this);
-//    TransmitThread->start();
     TransmitData();
 }
 
@@ -621,10 +628,16 @@ void MainWindow::TransmitData()
 {
     switch (ui->MessageFrameTypeComboBox->currentIndex()) {
     case 0:
-        TransmitCAN();
+        ZCAN_Transmit_Data can_data;
+        ConstructCANFrame(can_data);
+
+        TransmitCAN(can_data);
         break;
     case 1:
-        TransmitCANFD();
+        ZCAN_TransmitFD_Data canfd_data;
+        ConstructCANFDFrame(canfd_data);
+
+        TransmitCANFD(canfd_data);
         break;
     }
 }
@@ -634,24 +647,8 @@ void MainWindow::AddTableData(const ZCAN_Receive_Data *data, UINT len)
     for (UINT i = 0; i < len; ++i)
     {
         const ZCAN_Receive_Data& can = data[i];
-        const canid_t& id = can.frame.can_id;
-        QString str;
 
-        TableData InTableData;
-        InTableData.TimeStamp    =   can.timestamp;
-        InTableData.FrameID      =   GET_ID(id);
-        InTableData.EventType    =   FrameType::CAN;
-        InTableData.DirType      =   DirectionType::Receive;
-        InTableData.DLC          =   can.frame.can_dlc;
-
-        for (UINT i = 0; i < can.frame.can_dlc; ++i)
-        {
-            str += QString("%1 ").arg(can.frame.data[i], 2, 16, QLatin1Char('0'));
-        }
-
-        InTableData.Data = str.toUpper();
-
-        AddTableData(InTableData);
+        AddTableData(QCANLibrary::ConstructTableData(can));
     }
 }
 
@@ -660,25 +657,8 @@ void MainWindow::AddTableData(const ZCAN_ReceiveFD_Data *data, UINT len)
     for (UINT i = 0; i < len; ++i)
     {
         const ZCAN_ReceiveFD_Data& canfd = data[i];
-        const canid_t& id = canfd.frame.can_id;
-        QString str;
 
-        TableData InTableData;
-        InTableData.TimeStamp    =   canfd.timestamp;
-        InTableData.FrameID      =   GET_ID(id);
-        InTableData.EventType    =   FrameType::CANFD;
-        InTableData.DirType      =   DirectionType::Receive;
-        InTableData.DLC          =   canfd.frame.len;
-
-        for (UINT i = 0; i < canfd.frame.len; ++i)
-        {
-
-            str += QString("%1 ").arg(canfd.frame.data[i], 2, 16, QLatin1Char('0'));
-        }
-
-        InTableData.Data = str.toUpper();
-
-        AddTableData(InTableData);
+        AddTableData(QCANLibrary::ConstructTableData(canfd));
     }
 }
 
@@ -688,24 +668,8 @@ void MainWindow::AddTableData(const ZCAN_Transmit_Data *data, UINT len)
     for (UINT i = 0; i < len; ++i)
     {
         const ZCAN_Transmit_Data& can = data[i];
-        const canid_t& id = can.frame.can_id;
-        QString str;
 
-        TableData InTableData;
-        InTableData.TimeStamp    =   QDateTime::currentMSecsSinceEpoch();
-        InTableData.FrameID      =   GET_ID(id);
-        InTableData.EventType    =   FrameType::CAN;
-        InTableData.DirType      =   DirectionType::Transmit;
-        InTableData.DLC          =   can.frame.can_dlc;
-
-        for (UINT i = 0; i < can.frame.can_dlc; ++i)
-        {
-            str += QString("%1 ").arg(can.frame.data[i],2,16,QLatin1Char('0'));
-        }
-
-        InTableData.Data = str.toUpper();
-
-        AddTableData(InTableData);
+        AddTableData(QCANLibrary::ConstructTableData(can));
     }
 }
 
@@ -713,35 +677,20 @@ void MainWindow::AddTableData(const ZCAN_TransmitFD_Data *data, UINT len)
 {
     for (UINT i = 0; i < len; ++i)
     {
-        const ZCAN_TransmitFD_Data& canfd = data[i];
-        const canid_t& id = canfd.frame.can_id;
-        QString str;
+        const ZCAN_TransmitFD_Data& can = data[i];
 
-        TableData InTableData;
-        InTableData.TimeStamp    =   QDateTime::currentMSecsSinceEpoch();
-        InTableData.FrameID      =   GET_ID(id);
-        InTableData.EventType    =   FrameType::CANFD;
-        InTableData.DirType      =   DirectionType::Transmit;
-        InTableData.DLC          =   canfd.frame.len;
-
-        for (UINT i = 0; i < canfd.frame.len; ++i)
-        {
-            str += QString("%1 ").arg(canfd.frame.data[i],2,16,QLatin1Char('0'));
-        }
-
-        InTableData.Data = str.toUpper();
-
-        AddTableData(InTableData);
+        AddTableData(QCANLibrary::ConstructTableData(can));
     }
 }
 
-void MainWindow::AddTableData(TableData& InTableData)
+void MainWindow::AddTableData(const TableData& InTableData)
 {
-    AddTotalTablData(Tables[0], InTableData);
-    AddDeltaTablData(Tables[1], InTableData);
+    AddTotalTableData(Tables[0], InTableData);
+    AddDeltaTableData(Tables[1], InTableData);
+    AddDiagTableData(Tables[2],InTableData);
 }
 
-int MainWindow::AddTotalTablData(QMessageTableWidget *MessageTableWidget, TableData &InTableData)
+int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
 {
     int rowIndex = MessageTableWidget->rowCount();//当前表格的行数
     MessageTableWidget->insertRow(rowIndex);//在最后一行的后面插入一行
@@ -768,7 +717,7 @@ int MainWindow::AddTotalTablData(QMessageTableWidget *MessageTableWidget, TableD
 
         if(TStartTime == 0)
         {
-            TStartTime = InTableData.TimeStamp;
+            TStartTime = QDateTime::currentMSecsSinceEpoch();
         }
 
         intervalTimeMS = InTableData.TimeStamp - TStartTime;
@@ -798,7 +747,7 @@ int MainWindow::AddTotalTablData(QMessageTableWidget *MessageTableWidget, TableD
     return rowIndex;
 }
 
-void MainWindow::AddDeltaTablData(QMessageTableWidget *MessageTableWidget, TableData &InTableData)
+void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
 {
     const MessageKeyInfo& KeyInfo = MessageKeyInfo(InTableData.FrameID, InTableData.DirType);
 
@@ -816,34 +765,35 @@ void MainWindow::AddDeltaTablData(QMessageTableWidget *MessageTableWidget, Table
     }
     else
     {
-        int rowIndex = AddTotalTablData(MessageTableWidget, InTableData);
+        int rowIndex = AddTotalTableData(MessageTableWidget, InTableData);
 
         MessageTableWidget->MessageIDMap.insert(KeyInfo, MessageValueInfo(InTableData.TimeStamp, rowIndex));
     }
 }
 
-void MainWindow::TransmitCAN()
+int MainWindow::AddDiagTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
 {
-    ZCAN_Transmit_Data can_data;
+    QByteArray ba;
+    uint ID =  ba.setNum(InTableData.FrameID,16).toUInt(nullptr,16);
+    if((ID != 0x740) && (ID != 0x748))
+    {
+        return -1;
+    }
+    AddTotalTableData(MessageTableWidget, InTableData);
 
-    ConstructCANFrame(can_data);
-
-    auto result = ZCAN_Transmit(chHandle, &can_data, 1);
-//    if(can_data.transmit_type != 2){
-       AddTableData(&can_data,1);
-//    }
+    return 0;
 }
 
-void MainWindow::TransmitCANFD()
+void MainWindow::TransmitCAN(ZCAN_Transmit_Data can_data)
 {
-    ZCAN_TransmitFD_Data canfd_data;
+    auto result = ZCAN_Transmit(chHandle, &can_data, 1);
+    AddTableData(&can_data, result);
+}
 
-    ConstructCANFDFrame(canfd_data);
-
+void MainWindow::TransmitCANFD(ZCAN_TransmitFD_Data canfd_data)
+{
     auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1);
-//    if(canfd_data.transmit_type != 2){
-        AddTableData(&canfd_data,1);
-//    }
+    AddTableData(&canfd_data, result);
 }
 
 bool MainWindow::ChackDLCData()
@@ -960,5 +910,16 @@ void MainWindow::on_actionACR_triggered()
         ACRFromWindow = new ACRForm(this, Qt::Window);
 
     ACRFromWindow->show();
+}
+
+
+void MainWindow::on_comboBox_currentIndexChanged(int index)
+{
+    for(auto i : Tables)
+    {
+        i->hide();
+    }
+
+    Tables[index]->show();
 }
 

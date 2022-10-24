@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     CustomThread/QReceiveThread.cpp \
+    CustomThread/QThreadBase.cpp \
     CustomThread/QTransmitThread.cpp \
     CustomWidget/CheckBox/QDrawerCheckBox.cpp \
     CustomWidget/DataEdit.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
     CustomWidget/TableWidget/QMessageTableWidget.cpp \
     CustomWidget/ToolBox.cpp \
     CustomWidget/ToolPage.cpp \
+    Library/QCANLibrary.cpp \
     Library/QWidgetLibrary.cpp \
     Setting/QAutoMessageConfig.cpp \
     Setting/QDeviceSettingConfig.cpp \
@@ -29,6 +31,7 @@ SOURCES += \
 
 HEADERS += \
     CustomThread/QReceiveThread.h \
+    CustomThread/QThreadBase.h \
     CustomThread/QTransmitThread.h \
     CustomWidget/CheckBox/QDrawerCheckBox.h \
     CustomWidget/DataEdit.h \
@@ -37,6 +40,7 @@ HEADERS += \
     CustomWidget/ToolBox.h \
     CustomWidget/ToolPage.h \
     Data/FromeStruct.h \
+    Library/QCANLibrary.h \
     Library/QWidgetLibrary.h \
     Setting/QAutoMessageConfig.h \
     Setting/QDeviceSettingConfig.h \

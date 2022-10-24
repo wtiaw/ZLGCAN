@@ -4,7 +4,7 @@
 QMessageTableWidget::QMessageTableWidget(QWidget *parent) :
     QTableWidget(parent)
 {
-    setColumnCount(7);
+    setColumnCount(6);
     QStringList header;
 
     header<<"Time(s)"<<"ID"<<"Type"<<"Dir"<<"DLC"<<"Data";

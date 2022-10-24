@@ -301,10 +301,22 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="ChangeTable">
-             <property name="text">
-              <string>显示变化</string>
-             </property>
+            <widget class="QComboBox" name="comboBox">
+             <item>
+              <property name="text">
+               <string>Trace</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Toggle Time Mode</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Diage Trace</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>

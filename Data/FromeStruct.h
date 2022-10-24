@@ -1,7 +1,7 @@
 #ifndef FROMESTRUCT_H
 #define FROMESTRUCT_H
 
-#endif // FROMESTRUCT_H
+
 
 
 enum FrameType
@@ -16,3 +16,5 @@ enum DirectionType
     Transmit,
     Receive,
 };
+
+#endif // FROMESTRUCT_H
