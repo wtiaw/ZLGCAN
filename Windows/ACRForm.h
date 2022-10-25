@@ -37,8 +37,6 @@ public:
     void StopTimer();
 
 private:
-    void ConstructCAN(ZCAN_Transmit_Data &can_data, BYTE DLC, BYTE Data[], BYTE TransmitType);
-
     BYTE can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
     void Send121();

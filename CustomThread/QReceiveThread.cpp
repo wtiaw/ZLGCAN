@@ -31,7 +31,7 @@ void QReceiveThread::run()
     }
 }
 
-void QReceiveThread::ReceiveData(CHANNEL_HANDLE ChannelHandle)
+void QReceiveThread::ReceiveData(CHANNEL_HANDLE& ChannelHandle)
 {
     ZCAN_Receive_Data can_data[100];
     ZCAN_ReceiveFD_Data canfd_data[100];
@@ -57,14 +57,14 @@ void QReceiveThread::ReceiveData(CHANNEL_HANDLE ChannelHandle)
         for (UINT i = 0; i < len; ++i)
         {
             const ZCAN_ReceiveFD_Data& canfd = canfd_data[i];
-Reception(canfd);
-            emit AddTableData(QCANLibrary::ConstructTableData(canfd));
 
+            emit AddTableData(QCANLibrary::ConstructTableData(canfd));
+            Reception(canfd);
         }
     }
 }
 
-void QReceiveThread::InitReceptionData(CHANNEL_HANDLE ChannelHandle)
+void QReceiveThread::InitReceptionData(CHANNEL_HANDLE& ChannelHandle)
 {
     ReceptionDatas.clear();
     QVector<BYTE> Temp = {0x07, 0x62};

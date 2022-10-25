@@ -27,9 +27,9 @@ public:
     void run() override;
 
 private:
-    void ReceiveData(CHANNEL_HANDLE ChannelHandle);
+    void ReceiveData(CHANNEL_HANDLE& ChannelHandle);
 
-    void InitReceptionData(CHANNEL_HANDLE ChannelHandle);
+    void InitReceptionData(CHANNEL_HANDLE& ChannelHandle);
     void AddReceptionData(const uint FrameID, const QVector<BYTE> FilterData, std::function<void ()> const Func);
 
     bool ShouldReception(const ZCAN_Receive_Data& Data, const ReceptionData InReceptionData);

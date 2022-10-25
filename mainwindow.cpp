@@ -338,11 +338,6 @@ void MainWindow::On_InitCAN()
     ui->ABitComboBox->         setEnabled(false);
     ui->DBitComboBox->         setEnabled(false);
     ui->ResistanceComboBox->   setEnabled(false);
-
-//    property->SetValue("0/filter_mode", "0"); // 标准帧
-//    property->SetValue("0/filter_start", "0x740");  // 起始 ID
-//    property->SetValue("0/filter_end", "0x748");  // 结束 ID
-//    property->SetValue("0/filter_ack", "0");
 }
 
 void MainWindow::On_OpenCAN()

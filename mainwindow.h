@@ -30,6 +30,8 @@ public:
     void TransmitCAN(ZCAN_Transmit_Data can_data);
     void TransmitCANFD(ZCAN_TransmitFD_Data canfd_data);
 
+    bool IsOpenCAN(){ return GetChannelHandle(); }
+
 public slots:
     void ReceiveData();
     void TransmitData();

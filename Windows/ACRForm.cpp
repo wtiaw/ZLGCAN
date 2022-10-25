@@ -172,11 +172,6 @@ void ACRForm::StopTimer()
     }
 }
 
-void ACRForm::ConstructCAN(ZCAN_Transmit_Data &can_data, BYTE DLC, BYTE Data[], BYTE TransmitType)
-{
-
-}
-
 BYTE ACRForm::can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length)
 {
     CANE2E_CRC8_STARTVALUE = CANE2E_CRC8_INITIALVALUE;
@@ -204,6 +199,8 @@ void ACRForm::Send121()
 
 void ACRForm::on_pushButton_clicked()
 {
+    if(!mainWindow->IsOpenCAN()) return;
+
     TransmitMessageByTimer(EMessageTimer::Message_121, 10, &canfd_data_121, &ACRForm::Send121);
 
     TransmitMessageByTimer(EMessageTimer::Message_1C2, 10, &canfd_data_1C2);
@@ -217,47 +214,13 @@ void ACRForm::on_pushButton_clicked()
     TransmitMessageByTimer(EMessageTimer::Message_2F7, 100, &canfd_data_2F7);
 
     TransmitMessageByTimer(EMessageTimer::Message_406, 700, &canfd_data_406);
-
-//    ZCAN_AUTO_TRANSMIT_OBJ auto_can;
-//    memset(&auto_can, 0, sizeof(auto_can));
-//    auto_can.index = 99;  // 定时列表索引 0
-//    auto_can.enable = 1; // 使能此索引，每条可单独设置
-//    auto_can.interval = 4000;  // 定时发送间隔 100ms
-
-//    ZCAN_Transmit_Data &can_data = auto_can.obj;
-//    canid_t CANID     = 0x406;
-//    BYTE DLC          = 8;
-//    BYTE TransmitType = 3;
-
-//    memset(&can_data, 0, sizeof(can_data));
-//    can_data.frame.can_id   =  MAKE_CAN_ID(CANID, 0, 0, 0);         // CAN ID
-//    can_data.frame.can_dlc  =  DLC;                                 // CAN 数据长度
-//    can_data.transmit_type  =  TransmitType;                        //发送模式
-
-//    ZCAN_AUTO_TRANSMIT_OBJ auto_can1;
-//    memset(&auto_can1, 0, sizeof(auto_can1));
-//    auto_can1.index = 98;  // 定时列表索引 0
-//    auto_can1.enable = 1; // 使能此索引，每条可单独设置
-//    auto_can1.interval = 700;  // 定时发送间隔 100ms
-
-//    ZCAN_Transmit_Data &can_data1 = auto_can1.obj;
-//    canid_t CANID1     = 0x406;
-//    BYTE DLC1          = 8;
-//    BYTE TransmitType1 = 0;
-
-//    memset(&can_data1, 0, sizeof(can_data1));
-//    can_data1.frame.can_id   =  MAKE_CAN_ID(CANID1, 0, 0, 0);         // CAN ID
-//    can_data1.frame.can_dlc  =  DLC1;                                 // CAN 数据长度
-//    can_data1.transmit_type  =  TransmitType1;                        //发送模式
-
-//    mainWindow->GetProperty()->SetValue("0/auto_send", (const char*)&auto_can1);
-//    mainWindow->GetProperty()->SetValue("0/auto_send", (const char*)&auto_can);
-//    mainWindow->GetProperty()->SetValue("0/apply_auto_send", "0");
 }
 
 
 void ACRForm::on_pushButton_2_clicked()
 {
+    if(!mainWindow->IsOpenCAN()) return;
+
     ZCAN_TransmitFD_Data can_data;
 
     canid_t CANID     = 0x740;
@@ -274,52 +237,6 @@ void ACRForm::on_pushButton_2_clicked()
     can_data.frame.data[3] = 0x01;
 
     mainWindow->TransmitCANFD(can_data);
-
-
-
-
-//    ZCAN_AUTO_TRANSMIT_OBJ auto_can;
-
-//    memset(&auto_can, 0, sizeof(auto_can));
-//    auto_can.index = 98;  // 定时列表索引 0
-//    auto_can.enable = 1; // 使能此索引，每条可单独设置
-//    auto_can.interval = 4000;  // 定时发送间隔 100ms
-
-//    ZCAN_Transmit_Data &auto_can_data = auto_can.obj;
-//    CANID        = 0x740;
-//    DLC          = 8;
-//    TransmitType = 0;
-
-//    memset(&auto_can_data, 0, sizeof(auto_can_data));
-//    auto_can_data.frame.can_id   =  MAKE_CAN_ID(CANID, 0, 0, 0);         // CAN ID
-//    auto_can_data.frame.can_dlc  =  DLC;                                 // CAN 数据长度
-//    auto_can_data.transmit_type  =  TransmitType;
-//    auto_can_data.frame.data[0] = 0x3E;
-//    auto_can_data.frame.data[1] = 0x00;
-
-//    mainWindow->GetProperty()->SetValue("0/auto_send", (const char*)&auto_can);
-//    mainWindow->GetProperty()->SetValue("0/apply_auto_send", "0");
-
-
-//    memset(&auto_can, 0, sizeof(auto_can));
-//    auto_can.index = 97;  // 定时列表索引 0
-//    auto_can.enable = 1; // 使能此索引，每条可单独设置
-//    auto_can.interval = 10;  // 定时发送间隔 100ms
-
-//    auto_can_data = auto_can.obj;
-//    CANID        = 0x740;
-//    DLC          = 8;
-//    TransmitType = 0;
-
-//    memset(&auto_can_data, 0, sizeof(auto_can_data));
-//    auto_can_data.frame.can_id   =  MAKE_CAN_ID(CANID, 0, 0, 0);         // CAN ID
-//    auto_can_data.frame.can_dlc  =  DLC;                                 // CAN 数据长度
-//    auto_can_data.transmit_type  =  TransmitType;
-//    auto_can_data.frame.data[0] = 0x00;
-//    auto_can_data.frame.data[1] = 0x24;
-
-//    mainWindow->GetProperty()->SetValue("0/auto_send", (const char*)&auto_can);
-//    mainWindow->GetProperty()->SetValue("0/apply_auto_send", "0");
 }
 
 
