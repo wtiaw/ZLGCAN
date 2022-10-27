@@ -27,8 +27,8 @@ public:
     int GetCanTypeFromUI();
 
     //TransmitMeaasge
-    void TransmitCAN(ZCAN_Transmit_Data can_data);
-    void TransmitCANFD(ZCAN_TransmitFD_Data canfd_data);
+    void TransmitCANData(ZCAN_Transmit_Data& can_data);
+    void TransmitCANData(ZCAN_TransmitFD_Data& canfd_data);
 
     bool IsOpenCAN(){ return GetChannelHandle(); }
 
@@ -37,10 +37,12 @@ public slots:
     void TransmitData();
 
     //MeaasgeTable
-    void AddTableData(const ZCAN_Transmit_Data* data, UINT len);
-    void AddTableData(const ZCAN_TransmitFD_Data* data, UINT len);
+    void AddTableData(const ZCAN_Transmit_Data& data);
+    void AddTableData(const ZCAN_TransmitFD_Data& data);
     void AddTableData(const ZCAN_Receive_Data* data, UINT len);
     void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
+    void AddTableData(const ZCAN_Receive_Data& data);
+    void AddTableData(const ZCAN_ReceiveFD_Data& data);
 
     void AddTableData(const TableData& InTableData);
 
@@ -150,7 +152,7 @@ private:
     QVector<QMessageTableWidget*> Tables;
 
     UINT64 RStartTime = 0;
-    UINT64 TStartTime = 0;
+    LARGE_INTEGER TStartTime;
     UINT64 temp = 0;
 
     DEVICE_HANDLE dhandle;

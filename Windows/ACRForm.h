@@ -1,6 +1,7 @@
 #ifndef ACRFORM_H
 #define ACRFORM_H
 
+#include "CustomThread/PerformanceFrequency.h"
 #include "mainwindow.h"
 #include "qtimer.h"
 #include "typedef.h"
@@ -29,14 +30,16 @@ public:
     explicit ACRForm(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~ACRForm();
 
+
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data *CANData, void (ACRForm::* Function)() = nullptr);
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data &CANData, void (ACRForm::* Function)() = nullptr);
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data *CANFDData, void (ACRForm::* Function)() = nullptr);
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data &CANFDData, void (ACRForm::* Function)() = nullptr);
 
     void StopTimer();
 
 private:
+    template<typename Transmit_Data>
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, Transmit_Data *CANData, void (ACRForm::* Function)() = nullptr);
+
     BYTE can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
     void Send121();
@@ -52,6 +55,7 @@ private:
     Ui::ACRForm *ui;
 
     QMap<EMessageTimer, QTimer*> MessageTimerContainer;
+    QMap<EMessageTimer, class PerformanceFrequency*> MessageThreadContainer;
 
     MainWindow* mainWindow;
 
@@ -98,5 +102,50 @@ private:
     ZCAN_TransmitFD_Data canfd_data_2F7;
     int Count_121;
 };
+
+template<typename Transmit_Data>
+void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, Transmit_Data *CANData, void (ACRForm::*Function)())
+{
+//    QTimer* Timer = nullptr;
+//    if(!MessageTimerContainer.contains(InMessageTimerType)){
+//        Timer = new QTimer;
+//        Timer->setTimerType(Qt::PreciseTimer);
+//        connect(Timer, &QTimer::timeout, this, [=]() -> void
+//        {
+//            mainWindow->TransmitCANData(*CANData);
+
+//            if(Function)
+//                (this->*Function)();
+//        });
+
+//        MessageTimerContainer.insert(InMessageTimerType, Timer);
+//    }
+//    else
+//    {
+//        Timer = MessageTimerContainer[InMessageTimerType];
+//    }
+
+//    Timer->start(msec);
+
+    PerformanceFrequency* temp;
+    if(!MessageThreadContainer.contains(InMessageTimerType)){
+        temp = new PerformanceFrequency;
+        connect(temp, &PerformanceFrequency::TimeOut, this, [=]() mutable -> void
+        {
+            mainWindow->TransmitCANData(*CANData);
+
+            if(Function)
+                (this->*Function)();
+        }, Qt::QueuedConnection);
+
+        MessageThreadContainer.insert(InMessageTimerType, temp);
+    }
+    else
+    {
+        temp = MessageThreadContainer[InMessageTimerType];
+    }
+
+    temp->setThreadRunning(msec);
+}
 
 #endif // ACRFORM_H

@@ -1,4 +1,5 @@
 QT       += core gui
+QT       += concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
@@ -10,6 +11,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    CustomThread/PerformanceFrequency.cpp \
     CustomThread/QReceiveThread.cpp \
     CustomThread/QThreadBase.cpp \
     CustomThread/QTransmitThread.cpp \
@@ -30,6 +32,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    CustomThread/PerformanceFrequency.h \
     CustomThread/QReceiveThread.h \
     CustomThread/QThreadBase.h \
     CustomThread/QTransmitThread.h \

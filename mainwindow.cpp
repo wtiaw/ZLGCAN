@@ -35,9 +35,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
 
-//    AutoSendConfig->exit();
-//    delete AutoSendConfig;
-
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dhandle);
 }
@@ -49,6 +46,9 @@ int MainWindow::GetCanTypeFromUI()
 
 void MainWindow::Init()
 {
+    dhandle = nullptr;
+    chHandle = nullptr;
+
     InitButtonFunc();
 
     ReadConfig();
@@ -253,7 +253,7 @@ void MainWindow::On_OpenDevice()
     int DeviceName = QDeviceSettingConfig::DeviceName[ConfigDevice.Name].Value;
     int DeviceID = ConfigDevice.ID;
 
-    TStartTime = 0;
+    TStartTime.QuadPart = 0;
     RStartTime = 0;
     temp = 0;
 
@@ -367,11 +367,14 @@ void MainWindow::On_OpenCAN()
     }
 
     UpdateDeltaTableTable->start(10);
+
+    TStartTime = QCANLibrary::GetCurrentTime_us();
 }
 
 void MainWindow::On_Reset()
 {
     ReleaseIProperty(property);
+    chHandle = nullptr;
 
     qDebug("复位通道成功");
     ui->OpenCAN->  setEnabled(true);
@@ -409,6 +412,7 @@ void MainWindow::On_CloseDevice()
 
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dhandle);
+    dhandle = nullptr;
 
     SDevice ConfigDevice = SettingConfig->GetDevice();
     std::string DeviceDisplayName = (QDeviceSettingConfig::DeviceName[ConfigDevice.Name].Display).toStdString();
@@ -626,13 +630,13 @@ void MainWindow::TransmitData()
         ZCAN_Transmit_Data can_data;
         ConstructCANFrame(can_data);
 
-        TransmitCAN(can_data);
+        TransmitCANData(can_data);
         break;
     case 1:
         ZCAN_TransmitFD_Data canfd_data;
         ConstructCANFDFrame(canfd_data);
 
-        TransmitCANFD(canfd_data);
+        TransmitCANData(canfd_data);
         break;
     }
 }
@@ -643,7 +647,7 @@ void MainWindow::AddTableData(const ZCAN_Receive_Data *data, UINT len)
     {
         const ZCAN_Receive_Data& can = data[i];
 
-        AddTableData(QCANLibrary::ConstructTableData(can));
+        AddTableData(can);
     }
 }
 
@@ -653,29 +657,28 @@ void MainWindow::AddTableData(const ZCAN_ReceiveFD_Data *data, UINT len)
     {
         const ZCAN_ReceiveFD_Data& canfd = data[i];
 
-        AddTableData(QCANLibrary::ConstructTableData(canfd));
+        AddTableData(canfd);
     }
 }
 
-void MainWindow::AddTableData(const ZCAN_Transmit_Data *data, UINT len)
+void MainWindow::AddTableData(const ZCAN_Receive_Data &data)
 {
-
-    for (UINT i = 0; i < len; ++i)
-    {
-        const ZCAN_Transmit_Data& can = data[i];
-
-        AddTableData(QCANLibrary::ConstructTableData(can));
-    }
+    AddTableData(QCANLibrary::ConstructTableData(data));
 }
 
-void MainWindow::AddTableData(const ZCAN_TransmitFD_Data *data, UINT len)
+void MainWindow::AddTableData(const ZCAN_ReceiveFD_Data &data)
 {
-    for (UINT i = 0; i < len; ++i)
-    {
-        const ZCAN_TransmitFD_Data& can = data[i];
+    AddTableData(QCANLibrary::ConstructTableData(data));
+}
 
-        AddTableData(QCANLibrary::ConstructTableData(can));
-    }
+void MainWindow::AddTableData(const ZCAN_Transmit_Data &data)
+{
+    AddTableData(QCANLibrary::ConstructTableData(data));
+}
+
+void MainWindow::AddTableData(const ZCAN_TransmitFD_Data &data)
+{
+    AddTableData(QCANLibrary::ConstructTableData(data));
 }
 
 void MainWindow::AddTableData(const TableData& InTableData)
@@ -690,7 +693,8 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
     int rowIndex = MessageTableWidget->rowCount();//当前表格的行数
     MessageTableWidget->insertRow(rowIndex);//在最后一行的后面插入一行
 
-    UINT64 intervalTimeMS;
+    UINT64 intervalTimeNS;
+    double CPUintervalTime;
     switch (InTableData.DirType) {
     case DirectionType::Receive:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Rx"));
@@ -699,29 +703,21 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
         {
             RStartTime = InTableData.TimeStamp;
 
-
-            temp = TStartTime ? QDateTime::currentMSecsSinceEpoch() - TStartTime : 0;
+            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
         }
-        intervalTimeMS = InTableData.TimeStamp - RStartTime;
-        intervalTimeMS /= 1000.0;
-        intervalTimeMS += temp;
 
+        intervalTimeNS = InTableData.TimeStamp - RStartTime;
+        intervalTimeNS += temp;
+        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeNS/1000000.0, 'f', 6)));
         break;
     case DirectionType::Transmit:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Tx"));
 
-        if(TStartTime == 0)
-        {
-            TStartTime = QDateTime::currentMSecsSinceEpoch();
-        }
-
-        intervalTimeMS = InTableData.TimeStamp - TStartTime;
-
+        CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
+        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
         break;
     }
 
-
-    MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeMS/1000.0, 'f', 6)));
     MessageTableWidget->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16).toUpper()));
 
     switch (InTableData.EventType) {
@@ -748,21 +744,42 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
 
     if(MessageTableWidget->MessageIDMap.contains(KeyInfo))
     {
-        int rowIndex  = MessageTableWidget->MessageIDMap[KeyInfo].TableIndex;
-        UINT64 TimeStamp = MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeMS;
+        int rowIndex          = MessageTableWidget->MessageIDMap[KeyInfo].TableIndex;
+        UINT64 TimeStamp      = MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeNS;
+        LARGE_INTEGER CPUTime = MessageTableWidget->MessageIDMap[KeyInfo].CPUintervalTimeNS;
 
-        double temp = InTableData.TimeStamp - TimeStamp;
-        MessageTableWidget->item(rowIndex, 0)->setText(QString::number(temp/(KeyInfo.directionType == DirectionType::Transmit ? 1000 : 1000000),'f', 6));
+
+        switch (InTableData.DirType)
+        {
+            case DirectionType::Receive:
+            {
+                double temp = InTableData.TimeStamp - TimeStamp;
+
+                MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(temp/1000000.0, 'f', 6)));
+
+                MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeNS = InTableData.TimeStamp;
+                break;
+            }
+            case DirectionType::Transmit:
+            {
+                double CPUintervalTime = QCANLibrary::ElapsedTime(CPUTime, InTableData.CPUTime) ;
+
+                MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
+
+                MessageTableWidget->MessageIDMap[KeyInfo].CPUintervalTimeNS = InTableData.CPUTime;
+                break;
+            }
+        }
+
         MessageTableWidget->item(rowIndex, 5)->setText(InTableData.Data);
 
-        MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeMS = InTableData.TimeStamp;
         MessageTableWidget->MessageIDMap[KeyInfo].Count = 0;
     }
     else
     {
         int rowIndex = AddTotalTableData(MessageTableWidget, InTableData);
 
-        MessageTableWidget->MessageIDMap.insert(KeyInfo, MessageValueInfo(InTableData.TimeStamp, rowIndex));
+        MessageTableWidget->MessageIDMap.insert(KeyInfo, MessageValueInfo(InTableData.TimeStamp, rowIndex, InTableData.CPUTime));
     }
 }
 
@@ -779,16 +796,16 @@ int MainWindow::AddDiagTableData(QMessageTableWidget *MessageTableWidget, const 
     return 0;
 }
 
-void MainWindow::TransmitCAN(ZCAN_Transmit_Data can_data)
+void MainWindow::TransmitCANData(ZCAN_Transmit_Data& can_data)
 {
     auto result = ZCAN_Transmit(chHandle, &can_data, 1);
-    AddTableData(&can_data, result);
+    AddTableData(can_data);
 }
 
-void MainWindow::TransmitCANFD(ZCAN_TransmitFD_Data canfd_data)
+void MainWindow::TransmitCANData(ZCAN_TransmitFD_Data& canfd_data)
 {
     auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1);
-    AddTableData(&canfd_data, result);
+    AddTableData(canfd_data);
 }
 
 bool MainWindow::ChackDLCData()
@@ -867,8 +884,8 @@ void MainWindow::ConstructCANFrame(ZCAN_Transmit_Data &can_data)
 
 void MainWindow::ConstructCANFDFrame(ZCAN_TransmitFD_Data& canfd_data)
 {
-    canid_t CANID = GetLineTextValue(ui->DataID).toInt(nullptr, 16);
-    BYTE DLC = GetLineTextValue(ui->DLCEdit).toInt();
+    canid_t CANID     = GetLineTextValue(ui->DataID).toInt(nullptr, 16);
+    BYTE DLC          = GetLineTextValue(ui->DLCEdit).toInt();
     BYTE TransmitType = ui->MessageTransmitComboBox->currentIndex();
 
     memset(&canfd_data, 0, sizeof(canfd_data));

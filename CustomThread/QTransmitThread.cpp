@@ -11,21 +11,9 @@ QTransmitThread::QTransmitThread(QObject *parent)
 void QTransmitThread::run()
 {
     qDebug() << "当前子线程ID:" << QThread::currentThreadId();
-    qDebug() << "开始执行线程";
 
-    bIsPause = false;
-
-//    connect(this, SIGNAL(AddCANTableData(const ZCAN_Receive_Data*, UINT)), mainWindow, SLOT(AddTableData(const ZCAN_Receive_Data*, UINT)));
-//    connect(this, SIGNAL(AddCANFDTableData(const ZCAN_ReceiveFD_Data*, UINT)), mainWindow, SLOT(AddTableData(const ZCAN_ReceiveFD_Data*, UINT)));
-//    CHANNEL_HANDLE chHandle = mainWindow->GetChannelHandle();
-
-    while(!isInterruptionRequested()){
-        if(!bIsPause){
-            Test();
-        }
-        ElapsedTimer->start();
-        msleep(0);
-    }
+    emit Fun();
+    exec();
 }
 
 void QTransmitThread::Test()

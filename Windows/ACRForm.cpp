@@ -1,7 +1,9 @@
 #include "ACRForm.h"
 #include "mainwindow.h"
 #include <QByteArray>
+#include <QtConcurrent>
 #include "ui_ACRForm.h"
+#include "zlgcan.h"
 
 ACRForm::ACRForm(QWidget *parent, Qt::WindowFlags f) :
     QWidget(parent, f),
@@ -16,46 +18,42 @@ ACRForm::ACRForm(QWidget *parent, Qt::WindowFlags f) :
     mainWindow = qobject_cast<MainWindow*>(parent);
 
     memset(&canfd_data_406, 0, sizeof(canfd_data_406));
-    canfd_data_406.frame.can_id   =  MAKE_CAN_ID(0x406, 0, 0, 0);         // CAN ID
-    canfd_data_406.frame.len      =  8;                                 // CAN 数据长度
-    canfd_data_406.transmit_type  =  0;
+    canfd_data_406.frame.can_id    =  MAKE_CAN_ID(0x406, 0, 0, 0);
+    canfd_data_406.frame.len       =  8;
+    canfd_data_406.transmit_type   =  0;
 
     memset(&canfd_data_121, 0, sizeof(canfd_data_121));
-    canfd_data_121.frame.can_id   =  MAKE_CAN_ID(0x121, 0, 0, 0);         // CAN ID
-    canfd_data_121.frame.len      =  8;                                 // CAN 数据长度
-    canfd_data_121.transmit_type  =  0;
-    canfd_data_121.frame.data[1]  =  0x20;
+    canfd_data_121.frame.can_id    =  MAKE_CAN_ID(0x121, 0, 0, 0);
+    canfd_data_121.frame.len       =  8;
+    canfd_data_121.transmit_type   =  0;
+    canfd_data_121.frame.data[1]   =  0x20;
 
     memset(&canfd_data_1C2, 0, sizeof(canfd_data_1C2));
-    canfd_data_1C2.frame.can_id    =  MAKE_CAN_ID(0x1C2, 0, 0, 0);         // CAN ID
-    canfd_data_1C2.frame.len       =  64;                                 // CAN 数据长度
+    canfd_data_1C2.frame.can_id    =  MAKE_CAN_ID(0x1C2, 0, 0, 0);
+    canfd_data_1C2.frame.len       =  64;
     canfd_data_1C2.transmit_type   =  0;
-    canfd_data_1C2.frame.data[12]   =  0x01;
-    canfd_data_1C2.frame.data[16]   =  0x04;
-//    canfd_data_1C2.frame.data[12]  =  0x19;
-//    canfd_data_1C2.frame.data[20]  =  0xC8;
-//    canfd_data_1C2.frame.data[23]  =  0x67;
-//    canfd_data_1C2.frame.data[24]  =  0x20;
+    canfd_data_1C2.frame.data[12]  =  0x01;
+    canfd_data_1C2.frame.data[16]  =  0x04;
 
     memset(&canfd_data_50, 0, sizeof(canfd_data_50));
-    canfd_data_50.frame.can_id    =  MAKE_CAN_ID(0x50, 0, 0, 0);         // CAN ID
-    canfd_data_50.frame.len       =  8;                                 // CAN 数据长度
-    canfd_data_50.transmit_type   =  0;
+    canfd_data_50.frame.can_id     =  MAKE_CAN_ID(0x50, 0, 0, 0);
+    canfd_data_50.frame.len        =  8;
+    canfd_data_50.transmit_type    =  0;
 
     memset(&canfd_data_288, 0, sizeof(canfd_data_288));
-    canfd_data_288.frame.can_id    =  MAKE_CAN_ID(0x288, 0, 0, 0);         // CAN ID
-    canfd_data_288.frame.len       =  8;                                 // CAN 数据长度
+    canfd_data_288.frame.can_id    =  MAKE_CAN_ID(0x288, 0, 0, 0);
+    canfd_data_288.frame.len       =  8;
     canfd_data_288.transmit_type   =  0;
     canfd_data_288.frame.data[5]   =  0x08;
 
     memset(&canfd_data_2D2, 0, sizeof(canfd_data_2D2));
-    canfd_data_2D2.frame.can_id    =  MAKE_CAN_ID(0x2D2, 0, 0, 0);         // CAN ID
-    canfd_data_2D2.frame.len       =  64;                                 // CAN 数据长度
+    canfd_data_2D2.frame.can_id    =  MAKE_CAN_ID(0x2D2, 0, 0, 0);
+    canfd_data_2D2.frame.len       =  64;
     canfd_data_2D2.transmit_type   =  0;
 
     memset(&canfd_data_2F7, 0, sizeof(canfd_data_2F7));
-    canfd_data_2F7.frame.can_id    =  MAKE_CAN_ID(0x2F7, 0, 0, 0);         // CAN ID
-    canfd_data_2F7.frame.len       =  64;                                 // CAN 数据长度
+    canfd_data_2F7.frame.can_id    =  MAKE_CAN_ID(0x2F7, 0, 0, 0);
+    canfd_data_2F7.frame.len       =  64;
     canfd_data_2F7.transmit_type   =  0;
 }
 
@@ -66,107 +64,22 @@ ACRForm::~ACRForm()
 
 void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data *CANData, void (ACRForm::*Function)())
 {
-    QTimer* Timer = nullptr;
-    if(!MessageTimerContainer.contains(InMessageTimerType)){
-        Timer = new QTimer;
-        Timer->setTimerType(Qt::PreciseTimer);
-
-        connect(Timer, &QTimer::timeout, this, [=]() -> void
-        {
-            mainWindow->TransmitCAN(*CANData);
-
-            if(Function)
-                (this->*Function)();
-        });
-
-        MessageTimerContainer.insert(InMessageTimerType, Timer);
-    }
-    else
-    {
-        Timer = MessageTimerContainer[InMessageTimerType];
-    }
-
-    Timer->start(msec);
-}
-
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data &CANData, void (ACRForm::* Function)())
-{
-    QTimer* Timer = nullptr;
-    if(!MessageTimerContainer.contains(InMessageTimerType)){
-        Timer = new QTimer;
-        Timer->setTimerType(Qt::PreciseTimer);
-
-        connect(Timer, &QTimer::timeout, this, [=]() -> void
-        {
-            mainWindow->TransmitCAN(CANData);
-
-            if(Function)
-                (this->*Function)();
-        });
-
-        MessageTimerContainer.insert(InMessageTimerType, Timer);
-    }
-    else
-    {
-        Timer = MessageTimerContainer[InMessageTimerType];
-    }
-
-    Timer->start(msec);
+    TransmitMessageByTimer<ZCAN_Transmit_Data>(InMessageTimerType, msec, CANData, Function);
 }
 
 void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data *CANFDData, void (ACRForm::*Function)())
 {
-    QTimer* Timer = nullptr;
-    if(!MessageTimerContainer.contains(InMessageTimerType)){
-        Timer = new QTimer;
-        Timer->setTimerType(Qt::PreciseTimer);
-
-        connect(Timer, &QTimer::timeout, this, [=]() -> void
-        {
-            mainWindow->TransmitCANFD(*CANFDData);
-
-            if(Function)
-                (this->*Function)();
-        });
-
-        MessageTimerContainer.insert(InMessageTimerType, Timer);
-    }
-    else
-    {
-        Timer = MessageTimerContainer[InMessageTimerType];
-    }
-
-    Timer->start(msec);
-}
-
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data &CANFDData, void (ACRForm::*Function)())
-{
-    QTimer* Timer = nullptr;
-    if(!MessageTimerContainer.contains(InMessageTimerType)){
-        Timer = new QTimer;
-        Timer->setTimerType(Qt::PreciseTimer);
-
-        connect(Timer, &QTimer::timeout, this, [=]() -> void
-        {
-            mainWindow->TransmitCANFD(CANFDData);
-
-            if(Function)
-                (this->*Function)();
-        });
-
-        MessageTimerContainer.insert(InMessageTimerType, Timer);
-    }
-    else
-    {
-        Timer = MessageTimerContainer[InMessageTimerType];
-    }
-
-    Timer->start(msec);
+    TransmitMessageByTimer<ZCAN_TransmitFD_Data>(InMessageTimerType, msec, CANFDData, Function);
 }
 
 void ACRForm::StopTimer()
 {
-    for(auto i : MessageTimerContainer.values())
+    for(auto i : MessageThreadContainer.values())
+    {
+        i->setThreadStop();
+    }
+
+    for(auto& i : MessageTimerContainer.values())
     {
         i->stop();
     }
@@ -236,34 +149,17 @@ void ACRForm::on_pushButton_2_clicked()
     can_data.frame.data[2] = 0xFD;
     can_data.frame.data[3] = 0x01;
 
-    mainWindow->TransmitCANFD(can_data);
+    mainWindow->TransmitCANData(can_data);
 }
 
 
 void ACRForm::on_pushButton_3_clicked()
 {
-    //    ZCAN_Transmit_Data can_data;
-    //    canid_t CANID     = 0x111;
-    //    BYTE DLC          = 8;
-    //    BYTE TransmitType = 0;
+    PerformanceFrequency* temp = new PerformanceFrequency;
+    connect(temp, &PerformanceFrequency::TimeOut, this, [=]() -> void
+    {
+        qDebug()<<"Test";
+    });
 
-    //    memset(&can_data, 0, sizeof(can_data));
-    //    can_data.frame.can_id   =  MAKE_CAN_ID(CANID, 0, 0, 0);         // CAN ID
-    //    can_data.frame.can_dlc  =  DLC;                                 // CAN 数据长度
-    //    can_data.transmit_type  =  TransmitType;
-
-    //    TransmitMessageByTimer(EMessageTimer::NM1,300,can_data);
-
-    //    ZCAN_Transmit_Data can_data1;
-    //    canid_t CANID1     = 0x222;
-    //    BYTE DLC1          = 8;
-    //    BYTE TransmitType1 = 0;
-
-    //    memset(&can_data1, 0, sizeof(can_data1));
-    //    can_data1.frame.can_id   =  MAKE_CAN_ID(CANID1, 0, 0, 0);         // CAN ID
-    //    can_data1.frame.can_dlc  =  DLC1;                                 // CAN 数据长度
-    //    can_data1.transmit_type  =  TransmitType1;
-
-    //    TransmitMessageByTimer(EMessageTimer::NM2,3000,can_data1);
+    temp->setThreadRunning(90);
 }
-

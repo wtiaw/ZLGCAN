@@ -1,10 +1,14 @@
 #include "QReceiveThread.h"
 #include "qdebug.h"
+#include <QMetaType>
 
 QReceiveThread::QReceiveThread(QObject *parent)
     : QThreadBase{parent}
 {
     mainWindow = qobject_cast<MainWindow*>(parent);
+//    qRegisterMetaType<TableData>("TableData");
+//    qRegisterMetaType<ZCAN_Transmit_Data>("ZCAN_Transmit_Data");
+//    qRegisterMetaType<ZCAN_TransmitFD_Data>("ZCAN_TransmitFD_Data");
 }
 
 QReceiveThread::~QReceiveThread()
@@ -14,12 +18,16 @@ QReceiveThread::~QReceiveThread()
 
 void QReceiveThread::run()
 {
-    qDebug() << "当前子线程ID:" << QThread::currentThreadId();
-    qDebug() << "开始执行线程";
+    QThreadBase::run();
 
     bIsPause = false;
 
     connect(this, SIGNAL(AddTableData(const TableData&)), mainWindow, SLOT(AddTableData(const TableData&)));
+    connect(this, SIGNAL(AddCANTableData_T(const ZCAN_Transmit_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_Transmit_Data&)));
+    connect(this, SIGNAL(AddCANFDTableData_T(const ZCAN_TransmitFD_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_TransmitFD_Data&)));
+    connect(this, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_Receive_Data&)));
+    connect(this, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
+
     CHANNEL_HANDLE chHandle = mainWindow->GetChannelHandle();
     InitReceptionData(chHandle);
 
@@ -31,6 +39,12 @@ void QReceiveThread::run()
     }
 }
 
+void QReceiveThread::Stop()
+{
+    disconnect(this, 0, mainWindow, 0);
+    QThreadBase::Stop();
+}
+
 void QReceiveThread::ReceiveData(CHANNEL_HANDLE& ChannelHandle)
 {
     ZCAN_Receive_Data can_data[100];
@@ -39,26 +53,29 @@ void QReceiveThread::ReceiveData(CHANNEL_HANDLE& ChannelHandle)
 
     if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CAN))
     {
-        len = ZCAN_Receive(ChannelHandle, can_data, 100, 1);
+        len = ZCAN_Receive(ChannelHandle, can_data, 100);
 
         for (UINT i = 0; i < len; ++i)
         {
             const ZCAN_Receive_Data& can = can_data[i];
 
-            emit AddTableData(QCANLibrary::ConstructTableData(can));
+//            emit AddTableData(QCANLibrary::ConstructTableData(can));
+            emit AddCANTableData_R(can);
             Reception(can);
         }
     }
 
     if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CANFD))
     {
-        len = ZCAN_ReceiveFD(ChannelHandle, canfd_data, 100, 1);
+        len = ZCAN_ReceiveFD(ChannelHandle, canfd_data, 100);
 
         for (UINT i = 0; i < len; ++i)
         {
             const ZCAN_ReceiveFD_Data& canfd = canfd_data[i];
 
-            emit AddTableData(QCANLibrary::ConstructTableData(canfd));
+//            mainWindow->AddTableData(QCANLibrary::ConstructTableData(canfd));
+//            emit AddTableData(QCANLibrary::ConstructTableData(canfd));
+            emit AddCANFDTableData_R(canfd);
             Reception(canfd);
         }
     }
@@ -82,7 +99,10 @@ void QReceiveThread::InitReceptionData(CHANNEL_HANDLE& ChannelHandle)
         can_data.frame.data[3] = 0x07;
 
         ZCAN_TransmitFD(ChannelHandle, &can_data, 1);
-        emit AddTableData(QCANLibrary::ConstructTableData(can_data));
+
+//            mainWindow->AddTableData(can_data);
+            emit AddCANFDTableData_T(can_data);
+
     });
 
     Temp = {0x10, 0x21};
@@ -97,7 +117,10 @@ void QReceiveThread::InitReceptionData(CHANNEL_HANDLE& ChannelHandle)
         can_data.frame.data[0] = 0x30;
 
         ZCAN_TransmitFD(ChannelHandle, &can_data, 1);
-        emit AddTableData(QCANLibrary::ConstructTableData(can_data));
+
+//            mainWindow->AddTableData(can_data);
+            emit AddCANFDTableData_T(can_data);
+
     });
 }
 
@@ -136,6 +159,7 @@ bool QReceiveThread::ShouldReception(const ZCAN_ReceiveFD_Data &Data, const Rece
 
 void QReceiveThread::Reception(const ZCAN_Receive_Data& Data)
 {
+//    Reception<ZCAN_Receive_Data>(Data);
     for(auto& i : ReceptionDatas)
     {
         if(ShouldReception(Data,i))
@@ -153,6 +177,7 @@ void QReceiveThread::Reception(const ZCAN_Receive_Data& Data)
 
 void QReceiveThread::Reception(const ZCAN_ReceiveFD_Data& Data)
 {
+//    Reception<ZCAN_ReceiveFD_Data>(Data);
     for(auto& i : ReceptionDatas)
     {
         if(ShouldReception(Data,i))
@@ -172,3 +197,5 @@ void QReceiveThread::Test()
 {
     qDebug() << "经过时间:" << ElapsedTimer->elapsed();
 }
+
+

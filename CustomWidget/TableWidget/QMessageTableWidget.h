@@ -4,6 +4,7 @@
 #include "Data/FromeStruct.h"
 #include "typedef.h"
 #include <QTableWidget>
+#include<windows.h>
 
 struct MessageKeyInfo
 {
@@ -44,19 +45,21 @@ struct MessageKeyInfo
 
 struct MessageValueInfo
 {
-    UINT64 intervalTimeMS;
+    UINT64 intervalTimeNS;
+    LARGE_INTEGER CPUintervalTimeNS;
     int TableIndex;
     int Count = 0;
 
     MessageValueInfo(){
-        intervalTimeMS = 0;
+        intervalTimeNS = 0;
         TableIndex     = 0;
         Count          = 0;
     }
 
-    MessageValueInfo(UINT64 InIntervalTimeMS, int InTableIndex){
-        intervalTimeMS = InIntervalTimeMS;
-        TableIndex     = InTableIndex;
+    MessageValueInfo(UINT64 InIntervalTimeMS, int InTableIndex, LARGE_INTEGER InCPUintervalTimeNS){
+        intervalTimeNS    = InIntervalTimeMS;
+        TableIndex        = InTableIndex;
+        CPUintervalTimeNS = InCPUintervalTimeNS;
     }
 };
 

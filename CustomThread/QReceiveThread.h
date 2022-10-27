@@ -25,6 +25,7 @@ public:
     ~QReceiveThread();
 
     void run() override;
+    void Stop() override;
 
 private:
     void ReceiveData(CHANNEL_HANDLE& ChannelHandle);
@@ -38,13 +39,20 @@ private:
     void Reception(const ZCAN_Receive_Data& Data);
     void Reception(const ZCAN_ReceiveFD_Data& Data);
 
+    template<typename ReceiveData>
+    void Reception(const ReceiveData& Data);
+
 private slots:
     void Test();
 
 public:
 signals:
-    void AddCANTableData(const ZCAN_Receive_Data* data, UINT len);
-    void AddCANFDTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
+    void AddCANTableData_T(const ZCAN_Transmit_Data& data);
+    void AddCANFDTableData_T(const ZCAN_TransmitFD_Data& data);
+
+    void AddCANTableData_R(const ZCAN_Receive_Data& data);
+    void AddCANFDTableData_R(const ZCAN_ReceiveFD_Data& data);
+
 
     void AddTableData(const TableData& InTableData);
 
@@ -56,5 +64,23 @@ private:
 
     QVector<ReceptionData> ReceptionDatas;
 };
+
+//template<typename ReceiveData>
+//void QReceiveThread::Reception(const ReceiveData& Data)
+//{
+//    for(auto& i : ReceptionDatas)
+//    {
+//        if(ShouldReception(Data,i))
+//        {
+//            if(i.FuncNoMember)
+//                i.FuncNoMember();
+
+//            if(i.FuncMember)
+//                (this->*i.FuncMember)();
+
+//            return;
+//        }
+//    }
+//}
 
 #endif // QRECEIVETHREAD_H

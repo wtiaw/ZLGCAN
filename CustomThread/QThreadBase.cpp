@@ -9,11 +9,13 @@ QThreadBase::QThreadBase(QObject *parent)
 
 void QThreadBase::run()
 {
-
+    qDebug() <<"当前子线程ID:" << QThread::currentThreadId() << "Run";
 }
 
 void QThreadBase::Stop()
 {
+    qDebug() <<"当前子线程ID:" << QThread::currentThreadId() << "Stop";
+
     requestInterruption();
     quit();
     wait();

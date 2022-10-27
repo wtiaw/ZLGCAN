@@ -12,6 +12,10 @@ public:
 
     void run() override;
 
+public:
+signals:
+    void Fun();
+
 private:
     void Test();
 

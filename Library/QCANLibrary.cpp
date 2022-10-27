@@ -1,5 +1,4 @@
 #include "QCANLibrary.h"
-#include "qdatetime.h"
 
 QCANLibrary::QCANLibrary(QObject *parent)
     : QObject{parent}
@@ -13,7 +12,7 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_Transmit_Data &CAN)
     QString str;
 
     TableData InTableData;
-    InTableData.TimeStamp    =   QDateTime::currentMSecsSinceEpoch();
+    InTableData.CPUTime      =   GetCurrentTime_us();
     InTableData.FrameID      =   GET_ID(id);
     InTableData.EventType    =   FrameType::CAN;
     InTableData.DirType      =   DirectionType::Transmit;
@@ -36,7 +35,7 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_TransmitFD_Data &CAN)
     QString str;
 
     TableData InTableData;
-    InTableData.TimeStamp    =   QDateTime::currentMSecsSinceEpoch();
+    InTableData.CPUTime      =   GetCurrentTime_us();
     InTableData.FrameID      =   GET_ID(id);
     InTableData.EventType    =   FrameType::CANFD;
     InTableData.DirType      =   DirectionType::Transmit;
@@ -60,6 +59,7 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_Receive_Data &CAN)
 
     TableData InTableData;
     InTableData.TimeStamp    =   CAN.timestamp;
+    InTableData.CPUTime      =   GetCurrentTime_us();
     InTableData.FrameID      =   GET_ID(id);
     InTableData.EventType    =   FrameType::CAN;
     InTableData.DirType      =   DirectionType::Receive;
@@ -83,6 +83,7 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_ReceiveFD_Data &CANFD)
 
     TableData InTableData;
     InTableData.TimeStamp    =   CANFD.timestamp;
+    InTableData.CPUTime      =   GetCurrentTime_us();
     InTableData.FrameID      =   GET_ID(id);
     InTableData.EventType    =   FrameType::CANFD;
     InTableData.DirType      =   DirectionType::Receive;
@@ -97,4 +98,19 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_ReceiveFD_Data &CANFD)
     InTableData.Data = str.toUpper();
 
     return InTableData;
+}
+
+LARGE_INTEGER QCANLibrary::GetCurrentTime_us()
+{
+    LARGE_INTEGER t1;
+    QueryPerformanceCounter(&t1);
+
+    return t1;
+}
+
+double QCANLibrary::ElapsedTime(const LARGE_INTEGER &StartTime, const LARGE_INTEGER &EndTime)
+{
+    LARGE_INTEGER nFreq;
+    QueryPerformanceFrequency(&nFreq);
+    return (EndTime.QuadPart -StartTime.QuadPart)/(double)nFreq.QuadPart;
 }
