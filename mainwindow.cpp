@@ -34,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dhandle);
 }
@@ -699,16 +698,19 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
     case DirectionType::Receive:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Rx"));
 
-        if(RStartTime == 0)
-        {
-            RStartTime = InTableData.TimeStamp;
+//        if(RStartTime == 0)
+//        {
+//            RStartTime = InTableData.TimeStamp;
 
-            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
-        }
+//            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
+//        }
 
-        intervalTimeNS = InTableData.TimeStamp - RStartTime;
-        intervalTimeNS += temp;
-        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeNS/1000000.0, 'f', 6)));
+//        intervalTimeNS = InTableData.TimeStamp - RStartTime;
+//        intervalTimeNS += temp;
+//        qDebug()<<temp;
+//        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeNS/1000000.0, 'f', 6)));
+        CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
+        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
         break;
     case DirectionType::Transmit:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Tx"));
@@ -919,7 +921,9 @@ void MainWindow::on_ChangeTable_clicked(bool checked)
 void MainWindow::on_actionACR_triggered()
 {
     if(!ACRFromWindow)
+    {
         ACRFromWindow = new ACRForm(this, Qt::Window);
+    }
 
     ACRFromWindow->show();
 }

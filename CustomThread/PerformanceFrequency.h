@@ -9,7 +9,7 @@ class PerformanceFrequency : public QThread
     Q_OBJECT
 public:
     explicit PerformanceFrequency(QObject *parent = nullptr);
-    void setThreadRunning(uint mTime);
+    void setThreadRunning(uint Delay = 100, bool InSingle = false, uint mTime = 100);
     void setThreadStop();
 
 Q_SIGNALS:
@@ -20,7 +20,9 @@ protected:
 
 private:
     bool bRunning = false;
-    uint mTime = 1;
+    bool Single = false;
+    uint mTime = 100;
+    uint delay = 100;
 };
 
 #endif // PERFORMANCEFREQUENCY_H

@@ -8,6 +8,7 @@
 #include "qlineedit.h"
 #include "Library/QCANLibrary.h"
 
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -136,10 +137,13 @@ private slots:
 
     void on_comboBox_currentIndexChanged(int index);
 
+public:
+    class QReceiveThread* ReceiveThread;
+
 private:
     Ui::MainWindow *ui;
     class AutoSendConfigWindow* AutoSendConfig;
-    class ACRForm* ACRFromWindow;
+    class ACRForm* ACRFromWindow = nullptr;
 
     QDeviceSettingConfig* SettingConfig;
 
@@ -159,10 +163,6 @@ private:
     CHANNEL_HANDLE chHandle;
     IProperty* property;
 
-    class QReceiveThread*  ReceiveThread;
-
     class QTimer* UpdateDeltaTableTable;
-
-
 };
 #endif // MAINWINDOW_H

@@ -12,6 +12,7 @@ CONFIG += c++17
 
 SOURCES += \
     CustomThread/PerformanceFrequency.cpp \
+    CustomThread/QReceiveItem.cpp \
     CustomThread/QReceiveThread.cpp \
     CustomThread/QThreadBase.cpp \
     CustomThread/QTransmitThread.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
 
 HEADERS += \
     CustomThread/PerformanceFrequency.h \
+    CustomThread/QReceiveItem.h \
     CustomThread/QReceiveThread.h \
     CustomThread/QThreadBase.h \
     CustomThread/QTransmitThread.h \

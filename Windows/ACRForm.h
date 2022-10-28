@@ -2,6 +2,7 @@
 #define ACRFORM_H
 
 #include "CustomThread/PerformanceFrequency.h"
+#include "CustomThread/QReceiveItem.h"
 #include "mainwindow.h"
 #include "qtimer.h"
 #include "typedef.h"
@@ -13,6 +14,8 @@ class ACRForm;
 
 enum EMessageTimer
 {
+    Single,
+    Extended_Session,
     Message_406,
     Message_121,
     Message_1C2,
@@ -31,18 +34,23 @@ public:
     ~ACRForm();
 
 
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_Transmit_Data *CANData, void (ACRForm::* Function)() = nullptr);
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, ZCAN_TransmitFD_Data *CANFDData, void (ACRForm::* Function)() = nullptr);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data& CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     void StopTimer();
 
 private:
+    void InitTrigger();
+
     template<typename Transmit_Data>
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, Transmit_Data *CANData, void (ACRForm::* Function)() = nullptr);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     BYTE can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
     void Send121();
+
+    void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData &)> const Func);
 
 private slots:
     void on_pushButton_clicked();
@@ -51,8 +59,16 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void on_pushButton_4_clicked();
+
+    void on_pushButton_5_clicked();
+
 private:
     Ui::ACRForm *ui;
+
+    QVector<QReceiveItem*> Items;
+
+    CHANNEL_HANDLE cHandle;
 
     QMap<EMessageTimer, QTimer*> MessageTimerContainer;
     QMap<EMessageTimer, class PerformanceFrequency*> MessageThreadContainer;
@@ -100,12 +116,16 @@ private:
     ZCAN_TransmitFD_Data canfd_data_288;
     ZCAN_TransmitFD_Data canfd_data_2D2;
     ZCAN_TransmitFD_Data canfd_data_2F7;
+
+    ZCAN_TransmitFD_Data canfd_data_Extended_Session;
     int Count_121;
 };
 
 template<typename Transmit_Data>
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec, Transmit_Data *CANData, void (ACRForm::*Function)())
+void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)(), uint delay, uint msec)
 {
+    if(!cHandle)
+        cHandle = mainWindow->GetChannelHandle();
 //    QTimer* Timer = nullptr;
 //    if(!MessageTimerContainer.contains(InMessageTimerType)){
 //        Timer = new QTimer;
@@ -126,10 +146,11 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec,
 //    }
 
 //    Timer->start(msec);
-
     PerformanceFrequency* temp;
-    if(!MessageThreadContainer.contains(InMessageTimerType)){
+    if(!MessageThreadContainer.contains(InMessageTimerType))
+    {
         temp = new PerformanceFrequency;
+
         connect(temp, &PerformanceFrequency::TimeOut, this, [=]() mutable -> void
         {
             mainWindow->TransmitCANData(*CANData);
@@ -138,14 +159,15 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, int msec,
                 (this->*Function)();
         }, Qt::QueuedConnection);
 
-        MessageThreadContainer.insert(InMessageTimerType, temp);
+        if(InMessageTimerType != EMessageTimer::Single)
+            MessageThreadContainer.insert(InMessageTimerType, temp);
     }
     else
     {
         temp = MessageThreadContainer[InMessageTimerType];
     }
 
-    temp->setThreadRunning(msec);
+    temp->setThreadRunning(delay, InMessageTimerType == EMessageTimer::Single, msec);
 }
 
 #endif // ACRFORM_H
