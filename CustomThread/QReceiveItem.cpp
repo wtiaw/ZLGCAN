@@ -9,39 +9,30 @@ QReceiveItem::QReceiveItem(QObject *parent)
 
 bool QReceiveItem::ContaineTrigger(const CANData &Data)
 {
-    if(Data.IsCanFD)
+    if(FrameId != Data.can_id) return false;
+    for(int i = 0 ; i < FilterData.length() ; i++)
     {
-        if(FrameId != Data.canfd.frame.can_id) return false;
-        for(int i = 0 ; i < FilterData.length() ; i++)
-        {
-            if(FilterData[i] != Data.canfd.frame.data[i]) return false;
-        }
+        if(FilterData[i] != Data.Data[i]) return false;
     }
-    else
-    {
-        if(FrameId != Data.can.frame.can_id) return false;
-        for(int i=0;i<FilterData.length();i++)
-        {
-            if(FilterData[i] != Data.can.frame.data[i]) return false;
-        }
-    }
+
     return true;
 }
 
-void QReceiveItem::ConstructTrigger(uint Id, QVector<BYTE> FilterData, const std::function<void (const CANData &)> Func)
+void QReceiveItem::ConstructTrigger(uint Id, QVector<BYTE> FilterData, QObject* context, const std::function<void (const CANData &)> Func)
 {
     SetTrigger(Id, FilterData);
-    connect(this, &QReceiveItem::Trigger, this, Func, Qt::QueuedConnection);
+    if(context)
+        connect(this, &QReceiveItem::Trigger, context, Func);
 }
 
 void QReceiveItem::On_Trigger(const CANData &Data)
 {
-    QString str;
-    for (UINT i = 0; i < Data.canfd.frame.len; ++i)
-    {
-        str += QString("%1 ").arg(Data.canfd.frame.data[i], 2, 16, QLatin1Char('0'));
-    }
-    qDebug()<<str;
+//    QString str;
+//    for (UINT i = 0; i < Data.canfd.frame.len; ++i)
+//    {
+//        str += QString("%1 ").arg(Data.canfd.frame.data[i], 2, 16, QLatin1Char('0'));
+//    }
+//    qDebug()<<str;
     emit Trigger(Data);
 }
 

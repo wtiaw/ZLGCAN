@@ -35,8 +35,8 @@ ACRForm::ACRForm(QWidget *parent, Qt::WindowFlags f) :
     canfd_data_1C2.frame.can_id    =  MAKE_CAN_ID(0x1C2, 0, 0, 0);
     canfd_data_1C2.frame.len       =  64;
     canfd_data_1C2.transmit_type   =  0;
-    canfd_data_1C2.frame.data[12]  =  0x01;
-    canfd_data_1C2.frame.data[16]  =  0x04;
+    canfd_data_1C2.frame.data[11]  =  0x01;
+    canfd_data_1C2.frame.data[15]  =  0x04;
 
     memset(&canfd_data_50, 0, sizeof(canfd_data_50));
     canfd_data_50.frame.can_id     =  MAKE_CAN_ID(0x50, 0, 0, 0);
@@ -58,6 +58,16 @@ ACRForm::ACRForm(QWidget *parent, Qt::WindowFlags f) :
     canfd_data_2F7.frame.can_id    =  MAKE_CAN_ID(0x2F7, 0, 0, 0);
     canfd_data_2F7.frame.len       =  64;
     canfd_data_2F7.transmit_type   =  0;
+
+    memset(&canfd_data_GW740, 0, sizeof(canfd_data_GW740));
+    canfd_data_GW740.frame.can_id    =  MAKE_CAN_ID(0x740, 0, 0, 0);
+    canfd_data_GW740.frame.len       =  8;
+    canfd_data_GW740.transmit_type   =  0;
+    canfd_data_GW740.frame.data[0]   =  0x07;
+    canfd_data_GW740.frame.data[1]   =  0x31;
+    canfd_data_GW740.frame.data[2]   =  0x01;
+    canfd_data_GW740.frame.data[3]   =  0xCF;
+    canfd_data_GW740.frame.data[4]   =  0x81;
 }
 
 ACRForm::~ACRForm()
@@ -122,7 +132,18 @@ void ACRForm::InitTrigger()
 {
     auto ReceiveThread = mainWindow->ReceiveThread;
 
-    QVector<BYTE> Temp = {0x07, 0x62};
+    QVector<BYTE> Temp;
+
+    CreateItem(0x122, Temp, [&](const CANData& Data)
+    {
+        ui->ACR_Key->setText(QString::number(Data.Data[4]));
+        ui->ACRCrcChk122->setText(QString::number(Data.Data[6]>>4, 16));
+        ui->ACRCycCntr122->setText(QString::number(Data.Data[7], 16));
+        ui->Activation_Status->setText(QString::number(Data.Data[1]));
+    });
+
+    //读版本
+    Temp = {0x07, 0x62, 0xFD, 0x01};
     CreateItem(0x748, Temp, [&](const CANData& Data)
     {
         ZCAN_TransmitFD_Data can_data;
@@ -137,21 +158,26 @@ void ACRForm::InitTrigger()
         can_data.frame.data[3] = 0x07;
 
         mainWindow->TransmitCANData(can_data);
+
+        char string_version[4];
+        for(int i = 0 ; i < 4 ; i++)
+        {
+            string_version[i] = Data.Data[i + 4];
+        }
+        ui->FBL->setText(string_version);
     });
 
-    Temp = {0x10, 0x21};
+    Temp = {0x62, 0xFD};
     CreateItem(0x748, Temp, [&](const CANData& Data)
     {
-        ZCAN_TransmitFD_Data can_data;
-
-        memset(&can_data, 0, sizeof(can_data));
-        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
-        can_data.frame.len      =  8;                                 // CAN 数据长度
-        can_data.transmit_type  =  0;
-        can_data.frame.data[0] = 0x30;
-
-        mainWindow->TransmitCANData(can_data);
+        char string_version[30];
+        for(int i = 0 ; i < 30 ; i++)
+        {
+            string_version[i] = Data.Data[i + 3];
+        }
+        ui->BSW->setText(string_version);
     });
+
 
     Temp = {0x06, 0x67, 0x61};
     CreateItem(0x748, Temp, [&](const CANData& Data)
@@ -162,9 +188,111 @@ void ACRForm::InitTrigger()
         can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
         can_data.frame.len      =  8;                                 // CAN 数据长度
         can_data.transmit_type  =  0;
+        can_data.frame.data[0] = 0x06;
+        can_data.frame.data[1] = 0x27;
+        can_data.frame.data[2] = 0x62;
+        can_data.frame.data[3] = ~Data.Data[3];
+        can_data.frame.data[4] = ~Data.Data[4];
+        can_data.frame.data[5] = ~Data.Data[5];
+        can_data.frame.data[6] = ~Data.Data[6];
+
+        mainWindow->TransmitCANData(can_data);
+    });
+
+    Temp = {0x02, 0x67, 0x62};
+    CreateItem(0x748, Temp, [&](const CANData& Data)
+    {
+        ZCAN_TransmitFD_Data can_data;
+
+        memset(&can_data, 0, sizeof(can_data));
+        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
+        can_data.frame.len      =  8;                                 // CAN 数据长度
+        can_data.transmit_type  =  0;
+        can_data.frame.data[0] = 0x07;
+        can_data.frame.data[1] = 0x31;
+        can_data.frame.data[2] = 0x01;
+        can_data.frame.data[3] = 0xFD;
+        can_data.frame.data[4] = 0x0A;
+        can_data.frame.data[5] = 0x00;
+        can_data.frame.data[6] = 0x28;
+        can_data.frame.data[7] = 0xAC;
+
+        mainWindow->TransmitCANData(can_data);
+    });
+
+    Temp = {0x07, 0x71, 0x01, 0xFD, 0x0A, 0x00};
+    CreateItem(0x748, Temp, [&](const CANData& Data)
+    {
+        ZCAN_TransmitFD_Data can_data;
+
+        memset(&can_data, 0, sizeof(can_data));
+        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
+        can_data.frame.len      =  8;                                 // CAN 数据长度
+        can_data.transmit_type  =  0;
+        can_data.frame.data[0] = 0x07;
+        can_data.frame.data[1] = 0x31;
+        can_data.frame.data[2] = 0x01;
+        can_data.frame.data[3] = 0xFD;
+        can_data.frame.data[4] = 0x0F;
+        can_data.frame.data[5] = 0x00;
+        can_data.frame.data[6] = ~Data.Data[6];
+        can_data.frame.data[7] = ~Data.Data[7];
+
+        mainWindow->TransmitCANData(can_data);
+    });
+
+    Temp = {0x71, 0x01 ,0xFD, 0x0F};
+    CreateItem(0x748, Temp, [&](const CANData& Data)
+    {
+        ZCAN_TransmitFD_Data can_data;
+
+        memset(&can_data, 0, sizeof(can_data));
+        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
+        can_data.frame.len      =  8;                                 // CAN 数据长度
+        can_data.transmit_type  =  0;
         can_data.frame.data[0] = 0x30;
 
         mainWindow->TransmitCANData(can_data);
+
+        char string_version[6];
+        for(int i = 0 ; i < 6; i++)
+        {
+            string_version[i] = Data.Data[i + 4];
+        }
+        ui->SV->setText(string_version);
+
+        mainWindow->TransmitCANData(canfd_data_GW740);
+    });
+
+    Temp = {0x07, 0x71 ,0x01, 0xCF, 0x81};
+    CreateItem(0x748, Temp, [&](const CANData& Data)
+    {
+        SendGW740();
+
+        mainWindow->TransmitCANData(canfd_data_GW740);
+
+        int hex_value;
+        if(Data.Data[5] == 0x02)
+        {
+            hex_value = (Data.Data[6] << 8) | Data.Data[7];
+            ui->Tem->setText(QString::number(hex_value / 100.f));
+        }
+        else if(Data.Data[5] == 0x03)
+        {
+            hex_value = (Data.Data[6] << 8) | Data.Data[7];
+            ui->VHBH_Phy->setText(QString::number(hex_value));
+        }
+        else if(Data.Data[5] == 0x04)
+        {
+            hex_value = (Data.Data[6] << 8) | Data.Data[7];
+            ui->VHBL_Phy->setText(QString::number(hex_value));
+        }
+        else if(Data.Data[5] == 0x06)
+        {
+            hex_value = (Data.Data[6] << 8) | Data.Data[7];
+            ui->CANW->setText(QString::number(hex_value));
+        }
+
     });
 
     ReceiveThread->AddTrigger(Items);
@@ -186,6 +314,8 @@ void ACRForm::Send121()
 {
     QByteArray ba;
 
+    canfd_data_121.frame.data[0] = ui->ACR_Req_LH->currentIndex();
+
     Count_121 = (Count_121 + 1) % 16;
     canfd_data_121.frame.data[6]  =  ba.setNum(Count_121, 16).toInt(nullptr, 16) << 4;
 
@@ -196,10 +326,18 @@ void ACRForm::Send121()
     canfd_data_121.frame.data[7] = can_e2e_CalculateCRC8(txDataBuffer_temp, 7);
 }
 
+void ACRForm::SendGW740()
+{
+    if(++Count_GW740 == 7) Count_GW740++;
+    if(Count_GW740 > 9) Count_GW740 = 0;
+
+    canfd_data_GW740.frame.data[7] = Count_GW740;
+}
+
 void ACRForm::CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData &)> const Func)
 {
     QReceiveItem* NewItem = new QReceiveItem;
-    NewItem->ConstructTrigger(Id,FilterData,Func);
+    NewItem->ConstructTrigger(Id, FilterData, this, Func);
 
     Items.append(NewItem);
 }
@@ -246,24 +384,6 @@ void ACRForm::on_pushButton_2_clicked()
     mainWindow->TransmitCANData(can_data);
 }
 
-
-void ACRForm::on_pushButton_3_clicked()
-{
-    PerformanceFrequency* temp = new PerformanceFrequency;
-    connect(temp, &PerformanceFrequency::TimeOut, this, [=]() -> void
-    {
-        qDebug()<<"Test";
-    });
-
-    temp->setThreadRunning(90);
-}
-
-void ACRForm::on_pushButton_4_clicked()
-{
-
-}
-
-
 void ACRForm::on_pushButton_5_clicked()
 {
     if(!mainWindow->IsOpenCAN()) return;
@@ -285,7 +405,7 @@ void ACRForm::on_pushButton_5_clicked()
     canfd_data_Extended_Session.frame.data[0]   =  0x02;
     canfd_data_Extended_Session.frame.data[1]   =  0x3E;
     canfd_data_Extended_Session.frame.data[2]   =  0x00;
-    TransmitMessageByTimer(EMessageTimer::Extended_Session, &canfd_data_Extended_Session, nullptr, 500, 4000);
+//    TransmitMessageByTimer(EMessageTimer::Extended_Session, &canfd_data_Extended_Session, nullptr, 500, 4000);
 
     memset(&can, 0, sizeof(can));
     can.frame.can_id    =  MAKE_CAN_ID(0x740, 0, 0, 0);

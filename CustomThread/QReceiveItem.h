@@ -7,47 +7,84 @@
 
 struct CANData
 {
-    ZCAN_Receive_Data can;
-    ZCAN_ReceiveFD_Data canfd;
-    bool IsCanFD = false;
+    canid_t can_id;
+    QVector<BYTE> Data;
+//    ZCAN_Receive_Data can;
+//    ZCAN_ReceiveFD_Data canfd;
+//    bool IsCanFD = false;
 
     CANData(){};
 
-    CANData(ZCAN_Receive_Data& can)
+    CANData(const ZCAN_Receive_Data& can)
     {
-        this->can = can;
-        this->IsCanFD = false;
+        this->can_id = can.frame.can_id;
+        for (int i = 0; i < can.frame.can_dlc; ++i) {
+            this->Data.append(can.frame.data[i]);
+        }
     }
-    CANData(ZCAN_ReceiveFD_Data& canfd)
+    CANData(const ZCAN_ReceiveFD_Data& canfd)
     {
-        this->canfd = canfd;
-        this->IsCanFD = true;
-    }
-
-    CANData(ZCAN_Receive_Data can)
-    {
-        this->can = can;
-        this->IsCanFD = false;
-    }
-    CANData(ZCAN_ReceiveFD_Data canfd)
-    {
-        this->canfd = canfd;
-        this->IsCanFD = true;
+        this->can_id = canfd.frame.can_id;
+        for (int i = 0; i < canfd.frame.len; ++i) {
+            this->Data.append(canfd.frame.data[i]);
+        }
     }
 
-    CANData(CANData const &canfd)
+    ~CANData()
     {
-        this->can     = canfd.can;
-        this->canfd   = canfd.canfd;
-        this->IsCanFD = canfd.IsCanFD;
+        Data.clear();
     }
 
-    CANData(CANData& canfd)
-    {
-        this->can     = canfd.can;
-        this->canfd   = canfd.canfd;
-        this->IsCanFD = canfd.IsCanFD;
-    }
+//    CANData(ZCAN_Receive_Data can)
+//    {
+//        this->can = can;
+//        this->IsCanFD = false;
+//    }
+//    CANData(ZCAN_ReceiveFD_Data canfd)
+//    {
+//        this->canfd = canfd;
+//        this->IsCanFD = true;
+//    }
+
+//    CANData(CANData const &canfd)
+//    {
+//        this->can     = canfd.can;
+//        this->canfd   = canfd.canfd;
+//        this->IsCanFD = canfd.IsCanFD;
+//    }
+
+//    CANData(CANData& canfd)
+//    {
+//        this->can     = canfd.can;
+//        this->canfd   = canfd.canfd;
+//        this->IsCanFD = canfd.IsCanFD;
+//    }
+
+//    bool IsValid()
+//    {
+//        return can.timestamp || canfd.timestamp;
+//    }
+
+//    bool operator == (const CANData& c)
+//    {
+//        if(this->IsCanFD != c.IsCanFD) return false;
+
+//        if(this->IsCanFD)
+//        {
+//            if(this->canfd.timestamp != c.canfd.timestamp) return false;
+//        }
+//        else
+//        {
+//            if(this->can.timestamp != c.can.timestamp) return false;
+//        }
+
+//        return true;
+//    }
+
+//    bool operator != (const CANData& c)
+//    {
+//        return !(*this == c);
+//    }
 };
 
 class QReceiveItem : public QObject
@@ -58,7 +95,7 @@ public:
 
     bool ContaineTrigger(const CANData& Data);
 
-    void ConstructTrigger(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData &)> const Func);
+    void ConstructTrigger(uint Id, QVector<BYTE> FilterData, QObject* context, std::function<void (const CANData &)> const Func);
 
     void On_Trigger(const CANData& Data);
 

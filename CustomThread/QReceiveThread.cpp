@@ -66,8 +66,8 @@ void QReceiveThread::AddTrigger(QVector<QReceiveItem *> NewItems)
 
 void QReceiveThread::ReceiveData(CHANNEL_HANDLE& ChannelHandle)
 {
-    ZCAN_Receive_Data can_data[100];
-    ZCAN_ReceiveFD_Data canfd_data[100];
+    ZCAN_Receive_Data can_data[10];
+    ZCAN_ReceiveFD_Data canfd_data[10];
     UINT len;
 
     if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CAN))
@@ -99,122 +99,60 @@ void QReceiveThread::ReceiveData(CHANNEL_HANDLE& ChannelHandle)
 
 void QReceiveThread::Reception(const CANData &Data)
 {
-    for (auto i : ReceiveItemContainer) {
-        if(i->ContaineTrigger(Data))
-            i->On_Trigger(Data);
+    BYTE Single = Data.Data[0] >> 4;
+
+    if(Single == 1)
+    {
+        FirstFrameId = Data.can_id;
+        length = Data.Data[1];
+
+        ZCAN_TransmitFD_Data can_data;
+
+        memset(&can_data, 0, sizeof(can_data));
+        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
+        can_data.frame.len      =  8;                                 // CAN 数据长度
+        can_data.transmit_type  =  0;
+        can_data.frame.data[0] = 0x30;
+
+        mainWindow->TransmitCANData(can_data);
+
+        for(int i = 0 ; i < 6 ;i++)
+        {
+            canData.append(Data.Data[i + 2]);
+            length--;
+        }
+    }
+    else if(Single == 2)
+    {
+        for(int i = 0 ; i < 7 ;i++)
+        {
+            canData.append(Data.Data[i + 1]);
+            length--;
+
+            if(length == 0)
+            {
+                CANData can;
+                can.can_id = FirstFrameId;
+                can.Data = canData;
+
+                for (auto i : ReceiveItemContainer) {
+                    if(i->ContaineTrigger(can))
+                        i->On_Trigger(can);
+                }
+
+                canData.clear();
+                break;
+            }
+        }
+    }
+    else if(Single == 0)
+    {
+        for (auto i : ReceiveItemContainer) {
+            if(i->ContaineTrigger(Data))
+                i->On_Trigger(Data);
+        }
     }
 }
-
-//void QReceiveThread::InitReceptionData(CHANNEL_HANDLE& ChannelHandle)
-//{
-//    ReceptionDatas.clear();
-//    QVector<BYTE> Temp = {0x07, 0x62};
-//    AddReceptionData(0x748, Temp, [&](ZCAN_ReceiveFD_Data&) -> void
-//    {
-//        ZCAN_TransmitFD_Data can_data;
-
-//        memset(&can_data, 0, sizeof(can_data));
-//        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
-//        can_data.frame.len      =  8;                                 // CAN 数据长度
-//        can_data.transmit_type  =  0;
-//        can_data.frame.data[0] = 0x03;
-//        can_data.frame.data[1] = 0x22;
-//        can_data.frame.data[2] = 0xFD;
-//        can_data.frame.data[3] = 0x07;
-
-//        ZCAN_TransmitFD(ChannelHandle, &can_data, 1);
-
-//        emit AddCANFDTableData_T(can_data);
-//    });
-
-//    Temp = {0x10, 0x21};
-//    AddReceptionData(0x748, Temp, [=]() -> void
-//    {
-//        ZCAN_TransmitFD_Data can_data;
-
-//        memset(&can_data, 0, sizeof(can_data));
-//        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
-//        can_data.frame.len      =  8;                                 // CAN 数据长度
-//        can_data.transmit_type  =  0;
-//        can_data.frame.data[0] = 0x30;
-
-//        ZCAN_TransmitFD(ChannelHandle, &can_data, 1);
-
-//        emit AddCANFDTableData_T(can_data);
-//    });
-
-//    Temp = {0x06, 0x67, 0x61};
-//    AddReceptionData(0x748, Temp, [=]() -> void
-//    {
-//        ZCAN_TransmitFD_Data can_data;
-
-//        memset(&can_data, 0, sizeof(can_data));
-//        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
-//        can_data.frame.len      =  8;                                 // CAN 数据长度
-//        can_data.transmit_type  =  0;
-//        can_data.frame.data[0] = 0x30;
-
-//        ZCAN_TransmitFD(ChannelHandle, &can_data, 1);
-
-//        emit AddCANFDTableData_T(can_data);
-//    });
-//}
-
-//bool QReceiveThread::ShouldReception(const ZCAN_Receive_Data &Data, const ReceptionData<ZCAN_Receive_Data> InReceptionData)
-//{
-//    if(Data.frame.can_id != InReceptionData.FrameId) return false;
-//    for(int i = 0 ; i < InReceptionData.FilterData.length() ; i++)
-//    {
-//        if(Data.frame.data[i] != InReceptionData.FilterData[i]) return false;
-//    }
-
-//    return true;
-//}
-
-//bool QReceiveThread::ShouldReception(const ZCAN_ReceiveFD_Data &Data, const ReceptionData<ZCAN_ReceiveFD_Data> InReceptionData)
-//{
-//    if(Data.frame.can_id != InReceptionData.FrameId) return false;
-//    for(int i = 0 ; i < InReceptionData.FilterData.length() ; i++)
-//    {
-//        if(Data.frame.data[i] != InReceptionData.FilterData[i]) return false;
-//    }
-
-//    return true;
-//}
-
-//void QReceiveThread::Reception(const ZCAN_Receive_Data& Data)
-//{
-//    for(auto& i : ReceptionDatas)
-//    {
-//        if(ShouldReception(Data,i))
-//        {
-//            if(i.FuncNoMember)
-//                i.FuncNoMember();
-
-//            if(i.FuncMember)
-//                (this->*i.FuncMember)();
-
-//            return;
-//        }
-//    }
-//}
-
-//void QReceiveThread::Reception(const ZCAN_ReceiveFD_Data& Data)
-//{
-//    for(auto& i : ReceptionDatas)
-//    {
-//        if(ShouldReception(Data,i))
-//        {
-//            if(i.FuncNoMember)
-//                i.FuncNoMember();
-
-//            if(i.FuncMember)
-//                (this->*i.FuncMember)();
-
-//            return;
-//        }
-//    }
-//}
 
 void QReceiveThread::Test()
 {

@@ -12,6 +12,7 @@
 #include <QScrollBar>
 #include <QStandardItemModel>
 #include "Library/QWidgetLibrary.h"
+#include <QtConcurrent>
 
 #define TMP_BUFFER_LEN 1000
 
@@ -800,13 +801,19 @@ int MainWindow::AddDiagTableData(QMessageTableWidget *MessageTableWidget, const 
 
 void MainWindow::TransmitCANData(ZCAN_Transmit_Data& can_data)
 {
-    auto result = ZCAN_Transmit(chHandle, &can_data, 1);
+    QtConcurrent::run([=]() mutable {
+        auto result = ZCAN_Transmit(chHandle, &can_data, 1);
+
+    });
     AddTableData(can_data);
 }
 
 void MainWindow::TransmitCANData(ZCAN_TransmitFD_Data& canfd_data)
 {
-    auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1);
+    QtConcurrent::run([=]() mutable {
+        auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1);
+//        AddTableData(canfd_data);
+    });
     AddTableData(canfd_data);
 }
 

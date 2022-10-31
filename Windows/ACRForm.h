@@ -23,6 +23,7 @@ enum EMessageTimer
     Message_288,
     Message_2D2,
     Message_2F7,
+    Message_GW740,
 };
 
 class ACRForm : public QWidget
@@ -49,6 +50,7 @@ private:
     BYTE can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
     void Send121();
+    void SendGW740();
 
     void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData &)> const Func);
 
@@ -56,10 +58,6 @@ private slots:
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
-
-    void on_pushButton_3_clicked();
-
-    void on_pushButton_4_clicked();
 
     void on_pushButton_5_clicked();
 
@@ -116,9 +114,11 @@ private:
     ZCAN_TransmitFD_Data canfd_data_288;
     ZCAN_TransmitFD_Data canfd_data_2D2;
     ZCAN_TransmitFD_Data canfd_data_2F7;
+    ZCAN_TransmitFD_Data canfd_data_GW740;
 
     ZCAN_TransmitFD_Data canfd_data_Extended_Session;
     int Count_121;
+    int Count_GW740;
 };
 
 template<typename Transmit_Data>

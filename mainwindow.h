@@ -78,8 +78,6 @@ private:
     bool SetResistance();
 
     //MeaasgeTable
-
-
     int  AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
     void AddDeltaTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
     int  AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);

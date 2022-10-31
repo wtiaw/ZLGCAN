@@ -582,11 +582,17 @@
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>面板</string>
+     <string>面板(Panel)</string>
     </property>
     <addaction name="actionACR"/>
    </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>工具(Tool)</string>
+    </property>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionACR">

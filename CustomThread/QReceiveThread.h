@@ -10,15 +10,6 @@
 #include "QThreadBase.h"
 #include "Library/QCANLibrary.h"
 
-//template<typename CANData>
-//struct ReceptionData
-//{
-//    uint FrameId;
-//    QVector<BYTE> FilterData;
-//    std::function<void (const CANData &)> FuncNoMember = nullptr;
-//    void (QReceiveThread::* FuncMember)() = nullptr;
-//};
-
 class QReceiveThread : public QThreadBase
 {
     Q_OBJECT
@@ -35,16 +26,6 @@ public:
 
 private:
     void ReceiveData(CHANNEL_HANDLE& ChannelHandle);
-
-//    void InitReceptionData(CHANNEL_HANDLE& ChannelHandle);
-//    template<typename CANData>
-//    void AddReceptionData(const uint FrameID, const QVector<BYTE> FilterData, std::function<void (const CANData &)> const Func);
-
-//    bool ShouldReception(const ZCAN_Receive_Data& Data, const ReceptionData<ZCAN_Receive_Data> InReceptionData);
-//    bool ShouldReception(const ZCAN_ReceiveFD_Data& Data, const ReceptionData<ZCAN_ReceiveFD_Data> InReceptionData);
-
-//    void Reception(const ZCAN_Receive_Data& Data);
-//    void Reception(const ZCAN_ReceiveFD_Data& Data);
 
     void Reception(const CANData& Data);
 
@@ -69,28 +50,11 @@ private:
     MainWindow* mainWindow;
 
     QVector<QReceiveItem*> ReceiveItemContainer;
-//    QVector<ReceptionData<ZCAN_ReceiveFD_Data>> ReceptionDatas;
+
+    canid_t FirstFrameId;
+    BYTE length;
+    QVector<BYTE> canData;
 };
 
-//template<typename CANData>
-//void QReceiveThread::AddReceptionData(const uint FrameID, const QVector<BYTE> FilterData, const std::function<void (const CANData &)> Func)
-//{
-//    ReceptionData<ZCAN_ReceiveFD_Data> Temp;
-
-//    Temp.FrameId = FrameID;
-//    Temp.FilterData = FilterData;
-//    Temp.FuncNoMember = Func;
-
-//    ReceptionDatas.append(Temp);
-//}
-
-//template<class ReceiveData>
-//void QReceiveThread::Reception(ReceiveData Data)
-//{
-//    for(auto i : ReceiveItemContainer)
-//    {
-
-//    }
-//}
 
 #endif // QRECEIVETHREAD_H
