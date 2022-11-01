@@ -72,6 +72,8 @@ private:
     void InitMessageID();
     void InitMessageDLC();
 
+    void InitThread();
+
     //Setting
     bool SetBaudRate();
     bool SetCANFDStandard();

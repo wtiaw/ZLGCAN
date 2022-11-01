@@ -68,6 +68,8 @@ ACRForm::ACRForm(QWidget *parent, Qt::WindowFlags f) :
     canfd_data_GW740.frame.data[2]   =  0x01;
     canfd_data_GW740.frame.data[3]   =  0xCF;
     canfd_data_GW740.frame.data[4]   =  0x81;
+
+    InitWindow();
 }
 
 ACRForm::~ACRForm()
@@ -126,6 +128,23 @@ void ACRForm::StopTimer()
     {
         i->stop();
     }
+}
+
+void ACRForm::InitWindow()
+{
+    ui->BSW->setText("---");
+    ui->SV->setText("---");
+    ui->FBL->setText("---");
+
+    ui->ACR_Key->setText("0");
+    ui->ACRCrcChk122->setText("0");
+    ui->ACRCycCntr122->setText("0");
+    ui->Activation_Status->setText("0");
+
+    ui->Tem->setText("0");
+    ui->VHBH_Phy->setText("0");
+    ui->VHBL_Phy->setText("0");
+    ui->CANW->setText("0");
 }
 
 void ACRForm::InitTrigger()
@@ -329,7 +348,7 @@ void ACRForm::Send121()
 void ACRForm::SendGW740()
 {
     if(++Count_GW740 == 7) Count_GW740++;
-    if(Count_GW740 > 9) Count_GW740 = 0;
+    Count_GW740 %= 10;
 
     canfd_data_GW740.frame.data[7] = Count_GW740;
 }

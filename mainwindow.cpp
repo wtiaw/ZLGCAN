@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
-    ReceiveThread = new QReceiveThread(this);
+
 
     UpdateDeltaTableTable = new QTimer;
     connect(UpdateDeltaTableTable, &QTimer::timeout,this, &MainWindow::On_UpdateDeltaTableTableTimeOut);
@@ -69,6 +69,8 @@ void MainWindow::Init()
 
     InitMessageID();
     InitMessageDLC();
+
+    InitThread();
 
     CreateDataEdit();
 
@@ -246,6 +248,13 @@ void MainWindow::InitMessageDLC()
     QWidgetLibrary::InitMessageDLC(ui->DLCEdit);
 }
 
+void MainWindow::InitThread()
+{
+    ReceiveThread = new QReceiveThread(this);
+    connect(ReceiveThread, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), this, SLOT(AddTableData(const ZCAN_Receive_Data&)));
+    connect(ReceiveThread, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), this, SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
+}
+
 void MainWindow::On_OpenDevice()
 {
     SDevice ConfigDevice = SettingConfig->GetDevice();
@@ -282,6 +291,8 @@ void MainWindow::On_OpenDevice()
     ui->DeviceIDCamboBox->    setEnabled(false);
 
     qDebug("设备：%s 打开成功",(DeviceDisplayName.c_str()));
+
+    if(ACRFromWindow) ACRFromWindow->InitWindow();
 }
 
 void MainWindow::On_InitCAN()
@@ -541,8 +552,17 @@ void MainWindow::On_AutoSendMessage()
     memset(&auto_can, 0, sizeof(auto_can));
     auto_can.index = 0;  // 定时列表索引 0
     auto_can.enable = 1; // 使能此索引，每条可单独设置
-    auto_can.interval = 700;  // 定时发送间隔 100ms
+    auto_can.interval = 100;  // 定时发送间隔 100ms
     ConstructCANFrame(auto_can.obj); // 构造 CAN 报文
+
+//    ZCAN_AUTO_TRANSMIT_OBJ auto_can1;
+
+//    memset(&auto_can1, 0, sizeof(auto_can1));
+//    auto_can1.index = 1;  // 定时列表索引 0
+//    auto_can1.enable = 1; // 使能此索引，每条可单独设置
+//    auto_can1.interval = 100;  // 定时发送间隔 100ms
+//    ConstructCANFrame(auto_can1.obj); // 构造 CAN 报文
+
 
     GetProperty()->SetValue("0/auto_send", (const char*)&auto_can);
 //    GetProperty()->SetValue("0/auto_send", (const char*)&auto_can1);
@@ -693,7 +713,7 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
     int rowIndex = MessageTableWidget->rowCount();//当前表格的行数
     MessageTableWidget->insertRow(rowIndex);//在最后一行的后面插入一行
 
-    UINT64 intervalTimeNS;
+//    UINT64 intervalTimeNS;
     double CPUintervalTime;
     switch (InTableData.DirType) {
     case DirectionType::Receive:
@@ -711,13 +731,13 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
 //        qDebug()<<temp;
 //        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeNS/1000000.0, 'f', 6)));
         CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
-        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
+        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 3) + "000"));
         break;
     case DirectionType::Transmit:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Tx"));
 
         CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
-        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
+        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 3) + "000"));
         break;
     }
 
@@ -758,7 +778,7 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
             {
                 double temp = InTableData.TimeStamp - TimeStamp;
 
-                MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(temp/1000000.0, 'f', 6)));
+                MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(temp/1000000.0, 'f', 3) + "000"));
 
                 MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeNS = InTableData.TimeStamp;
                 break;
@@ -767,7 +787,7 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
             {
                 double CPUintervalTime = QCANLibrary::ElapsedTime(CPUTime, InTableData.CPUTime) ;
 
-                MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
+                MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 3) + "000"));
 
                 MessageTableWidget->MessageIDMap[KeyInfo].CPUintervalTimeNS = InTableData.CPUTime;
                 break;

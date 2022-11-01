@@ -7,6 +7,7 @@
 #include "qtimer.h"
 #include "typedef.h"
 #include <QWidget>
+#include "Interface/QPanel.h"
 
 namespace Ui {
 class ACRForm;
@@ -26,7 +27,7 @@ enum EMessageTimer
     Message_GW740,
 };
 
-class ACRForm : public QWidget
+class ACRForm : public QWidget, public QPanelInterface
 {
     Q_OBJECT
 
@@ -41,6 +42,8 @@ public:
 
     void StopTimer();
 
+    //Interface
+    virtual void InitWindow() override;
 private:
     void InitTrigger();
 
@@ -117,8 +120,8 @@ private:
     ZCAN_TransmitFD_Data canfd_data_GW740;
 
     ZCAN_TransmitFD_Data canfd_data_Extended_Session;
-    int Count_121;
-    int Count_GW740;
+    int Count_121 = 0;
+    int Count_GW740 = 0;
 };
 
 template<typename Transmit_Data>

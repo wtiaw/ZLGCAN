@@ -45,6 +45,7 @@ HEADERS += \
     CustomWidget/ToolBox.h \
     CustomWidget/ToolPage.h \
     Data/FromeStruct.h \
+    Interface/QPanel.h \
     Library/QCANLibrary.h \
     Library/QWidgetLibrary.h \
     Setting/QAutoMessageConfig.h \
@@ -74,6 +75,15 @@ DEPENDPATH += $$PWD/zlgcan_x64
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/zlgcan_x64/zlgcan.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/zlgcan_x64/libzlgcan.a
+
+
+win32: LIBS += -L$$PWD/bl_x64/ -lbinlog
+
+INCLUDEPATH += $$PWD/bl_x64
+DEPENDPATH += $$PWD/bl_x64
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/bl_x64/binlog.lib
+else:win32-g++: PRE_TARGETDEPS += $$PWD/bl_x64/libbinlog.a
 
 RESOURCES += \
     Icon.qrc

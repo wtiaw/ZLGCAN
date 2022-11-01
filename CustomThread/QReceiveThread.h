@@ -8,7 +8,6 @@
 #include <QThread>
 #include <QMutex>
 #include "QThreadBase.h"
-#include "Library/QCANLibrary.h"
 
 class QReceiveThread : public QThreadBase
 {
@@ -34,14 +33,8 @@ private slots:
 
 public:
 signals:
-    void AddCANTableData_T(const ZCAN_Transmit_Data& data);
-    void AddCANFDTableData_T(const ZCAN_TransmitFD_Data& data);
-
     void AddCANTableData_R(const ZCAN_Receive_Data& data);
     void AddCANFDTableData_R(const ZCAN_ReceiveFD_Data& data);
-
-
-    void AddTableData(const TableData& InTableData);
 
 private:
     QTimer* Timer;
