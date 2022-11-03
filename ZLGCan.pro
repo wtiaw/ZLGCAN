@@ -16,6 +16,7 @@ SOURCES += \
     CustomThread/QReceiveThread.cpp \
     CustomThread/QThreadBase.cpp \
     CustomThread/QTransmitThread.cpp \
+    CustomThread/QWriteBLFThread.cpp \
     CustomWidget/CheckBox/QDrawerCheckBox.cpp \
     CustomWidget/DataEdit.cpp \
     CustomWidget/Frame/QStackedWidget.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
     CustomThread/QReceiveThread.h \
     CustomThread/QThreadBase.h \
     CustomThread/QTransmitThread.h \
+    CustomThread/QWriteBLFThread.h \
     CustomWidget/CheckBox/QDrawerCheckBox.h \
     CustomWidget/DataEdit.h \
     CustomWidget/Frame/QStackedWidget.h \

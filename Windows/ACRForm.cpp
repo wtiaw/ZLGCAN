@@ -178,7 +178,7 @@ void ACRForm::InitTrigger()
 
         mainWindow->TransmitCANData(can_data);
 
-        char string_version[4];
+        char string_version[5] = { 0 };
         for(int i = 0 ; i < 4 ; i++)
         {
             string_version[i] = Data.Data[i + 4];
@@ -189,7 +189,7 @@ void ACRForm::InitTrigger()
     Temp = {0x62, 0xFD};
     CreateItem(0x748, Temp, [&](const CANData& Data)
     {
-        char string_version[30];
+        char string_version[31];
         for(int i = 0 ; i < 30 ; i++)
         {
             string_version[i] = Data.Data[i + 3];
@@ -273,7 +273,7 @@ void ACRForm::InitTrigger()
 
         mainWindow->TransmitCANData(can_data);
 
-        char string_version[6];
+        char string_version[7];
         for(int i = 0 ; i < 6; i++)
         {
             string_version[i] = Data.Data[i + 4];
@@ -291,27 +291,33 @@ void ACRForm::InitTrigger()
         mainWindow->TransmitCANData(canfd_data_GW740);
 
         int hex_value;
-        if(Data.Data[5] == 0x02)
+        switch(Data.Data[5])
         {
-            hex_value = (Data.Data[6] << 8) | Data.Data[7];
-            ui->Tem->setText(QString::number(hex_value / 100.f));
+            case 0x02:
+            {
+                hex_value = (Data.Data[6] << 8) | Data.Data[7];
+                ui->Tem->setText(QString::number(hex_value / 100.f));
+                break;
+            }
+            case 0x03:
+            {
+                hex_value = (Data.Data[6] << 8) | Data.Data[7];
+                ui->VHBH_Phy->setText(QString::number(hex_value));
+                break;
+            }
+            case 0x04:
+            {
+                hex_value = (Data.Data[6] << 8) | Data.Data[7];
+                ui->VHBL_Phy->setText(QString::number(hex_value));
+                break;
+            }
+            case 0x06:
+            {
+                hex_value = (Data.Data[6] << 8) | Data.Data[7];
+                ui->CANW->setText(QString::number(hex_value));
+                break;
+            }
         }
-        else if(Data.Data[5] == 0x03)
-        {
-            hex_value = (Data.Data[6] << 8) | Data.Data[7];
-            ui->VHBH_Phy->setText(QString::number(hex_value));
-        }
-        else if(Data.Data[5] == 0x04)
-        {
-            hex_value = (Data.Data[6] << 8) | Data.Data[7];
-            ui->VHBL_Phy->setText(QString::number(hex_value));
-        }
-        else if(Data.Data[5] == 0x06)
-        {
-            hex_value = (Data.Data[6] << 8) | Data.Data[7];
-            ui->CANW->setText(QString::number(hex_value));
-        }
-
     });
 
     ReceiveThread->AddTrigger(Items);

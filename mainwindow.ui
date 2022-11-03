@@ -552,6 +552,13 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="SaveLog">
+          <property name="text">
+           <string>保存Log</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>

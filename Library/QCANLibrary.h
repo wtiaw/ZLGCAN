@@ -15,7 +15,8 @@ struct TableData
     FrameType       EventType;
     DirectionType   DirType;
     BYTE            DLC;
-    QString         Data;
+    QVector<BYTE>   Data;
+//    QString         Data;
 };
 //Q_DECLARE_METATYPE(TableData);
 

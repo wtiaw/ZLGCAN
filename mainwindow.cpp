@@ -13,6 +13,7 @@
 #include <QStandardItemModel>
 #include "Library/QWidgetLibrary.h"
 #include <QtConcurrent>
+#include "binlog.h"
 
 #define TMP_BUFFER_LEN 1000
 
@@ -363,7 +364,6 @@ void MainWindow::On_OpenCAN()
 
     ui->Reset->    setEnabled(true);
     ui->Send->     setEnabled(true);
-
     ui->OpenCAN->  setEnabled(false);
 
     if(bIsRunThread)
@@ -380,6 +380,27 @@ void MainWindow::On_OpenCAN()
     UpdateDeltaTableTable->start(10);
 
     TStartTime = QCANLibrary::GetCurrentTime_us();
+    if(bShouldSaveLog)
+    {
+        bool bSuccess;
+
+        hFile = BLCreateFile( (LPCSTR)(FilePath + "/test.blf").toLocal8Bit(), GENERIC_WRITE);
+
+        if ( INVALID_HANDLE_VALUE == hFile)
+        {
+            qDebug()<<"Fall!";
+            return;
+        }
+
+        bSuccess = BLSetApplication( hFile, BL_APPID_CANCASEXLLOG, 1, 0, 1);
+
+        SYSTEMTIME systemTime;
+        GetSystemTime( &systemTime);
+        bSuccess = bSuccess && BLSetMeasurementStartTime( hFile, &systemTime);
+
+        bSuccess = bSuccess && BLSetWriteOptions( hFile, 6, 0);
+        qDebug()<<"open"<<bSuccess;
+    }
 }
 
 void MainWindow::On_Reset()
@@ -434,11 +455,18 @@ void MainWindow::On_CloseDevice()
     {
         ACRFromWindow->StopTimer();
     }
+
+    if(hFile != INVALID_HANDLE_VALUE)
+    {
+        qDebug()<<BLCloseHandle( hFile);
+        hFile = INVALID_HANDLE_VALUE;
+    }
 }
 
 void MainWindow::On_OpenAutoSendConfigWindow()
 {
-    if(!AutoSendConfig){
+    if(!AutoSendConfig)
+    {
         AutoSendConfig = new AutoSendConfigWindow();
         AutoSendConfig->setWindowTitle("配置自动发送报文");
     }
@@ -705,7 +733,40 @@ void MainWindow::AddTableData(const TableData& InTableData)
 {
     AddTotalTableData(Tables[0], InTableData);
     AddDeltaTableData(Tables[1], InTableData);
-    AddDiagTableData(Tables[2],InTableData);
+    AddDiagTableData(Tables[2], InTableData);
+
+//    QFuture<void> future = QtConcurrent::run([=]() {
+        VBLCANFDMessage_t message;
+        memset(&message,    0, sizeof(VBLCANFDMessage_t));
+
+        message.mHeader.mBase.mSignature = BL_OBJ_SIGNATURE;
+        message.mHeader.mBase.mHeaderSize = sizeof( message.mHeader);
+        message.mHeader.mBase.mHeaderVersion = 1;
+        message.mHeader.mBase.mObjectSize = sizeof( VBLCANFDMessage_t);
+        message.mHeader.mBase.mObjectType = BL_OBJ_TYPE_CAN_FD_MESSAGE;
+        message.mHeader.mObjectFlags = BL_OBJ_FLAG_TIME_ONE_NANS;
+
+        /* setup CAN object header */
+        ULONGLONG time = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) * 1000000000;
+
+        message.mHeader.mObjectTimeStamp = time;
+        /* setup CAN message */
+        message.mChannel = SettingConfig->GetChannel().ID + 1;
+        message.mFlags = InTableData.DirType & 1;
+        message.mDLC = InTableData.DLC;
+        message.mValidDataBytes = InTableData.DLC;
+        message.mID = InTableData.FrameID;
+        message.mCANFDFlags = 1;
+        for(int i = 0 ;i < InTableData.Data.length(); i++)
+        {
+            message.mData[i] = InTableData.Data[i];
+        }
+
+        if(hFile != INVALID_HANDLE_VALUE)
+            DataCount += BLWriteObject( hFile, &message.mHeader.mBase);
+
+        qDebug()<<"数据："<<DataCount;
+//    });
 }
 
 int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
@@ -753,7 +814,13 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
     }
 
     MessageTableWidget->setItem(rowIndex, 4, new QTableWidgetItem(QString::number(InTableData.DLC)));
-    MessageTableWidget->setItem(rowIndex, 5, new QTableWidgetItem(InTableData.Data));
+
+    QString str;
+    for (UINT i = 0; i < InTableData.Data.length(); ++i)
+    {
+        str += QString("%1 ").arg(InTableData.Data[i], 2, 16, QLatin1Char('0'));
+    }
+    MessageTableWidget->setItem(rowIndex, 5, new QTableWidgetItem(str.toUpper()));
 
     if(!bIsDragged && ui->EnableScroll->isChecked())
         MessageTableWidget->scrollToBottom();
@@ -794,7 +861,12 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
             }
         }
 
-        MessageTableWidget->item(rowIndex, 5)->setText(InTableData.Data);
+        QString str;
+        for (UINT i = 0; i < InTableData.Data.length(); ++i)
+        {
+            str += QString("%1 ").arg(InTableData.Data[i], 2, 16, QLatin1Char('0'));
+        }
+        MessageTableWidget->setItem(rowIndex, 5, new QTableWidgetItem(str.toUpper()));
 
         MessageTableWidget->MessageIDMap[KeyInfo].Count = 0;
     }
@@ -964,5 +1036,23 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
     }
 
     Tables[index]->show();
+}
+
+
+void MainWindow::on_SaveLog_clicked(bool checked)
+{
+    bShouldSaveLog = checked;
+
+    if(bShouldSaveLog)
+    {
+        QDir dir(FilePath);
+        if(!dir.exists()){
+            bool ismkdir = dir.mkdir(FilePath);
+            if(!ismkdir)
+                qDebug() << "Create path fail" << Qt::endl;
+            else
+                qDebug() << "Create fullpath success" << Qt::endl;
+        }
+    }
 }
 

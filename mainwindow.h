@@ -137,6 +137,8 @@ private slots:
 
     void on_comboBox_currentIndexChanged(int index);
 
+    void on_SaveLog_clicked(bool checked);
+
 public:
     class QReceiveThread* ReceiveThread;
 
@@ -151,9 +153,11 @@ private:
     bool bInit = false;
     bool bIsRunThread = false;
     bool bIsDragged = false;
+    bool bShouldSaveLog = false;
 
     QVector<DataEdit*> DataEdits;
     QVector<QMessageTableWidget*> Tables;
+    QVector<TableData> DataLog;
 
     UINT64 RStartTime = 0;
     LARGE_INTEGER TStartTime;
@@ -164,5 +168,12 @@ private:
     IProperty* property;
 
     class QTimer* UpdateDeltaTableTable;
+
+    QString FilePath = QDir::currentPath() + tr("/log");
+
+//    LPCTSTR pFileName = reinterpret_cast<const wchar_t *>(FilePath.utf16());
+//    LPCTSTR pFileName = L"test.blf";
+    HANDLE hFile = INVALID_HANDLE_VALUE;
+    int DataCount = 0;
 };
 #endif // MAINWINDOW_H

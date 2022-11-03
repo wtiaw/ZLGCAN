@@ -9,7 +9,7 @@ QCANLibrary::QCANLibrary(QObject *parent)
 TableData QCANLibrary::ConstructTableData(const ZCAN_Transmit_Data &CAN)
 {
     const canid_t& id = CAN.frame.can_id;
-    QString str;
+//    QString str;
 
     TableData InTableData;
     InTableData.CPUTime      =   GetCurrentTime_us();
@@ -20,11 +20,11 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_Transmit_Data &CAN)
 
     for (UINT i = 0; i < CAN.frame.can_dlc; ++i)
     {
-
-        str += QString("%1 ").arg(CAN.frame.data[i], 2, 16, QLatin1Char('0'));
+        InTableData.Data.append(CAN.frame.data[i]);
+//        str += QString("%1 ").arg(CAN.frame.data[i], 2, 16, QLatin1Char('0'));
     }
 
-    InTableData.Data = str.toUpper();
+//    InTableData.Data = str.toUpper();
 
     return InTableData;
 }
@@ -43,11 +43,11 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_TransmitFD_Data &CAN)
 
     for (UINT i = 0; i < CAN.frame.len; ++i)
     {
-
-        str += QString("%1 ").arg(CAN.frame.data[i], 2, 16, QLatin1Char('0'));
+        InTableData.Data.append(CAN.frame.data[i]);
+//        str += QString("%1 ").arg(CAN.frame.data[i], 2, 16, QLatin1Char('0'));
     }
 
-    InTableData.Data = str.toUpper();
+//    InTableData.Data = str.toUpper();
 
     return InTableData;
 }
@@ -67,11 +67,11 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_Receive_Data &CAN)
 
     for (UINT i = 0; i < CAN.frame.can_dlc; ++i)
     {
-
-        str += QString("%1 ").arg(CAN.frame.data[i], 2, 16, QLatin1Char('0'));
+        InTableData.Data.append(CAN.frame.data[i]);
+//        str += QString("%1 ").arg(CAN.frame.data[i], 2, 16, QLatin1Char('0'));
     }
 
-    InTableData.Data = str.toUpper();
+//    InTableData.Data = str.toUpper();
 
     return InTableData;
 }
@@ -91,11 +91,11 @@ TableData QCANLibrary::ConstructTableData(const ZCAN_ReceiveFD_Data &CANFD)
 
     for (UINT i = 0; i < CANFD.frame.len; ++i)
     {
-
-        str += QString("%1 ").arg(CANFD.frame.data[i], 2, 16, QLatin1Char('0'));
+        InTableData.Data.append(CANFD.frame.data[i]);
+//        str += QString("%1 ").arg(CANFD.frame.data[i], 2, 16, QLatin1Char('0'));
     }
 
-    InTableData.Data = str.toUpper();
+//    InTableData.Data = str.toUpper();
 
     return InTableData;
 }
