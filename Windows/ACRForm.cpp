@@ -70,6 +70,7 @@ ACRForm::ACRForm(QWidget *parent, Qt::WindowFlags f) :
     canfd_data_GW740.frame.data[4]   =  0x81;
 
     InitWindow();
+    connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow, SLOT(TransmitCANData(ZCAN_TransmitFD_Data&)));
 }
 
 ACRForm::~ACRForm()
@@ -100,11 +101,11 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Tran
 
         connect(temp, &PerformanceFrequency::TimeOut, this, [=]() mutable -> void
         {
-            mainWindow->TransmitCANData(CANData);
+            emit TransmitCANFD(CANData);
 
             if(Function)
                 (this->*Function)();
-        }, Qt::QueuedConnection);
+        });
 
         if(InMessageTimerType != EMessageTimer::Single)
             MessageThreadContainer.insert(InMessageTimerType, temp);
@@ -176,7 +177,7 @@ void ACRForm::InitTrigger()
         can_data.frame.data[2] = 0xFD;
         can_data.frame.data[3] = 0x07;
 
-        mainWindow->TransmitCANData(can_data);
+        emit TransmitCANFD(can_data);
 
         char string_version[5] = { 0 };
         for(int i = 0 ; i < 4 ; i++)
@@ -215,7 +216,7 @@ void ACRForm::InitTrigger()
         can_data.frame.data[5] = ~Data.Data[5];
         can_data.frame.data[6] = ~Data.Data[6];
 
-        mainWindow->TransmitCANData(can_data);
+        emit TransmitCANFD(can_data);
     });
 
     Temp = {0x02, 0x67, 0x62};
@@ -236,7 +237,7 @@ void ACRForm::InitTrigger()
         can_data.frame.data[6] = 0x28;
         can_data.frame.data[7] = 0xAC;
 
-        mainWindow->TransmitCANData(can_data);
+        emit TransmitCANFD(can_data);
     });
 
     Temp = {0x07, 0x71, 0x01, 0xFD, 0x0A, 0x00};
@@ -257,21 +258,13 @@ void ACRForm::InitTrigger()
         can_data.frame.data[6] = ~Data.Data[6];
         can_data.frame.data[7] = ~Data.Data[7];
 
-        mainWindow->TransmitCANData(can_data);
+        emit TransmitCANFD(can_data);
     });
 
     Temp = {0x71, 0x01 ,0xFD, 0x0F};
     CreateItem(0x748, Temp, [&](const CANData& Data)
     {
         ZCAN_TransmitFD_Data can_data;
-
-        memset(&can_data, 0, sizeof(can_data));
-        can_data.frame.can_id   =  MAKE_CAN_ID(0x740, 0, 0, 0);         // CAN ID
-        can_data.frame.len      =  8;                                 // CAN 数据长度
-        can_data.transmit_type  =  0;
-        can_data.frame.data[0] = 0x30;
-
-        mainWindow->TransmitCANData(can_data);
 
         char string_version[7];
         for(int i = 0 ; i < 6; i++)
@@ -280,16 +273,12 @@ void ACRForm::InitTrigger()
         }
         ui->SV->setText(string_version);
 
-        mainWindow->TransmitCANData(canfd_data_GW740);
+        emit TransmitCANFD(canfd_data_GW740);
     });
 
     Temp = {0x07, 0x71 ,0x01, 0xCF, 0x81};
     CreateItem(0x748, Temp, [&](const CANData& Data)
     {
-        SendGW740();
-
-        mainWindow->TransmitCANData(canfd_data_GW740);
-
         int hex_value;
         switch(Data.Data[5])
         {
@@ -318,6 +307,11 @@ void ACRForm::InitTrigger()
                 break;
             }
         }
+
+        SendGW740();
+
+        emit TransmitCANFD(canfd_data_GW740);
+//        TransmitMessageByTimer(EMessageTimer::Single, canfd_data_GW740, nullptr, 0);
     });
 
     ReceiveThread->AddTrigger(Items);
@@ -372,17 +366,11 @@ void ACRForm::on_pushButton_clicked()
     if(!mainWindow->IsOpenCAN()) return;
 
     TransmitMessageByTimer(EMessageTimer::Message_121, &canfd_data_121, &ACRForm::Send121, 10, 10);
-
     TransmitMessageByTimer(EMessageTimer::Message_1C2, &canfd_data_1C2, nullptr, 10, 10);
-
     TransmitMessageByTimer(EMessageTimer::Message_50,  &canfd_data_50,  nullptr, 10, 500);
-
     TransmitMessageByTimer(EMessageTimer::Message_288, &canfd_data_288, nullptr, 10, 40);
-
     TransmitMessageByTimer(EMessageTimer::Message_2D2, &canfd_data_2D2, nullptr, 10, 100);
-
     TransmitMessageByTimer(EMessageTimer::Message_2F7, &canfd_data_2F7, nullptr, 10, 100);
-
     TransmitMessageByTimer(EMessageTimer::Message_406, &canfd_data_406, nullptr, 10, 700);
 }
 
@@ -406,7 +394,7 @@ void ACRForm::on_pushButton_2_clicked()
     can_data.frame.data[2] = 0xFD;
     can_data.frame.data[3] = 0x01;
 
-    mainWindow->TransmitCANData(can_data);
+    emit TransmitCANFD(can_data);
 }
 
 void ACRForm::on_pushButton_5_clicked()

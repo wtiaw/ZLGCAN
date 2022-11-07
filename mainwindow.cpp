@@ -13,7 +13,8 @@
 #include <QStandardItemModel>
 #include "Library/QWidgetLibrary.h"
 #include <QtConcurrent>
-#include "binlog.h"
+#include <QtGlobal>
+
 
 #define TMP_BUFFER_LEN 1000
 
@@ -25,12 +26,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
-
-
     UpdateDeltaTableTable = new QTimer;
     connect(UpdateDeltaTableTable, &QTimer::timeout,this, &MainWindow::On_UpdateDeltaTableTableTimeOut);
 
     Init();
+    MessageBuffer = new CircinalQueue<VBLCANFDMessage_t>(200);
 }
 
 MainWindow::~MainWindow()
@@ -95,8 +95,7 @@ void MainWindow::InitButtonFunc()
     connect(ui->CloseDevice,    SIGNAL(clicked()), this, SLOT(On_CloseDevice()));
     connect(ui->Send,           SIGNAL(clicked()), this, SLOT(On_SendMessage()));
     connect(ui->ConfigAutoSend, SIGNAL(clicked()), this, SLOT(On_OpenAutoSendConfigWindow()));
-
-    connect(ui->AutoSend, SIGNAL(clicked()), this, SLOT(On_AutoSendMessage()));
+    connect(ui->AutoSend,       SIGNAL(clicked()), this, SLOT(On_AutoSendMessage()));
 
     //ComboBox
     connect(ui->ChannelIDComboBox,        SIGNAL(currentIndexChanged(int)), this, SLOT(On_ChannelIDChanged(int)));
@@ -252,8 +251,10 @@ void MainWindow::InitMessageDLC()
 void MainWindow::InitThread()
 {
     ReceiveThread = new QReceiveThread(this);
-    connect(ReceiveThread, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), this, SLOT(AddTableData(const ZCAN_Receive_Data&)));
-    connect(ReceiveThread, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), this, SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
+//    connect(ReceiveThread, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), this, SLOT(AddTableData(const ZCAN_Receive_Data&)));
+//    connect(ReceiveThread, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), this, SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
+//    connect(ReceiveThread, SIGNAL(TransmitCAN(ZCAN_Transmit_Data&)), this, SLOT(TransmitCANData(ZCAN_Transmit_Data&)));
+//    connect(ReceiveThread, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), this, SLOT(TransmitCANData(ZCAN_TransmitFD_Data&)));
 }
 
 void MainWindow::On_OpenDevice()
@@ -361,6 +362,7 @@ void MainWindow::On_OpenCAN()
     }
 
     qDebug("启动通道成功");
+    bIsOpenCAN = true;
 
     ui->Reset->    setEnabled(true);
     ui->Send->     setEnabled(true);
@@ -382,24 +384,7 @@ void MainWindow::On_OpenCAN()
     TStartTime = QCANLibrary::GetCurrentTime_us();
     if(bShouldSaveLog)
     {
-        bool bSuccess;
-
-        hFile = BLCreateFile( (LPCSTR)(FilePath + "/test.blf").toLocal8Bit(), GENERIC_WRITE);
-
-        if ( INVALID_HANDLE_VALUE == hFile)
-        {
-            qDebug()<<"Fall!";
-            return;
-        }
-
-        bSuccess = BLSetApplication( hFile, BL_APPID_CANCASEXLLOG, 1, 0, 1);
-
-        SYSTEMTIME systemTime;
-        GetSystemTime( &systemTime);
-        bSuccess = bSuccess && BLSetMeasurementStartTime( hFile, &systemTime);
-
-        bSuccess = bSuccess && BLSetWriteOptions( hFile, 6, 0);
-        qDebug()<<"open"<<bSuccess;
+        CreateLogFile();
     }
 }
 
@@ -409,6 +394,8 @@ void MainWindow::On_Reset()
     chHandle = nullptr;
 
     qDebug("复位通道成功");
+    bIsOpenCAN = false;
+
     ui->OpenCAN->  setEnabled(true);
 
     ui->Reset->    setEnabled(false);
@@ -442,6 +429,8 @@ void MainWindow::On_CloseDevice()
     ReceiveThread->Stop();
     bIsRunThread = false;
 
+    bIsOpenCAN = false;
+
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dhandle);
     dhandle = nullptr;
@@ -456,11 +445,8 @@ void MainWindow::On_CloseDevice()
         ACRFromWindow->StopTimer();
     }
 
-    if(hFile != INVALID_HANDLE_VALUE)
-    {
-        qDebug()<<BLCloseHandle( hFile);
-        hFile = INVALID_HANDLE_VALUE;
-    }
+    StopLogFile();
+    TotalDataCount = 0;
 }
 
 void MainWindow::On_OpenAutoSendConfigWindow()
@@ -735,6 +721,8 @@ void MainWindow::AddTableData(const TableData& InTableData)
     AddDeltaTableData(Tables[1], InTableData);
     AddDiagTableData(Tables[2], InTableData);
 
+    if(!bShouldSaveLog) return;
+
 //    QFuture<void> future = QtConcurrent::run([=]() {
         VBLCANFDMessage_t message;
         memset(&message,    0, sizeof(VBLCANFDMessage_t));
@@ -747,9 +735,20 @@ void MainWindow::AddTableData(const TableData& InTableData)
         message.mHeader.mObjectFlags = BL_OBJ_FLAG_TIME_ONE_NANS;
 
         /* setup CAN object header */
-        ULONGLONG time = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) * 1000000000;
-
+        ULONGLONG time;
+        if(InTableData.TimeStamp != 0)
+        {
+            time = InTableData.TimeStamp - RStartTime;
+            time += temp;
+            time *= 1000;
+        }
+        else
+        {
+            time = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) * 1000000000;
+        }
         message.mHeader.mObjectTimeStamp = time;
+
+
         /* setup CAN message */
         message.mChannel = SettingConfig->GetChannel().ID + 1;
         message.mFlags = InTableData.DirType & 1;
@@ -762,46 +761,85 @@ void MainWindow::AddTableData(const TableData& InTableData)
             message.mData[i] = InTableData.Data[i];
         }
 
-        if(hFile != INVALID_HANDLE_VALUE)
-            DataCount += BLWriteObject( hFile, &message.mHeader.mBase);
+        int InsertIndex = MessageBuffer->GetLenth() - 1;
 
-        qDebug()<<"数据："<<DataCount;
+        while(InsertIndex >=0 && MessageBuffer->IndexAt(InsertIndex).mHeader.mObjectTimeStamp > time)
+        {
+            InsertIndex--;
+        }
+        MessageBuffer->Insert(InsertIndex + 1, message);
+
+        if(hFile != INVALID_HANDLE_VALUE && MessageBuffer->GetLenth() >= 110)
+        {
+            for(int i = 0 ; i < 100;i++)
+            {
+                VBLCANFDMessage_t temp;
+                MessageBuffer->DeQueue(temp);
+
+                bool WriteSuccess = BLWriteObject( hFile, &temp.mHeader.mBase);
+                CurrentDataCount += WriteSuccess;
+                TotalDataCount   += WriteSuccess;
+            }
+        }
+
+        qDebug()<<"当前缓存数据："<<MessageBuffer->GetLenth();
+        qDebug()<<"当前文件数据："<<CurrentDataCount;
+        qDebug()<<"总体文件数据："<<TotalDataCount;
+
+        if(CurrentDataCount >= 100000)
+        {
+            StopLogFile();
+            CreateLogFile();
+        }
 //    });
 }
 
 int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
 {
+    UINT64 intervalTimeNS;
+    double CPUintervalTime = 0;
     int rowIndex = MessageTableWidget->rowCount();//当前表格的行数
-    MessageTableWidget->insertRow(rowIndex);//在最后一行的后面插入一行
 
-//    UINT64 intervalTimeNS;
-    double CPUintervalTime;
+    if(InTableData.DirType == DirectionType::Receive)
+    {
+        if(RStartTime == 0)
+        {
+            RStartTime = InTableData.TimeStamp;
+
+            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
+        }
+
+        intervalTimeNS = InTableData.TimeStamp - RStartTime;
+        intervalTimeNS += temp;
+
+        CPUintervalTime = intervalTimeNS /1000000.0;
+    }
+    else if(InTableData.DirType == DirectionType::Transmit)
+    {
+        CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
+    }
+    else
+    {
+        return -1;
+    }
+
+    while(MessageTableWidget->item(rowIndex - 1,0) && MessageTableWidget->item(rowIndex - 1,0)->text().toFloat() > CPUintervalTime)
+    {
+        rowIndex--;
+    }
+
+    MessageTableWidget->insertRow(rowIndex);
+
+
     switch (InTableData.DirType) {
     case DirectionType::Receive:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Rx"));
-
-//        if(RStartTime == 0)
-//        {
-//            RStartTime = InTableData.TimeStamp;
-
-//            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
-//        }
-
-//        intervalTimeNS = InTableData.TimeStamp - RStartTime;
-//        intervalTimeNS += temp;
-//        qDebug()<<temp;
-//        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(intervalTimeNS/1000000.0, 'f', 6)));
-        CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
-        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 3) + "000"));
         break;
     case DirectionType::Transmit:
         MessageTableWidget->setItem(rowIndex, 3, new QTableWidgetItem("Tx"));
-
-        CPUintervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime) ;
-        MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 3) + "000"));
         break;
     }
-
+    MessageTableWidget->setItem(rowIndex, 0, new QTableWidgetItem(QString::number(CPUintervalTime, 'f', 6)));
     MessageTableWidget->setItem(rowIndex, 1, new QTableWidgetItem(QString::number(InTableData.FrameID, 16).toUpper()));
 
     switch (InTableData.EventType) {
@@ -895,18 +933,17 @@ void MainWindow::TransmitCANData(ZCAN_Transmit_Data& can_data)
 {
     QtConcurrent::run([=]() mutable {
         auto result = ZCAN_Transmit(chHandle, &can_data, 1);
-
     });
     AddTableData(can_data);
 }
 
 void MainWindow::TransmitCANData(ZCAN_TransmitFD_Data& canfd_data)
 {
-    QtConcurrent::run([=]() mutable {
+//    QtConcurrent::run([=]() mutable {
         auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1);
-//        AddTableData(canfd_data);
-    });
-    AddTableData(canfd_data);
+//    });
+        if(result)
+            AddTableData(canfd_data);
 }
 
 bool MainWindow::ChackDLCData()
@@ -1001,6 +1038,63 @@ void MainWindow::ConstructCANFDFrame(ZCAN_TransmitFD_Data& canfd_data)
     }
 }
 
+void MainWindow::CreateLogFile()
+{
+    bool bSuccess;
+
+    SYSTEMTIME systemTime;
+    GetSystemTime( &systemTime);
+    systemTime.wHour += 8;
+
+    QString SystemTimestr = QString("LogFile_%1-%2-%3_%4-%5-%6")
+            .arg(QString::number(systemTime.wYear))
+            .arg(QString::number(systemTime.wMonth) ,2 , '0')
+            .arg(QString::number(systemTime.wDay)   ,2 , '0')
+            .arg(QString::number(systemTime.wHour)  ,2 , '0')
+            .arg(QString::number(systemTime.wMinute),2 , '0')
+            .arg(QString::number(systemTime.wSecond),2 , '0');
+
+    QString FileName = QString("%1/%2.blf").arg(FilePath, SystemTimestr);
+
+    hFile = BLCreateFile( (LPCSTR)(FileName).toLocal8Bit(), GENERIC_WRITE);
+
+    if ( INVALID_HANDLE_VALUE == hFile)
+    {
+        qDebug()<<"Fall!";
+        return;
+    }
+
+    bSuccess = BLSetApplication( hFile, BL_APPID_CANOE, 1, 0, 1);
+    bSuccess = bSuccess && BLSetMeasurementStartTime( hFile, &systemTime);
+
+    bSuccess = bSuccess && BLSetWriteOptions( hFile, 6, 0);
+    qDebug()<<"创建Log文件："<<FileName<<bSuccess;
+}
+
+void MainWindow::StopLogFile()
+{
+    if(hFile != INVALID_HANDLE_VALUE)
+    {
+        for(int i = 0 ; i < MessageBuffer->GetLenth(); i++)
+        {
+            VBLCANFDMessage_t temp;
+            MessageBuffer->DeQueue(temp);
+
+            bool WriteSuccess = BLWriteObject( hFile, &temp.mHeader.mBase);
+            CurrentDataCount += WriteSuccess;
+            TotalDataCount   += WriteSuccess;
+        }
+
+        qDebug()<<"总体文件数据："<<TotalDataCount;
+
+
+        qDebug()<< "Close Log" <<BLCloseHandle( hFile);
+        hFile = INVALID_HANDLE_VALUE;
+
+        CurrentDataCount = 0;
+    }
+}
+
 
 void MainWindow::on_ChangeTable_clicked(bool checked)
 {
@@ -1046,13 +1140,71 @@ void MainWindow::on_SaveLog_clicked(bool checked)
     if(bShouldSaveLog)
     {
         QDir dir(FilePath);
-        if(!dir.exists()){
+        if(!dir.exists())
+        {
             bool ismkdir = dir.mkdir(FilePath);
             if(!ismkdir)
                 qDebug() << "Create path fail" << Qt::endl;
             else
                 qDebug() << "Create fullpath success" << Qt::endl;
         }
+
+        if(bIsOpenCAN) CreateLogFile();
     }
+    else
+    {
+        StopLogFile();
+    }
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    if(!test)
+        test = new CircinalQueue<int>(10);
+
+    int randa = QRandomGenerator::global()->bounded(10);
+    test->EnQueue(randa);
+
+    QString str;
+    for(int i = 0;i<test->GetLenth();i++)
+    {
+        str += QString::number(test->IndexAt(i)) + " ";
+    }
+
+    qDebug()<<str;
+}
+
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    if(!test)
+        test = new CircinalQueue<int>(10);
+    int a;
+    test->DeQueue(a);
+
+    QString str;
+    for(int i = 0;i<test->GetLenth();i++)
+    {
+        str += QString::number(test->IndexAt(i)) + " ";
+    }
+
+    qDebug()<<str;
+}
+
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    if(!test)
+        test = new CircinalQueue<int>(10);
+    test->Insert(2,99);
+
+    QString str;
+    for(int i = 0;i<test->GetLenth();i++)
+    {
+        str += QString::number(test->IndexAt(i)) + " ";
+    }
+
+    qDebug()<<str;
 }
 

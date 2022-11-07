@@ -24,8 +24,10 @@ void QReceiveThread::run()
 
     bIsPause = false;
 
-//    connect(this, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_Receive_Data&)));
-//    connect(this, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
+    connect(this, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_Receive_Data&)));
+    connect(this, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), mainWindow, SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
+    connect(this, SIGNAL(TransmitCAN(ZCAN_Transmit_Data&)), mainWindow, SLOT(TransmitCANData(ZCAN_Transmit_Data&)));
+    connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow, SLOT(TransmitCANData(ZCAN_TransmitFD_Data&)));
 
     CHANNEL_HANDLE chHandle = mainWindow->GetChannelHandle();
 
@@ -111,7 +113,8 @@ void QReceiveThread::Reception(const CANData &Data)
         can_data.transmit_type  =  0;
         can_data.frame.data[0] = 0x30;
 
-        mainWindow->TransmitCANData(can_data);
+        emit TransmitCANFD(can_data);
+//        mainWindow->TransmitCANData(can_data);
 
         for(int i = 0 ; i < 6 ;i++)
         {

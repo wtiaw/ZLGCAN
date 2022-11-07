@@ -50,6 +50,7 @@ HEADERS += \
     Interface/QPanel.h \
     Library/QCANLibrary.h \
     Library/QWidgetLibrary.h \
+    Library/CircinalQueue.h \
     Setting/QAutoMessageConfig.h \
     Setting/QDeviceSettingConfig.h \
     Setting/QSettingConfigBase.h \

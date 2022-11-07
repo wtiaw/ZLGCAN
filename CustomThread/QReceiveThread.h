@@ -36,6 +36,9 @@ signals:
     void AddCANTableData_R(const ZCAN_Receive_Data& data);
     void AddCANFDTableData_R(const ZCAN_ReceiveFD_Data& data);
 
+    void TransmitCAN(ZCAN_Transmit_Data& canfd_data);
+    void TransmitCANFD(ZCAN_TransmitFD_Data& canfd_data);
+
 private:
     QTimer* Timer;
     QElapsedTimer* ElapsedTimer;

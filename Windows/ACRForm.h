@@ -44,6 +44,11 @@ public:
 
     //Interface
     virtual void InitWindow() override;
+
+public:
+signals:
+    void TransmitCANFD(ZCAN_TransmitFD_Data& canfd_data);
+
 private:
     void InitTrigger();
 

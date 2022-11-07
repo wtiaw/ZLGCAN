@@ -12,7 +12,7 @@ PerformanceFrequency::PerformanceFrequency(QObject *parent)
 void PerformanceFrequency::setThreadRunning(uint Delay, bool InSingle, uint mTime)
 {
     this->mTime = mTime * 1000 - 1500;
-    this->delay = Delay * 1000;
+    this->delay = mTime ? Delay * 1000 : 1;
     bRunning = true;
     Single = InSingle;
 

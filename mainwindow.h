@@ -4,9 +4,11 @@
 #include <QMainWindow>
 #include "CustomWidget/DataEdit.h"
 #include "CustomWidget/TableWidget/QMessageTableWidget.h"
+#include "Library/CircinalQueue.h"
 #include "Setting/QDeviceSettingConfig.h"
 #include "qlineedit.h"
 #include "Library/QCANLibrary.h"
+#include "binlog.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -27,13 +29,15 @@ public:
 
     int GetCanTypeFromUI();
 
-    //TransmitMeaasge
-    void TransmitCANData(ZCAN_Transmit_Data& can_data);
-    void TransmitCANData(ZCAN_TransmitFD_Data& canfd_data);
+
 
     bool IsOpenCAN(){ return GetChannelHandle(); }
 
 public slots:
+    //TransmitMeaasge
+    void TransmitCANData(ZCAN_Transmit_Data& can_data);
+    void TransmitCANData(ZCAN_TransmitFD_Data& canfd_data);
+
     void ReceiveData();
     void TransmitData();
 
@@ -84,8 +88,6 @@ private:
     void AddDeltaTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
     int  AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
 
-
-
     //检查DLC输入格式
     bool ChackDLCData();
 
@@ -100,6 +102,10 @@ private:
 
     void ConstructCANFrame(ZCAN_Transmit_Data& can_data);
     void ConstructCANFDFrame(ZCAN_TransmitFD_Data& can_data);
+
+    //Log
+    void CreateLogFile();
+    void StopLogFile();
 
 private slots:
     //ButtonClick
@@ -139,6 +145,12 @@ private slots:
 
     void on_SaveLog_clicked(bool checked);
 
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
+
 public:
     class QReceiveThread* ReceiveThread;
 
@@ -154,6 +166,7 @@ private:
     bool bIsRunThread = false;
     bool bIsDragged = false;
     bool bShouldSaveLog = false;
+    bool bIsOpenCAN = false;
 
     QVector<DataEdit*> DataEdits;
     QVector<QMessageTableWidget*> Tables;
@@ -171,9 +184,13 @@ private:
 
     QString FilePath = QDir::currentPath() + tr("/log");
 
-//    LPCTSTR pFileName = reinterpret_cast<const wchar_t *>(FilePath.utf16());
-//    LPCTSTR pFileName = L"test.blf";
     HANDLE hFile = INVALID_HANDLE_VALUE;
-    int DataCount = 0;
+    int CurrentDataCount = 0;
+    int TotalDataCount = 0;
+
+//    QVector<VBLCANFDMessage_t> MessageBuffer;
+    CircinalQueue<VBLCANFDMessage_t> *MessageBuffer;
+
+    CircinalQueue<int> *test = nullptr;
 };
 #endif // MAINWINDOW_H
