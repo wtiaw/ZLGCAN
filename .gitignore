@@ -1,2 +1,6 @@
 ﻿zlgcan_x64
 cloc.exe
+debug
+release
+.vs
+Config
