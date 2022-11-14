@@ -4,26 +4,27 @@
 #include "qboxlayout.h"
 #include <QWidget>
 
-namespace Ui {
-class ToolBox;
+namespace Ui
+{
+    class ToolBox;
 }
 
-class ToolBox : public QWidget
+class ToolBox final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ToolBox(QWidget *parent = nullptr);
-    ~ToolBox();
+    explicit ToolBox(QWidget* parent = nullptr);
+    ~ToolBox() override;
 
     void AddItem();
 
-    void RemoveItem(class ToolPage* RemovedItem);
+    void RemoveItem(class ToolPage* RemovedItem) const;
 
 private:
-    Ui::ToolBox *ui;
+    Ui::ToolBox* ui;
 
-    QVBoxLayout *m_pContentVBoxLayout;
+    QVBoxLayout* m_pContentVBoxLayout;
 };
 
 #endif // TOOLBOX_H

@@ -3,8 +3,9 @@
 
 #include <QWidget>
 
-namespace Ui {
-class QStackedWidget;
+namespace Ui
+{
+    class QStackedWidget;
 }
 
 class QStackedWidget : public QWidget
@@ -12,28 +13,28 @@ class QStackedWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit QStackedWidget(QWidget *parent = nullptr);
+    explicit QStackedWidget(QWidget* parent = nullptr);
     ~QStackedWidget();
 
-    int GetCurrentActiveIndex(){ return CurrentActiveIndex; }
+    int GetCurrentActiveIndex() { return CurrentActiveIndex; }
     void SetActiveIndex(int index);
 
     void AddWidget(QWidget* InWidget);
 
-    int GetWidgetNum(){ return Widgets.length(); }
+    int GetWidgetNum() { return Widgets.length(); }
 
-    template<class type>
+    template <class type>
     type* GetCurrentWidget();
 
 private:
-    Ui::QStackedWidget *ui;
+    Ui::QStackedWidget* ui;
 
     int CurrentActiveIndex = 0;
 
     QVector<QWidget*> Widgets;
 };
 
-template<class type>
+template <class type>
 type* QStackedWidget::GetCurrentWidget()
 {
     return qobject_cast<type>(Widgets[CurrentActiveIndex]);

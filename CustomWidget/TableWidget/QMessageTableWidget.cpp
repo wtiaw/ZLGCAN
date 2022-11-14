@@ -1,30 +1,30 @@
 #include "QMessageTableWidget.h"
 #include "qheaderview.h"
 
-QMessageTableWidget::QMessageTableWidget(QWidget *parent) :
+QMessageTableWidget::QMessageTableWidget(QWidget* parent) :
     QTableWidget(parent)
 {
     setColumnCount(6);
     QStringList header;
 
-    header<<"Time(s)"<<"ID"<<"Type"<<"Dir"<<"DLC"<<"Data";
+    header << "Time(s)" << "ID" << "Type" << "Dir" << "DLC" << "Data";
     setHorizontalHeaderLabels(header);
 
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setSortingEnabled( false );
+    setSortingEnabled(false);
     verticalHeader()->hide();
-    setWordWrap( false );
+    setWordWrap(false);
     setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    setShowGrid( false );
+    setShowGrid(false);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
-    horizontalHeader()->setHighlightSections( false );
-    setAlternatingRowColors( true );   // alternative colors
+    horizontalHeader()->setHighlightSections(false);
+    setAlternatingRowColors(true); // alternative colors
     setFrameShape(QFrame::NoFrame);
 
     //表头加粗
-    QFont font =  horizontalHeader()->font();
+    QFont font = horizontalHeader()->font();
     font.setBold(true);
     horizontalHeader()->setFont(font);
 

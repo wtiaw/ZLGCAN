@@ -3,13 +3,12 @@
 #include<windows.h>
 #include<stdio.h>
 
-PerformanceFrequency::PerformanceFrequency(QObject *parent)
+PerformanceFrequency::PerformanceFrequency(QObject* parent)
     : QThread{parent}
 {
-
 }
 
-void PerformanceFrequency::setThreadRunning(uint Delay, bool InSingle, uint mTime)
+void PerformanceFrequency::SetThreadRunning(uint Delay, bool InSingle, uint mTime)
 {
     this->mTime = mTime * 1000 - 1500;
     this->delay = mTime ? Delay * 1000 : 1;
@@ -19,45 +18,45 @@ void PerformanceFrequency::setThreadRunning(uint Delay, bool InSingle, uint mTim
     start();
 }
 
-void PerformanceFrequency::setThreadStop()
+void PerformanceFrequency::SetThreadStop()
 {
-//    requestInterruption();
+    //    requestInterruption();
     bRunning = false;
     quit();
-//    wait();
+    //    wait();
 }
 
 void PerformanceFrequency::run()
 {
-//    while(!isInterruptionRequested())
+    //    while(!isInterruptionRequested())
     usleep(delay);
-    while(bRunning)
+    while (bRunning)
     {
-//        LARGE_INTEGER nFreq;
-//        LARGE_INTEGER t1;
-//        LARGE_INTEGER t2;
+        //        LARGE_INTEGER nFreq;
+        //        LARGE_INTEGER t1;
+        //        LARGE_INTEGER t2;
 
-//        double dt;
+        //        double dt;
 
-//        QueryPerformanceFrequency(&nFreq);
-//        QueryPerformanceCounter(&t1);
+        //        QueryPerformanceFrequency(&nFreq);
+        //        QueryPerformanceCounter(&t1);
 
 
         emit TimeOut();
 
-        if(Single)
+        if (Single)
         {
-           break;
+            break;
         }
         usleep(mTime);
 
 
-//        QueryPerformanceCounter(&t2);
-//        dt =(t2.QuadPart -t1.QuadPart)/(double)nFreq.QuadPart;
+        //        QueryPerformanceCounter(&t2);
+        //        dt =(t2.QuadPart -t1.QuadPart)/(double)nFreq.QuadPart;
 
 
-//        qDebug()<<"Run.elapsed ="<<dt * 1000000<<"ns";
+        //        qDebug()<<"Run.elapsed ="<<dt * 1000000<<"ns";
     }
 
-//    exec();
+    //    exec();
 }

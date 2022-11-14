@@ -13,11 +13,15 @@
 #define ChannelDBitBaudRatePath      "/Channel/DBitBaudRate"
 #define ChannelResistancePath        "/Channel/Resistance"
 
-template<class ValueClass>
+template <class ValueClass>
 struct DisplayAndValue
 {
-    DisplayAndValue() {}
-    DisplayAndValue(QString Display,ValueClass Value) {
+    DisplayAndValue()
+    {
+    }
+
+    DisplayAndValue(QString Display, ValueClass Value)
+    {
         this->Display = Display;
         this->Value = Value;
     }
@@ -43,12 +47,11 @@ struct SChannel
 };
 
 
-
 class QDeviceSettingConfig : public QSettingConfigBase
 {
     Q_OBJECT
 public:
-    explicit QDeviceSettingConfig(QObject *parent = nullptr);
+    explicit QDeviceSettingConfig(QObject* parent = nullptr);
 
     static QVector<DisplayAndValue<int>> DeviceName;
 
@@ -60,8 +63,8 @@ public:
     static QVector<DisplayAndValue<int>> MessageTransmitType;
     static QVector<DisplayAndValue<int>> MessageFrameType;
 
-    SDevice& GetDevice(){ return Device; }
-    SChannel& GetChannel(){ return Channel; }
+    SDevice& GetDevice() { return Device; }
+    SChannel& GetChannel() { return Channel; }
 
 
     virtual void ReadConfig(QJsonDocument& doc, QJsonObject& RootObject) override;

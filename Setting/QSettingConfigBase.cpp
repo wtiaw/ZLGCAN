@@ -1,6 +1,6 @@
 #include "QSettingConfigBase.h"
 
-QSettingConfigBase::QSettingConfigBase(QObject *parent)
+QSettingConfigBase::QSettingConfigBase(QObject* parent)
     : QObject{parent}
 {
     ConfigDirPath = QDir::currentPath() + "/Config";
@@ -8,29 +8,24 @@ QSettingConfigBase::QSettingConfigBase(QObject *parent)
 
 void QSettingConfigBase::ReadConfig(QJsonDocument& doc, QJsonObject& RootObject)
 {
-    QDir dir(ConfigDirPath);
-    if(!dir.exists()){
-        bool ismkdir = dir.mkdir(ConfigDirPath);
-        if(!ismkdir)
+    if (const QDir dir(ConfigDirPath); !dir.exists())
+    {
+        if (const bool ismkdir = dir.mkdir(ConfigDirPath); !ismkdir)
             qDebug() << "Create path fail" << Qt::endl;
         else
             qDebug() << "Create fullpath success" << Qt::endl;
     }
 
-    QFileInfo fi(ConfigDirPath + ConfigFilePath);
-    if(!fi.isFile()){
+    if (const QFileInfo fi(ConfigDirPath + ConfigFilePath); !fi.isFile())
+    {
         InitConfig();
     }
 }
 
 void QSettingConfigBase::InitConfig()
 {
-
 }
 
 void QSettingConfigBase::SaveConfig(QString ObjectName, QString key, int Value)
 {
-
 }
-
-

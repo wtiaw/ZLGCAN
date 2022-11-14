@@ -11,25 +11,27 @@ struct MessageKeyInfo
     int MessageID;
     DirectionType directionType;
 
-    MessageKeyInfo(){
-        MessageID     = 0;
+    MessageKeyInfo()
+    {
+        MessageID = 0;
         directionType = DirectionType::None;
     }
 
-    MessageKeyInfo(int InMessageID, DirectionType InDirectionType){
-        MessageID     = InMessageID;
+    MessageKeyInfo(int InMessageID, DirectionType InDirectionType)
+    {
+        MessageID = InMessageID;
         directionType = InDirectionType;
     }
 
-    bool operator < (const MessageKeyInfo &o) const
+    bool operator <(const MessageKeyInfo& o) const
     {
-        if(this->MessageID < o.MessageID)
+        if (this->MessageID < o.MessageID)
         {
             return true;
         }
-        else if(this->MessageID == o.MessageID)
+        else if (this->MessageID == o.MessageID)
         {
-            if(this->directionType < o.directionType)
+            if (this->directionType < o.directionType)
             {
                 return true;
             }
@@ -46,30 +48,32 @@ struct MessageKeyInfo
 struct MessageValueInfo
 {
     UINT64 intervalTimeNS;
-    LARGE_INTEGER CPUintervalTimeNS;
+    LARGE_INTEGER CPUIntervalTimeNS{};
     int TableIndex;
     int Count = 0;
 
-    MessageValueInfo(){
+    MessageValueInfo(): CPUIntervalTimeNS()
+    {
         intervalTimeNS = 0;
-        TableIndex     = 0;
-        Count          = 0;
+        TableIndex = 0;
+        Count = 0;
     }
 
-    MessageValueInfo(UINT64 InIntervalTimeMS, int InTableIndex, LARGE_INTEGER InCPUintervalTimeNS){
-        intervalTimeNS    = InIntervalTimeMS;
-        TableIndex        = InTableIndex;
-        CPUintervalTimeNS = InCPUintervalTimeNS;
+    MessageValueInfo(const UINT64 InIntervalTimeMs, const int InTableIndex, const LARGE_INTEGER InCPUIntervalTimeNs)
+    {
+        intervalTimeNS = InIntervalTimeMs;
+        TableIndex = InTableIndex;
+        CPUIntervalTimeNS = InCPUIntervalTimeNs;
     }
 };
 
-class QMessageTableWidget : public QTableWidget
+class QMessageTableWidget final : public QTableWidget
 {
     Q_OBJECT
 public:
-    QMessageTableWidget(QWidget *parent = nullptr);
+    explicit QMessageTableWidget(QWidget* parent = nullptr);
 
-    class QStandardItemModel* TableViewModel ;
+    class QStandardItemModel* TableViewModel;
 
     QMap<MessageKeyInfo, MessageValueInfo> MessageIDMap;
 };

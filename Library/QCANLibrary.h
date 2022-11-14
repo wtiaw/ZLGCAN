@@ -9,22 +9,23 @@
 
 struct TableData
 {
-    LARGE_INTEGER   CPUTime;
-    UINT64          TimeStamp;
-    canid_t         FrameID;
-    FrameType       EventType;
-    DirectionType   DirType;
-    BYTE            DLC;
-    QVector<BYTE>   Data;
-//    QString         Data;
+    LARGE_INTEGER CPUTime;
+    UINT64 TimeStamp;
+    canid_t FrameID;
+    FrameType EventType;
+    DirectionType DirType;
+    BYTE DLC;
+    QVector<BYTE> Data;
+    //    QString         Data;
 };
+
 //Q_DECLARE_METATYPE(TableData);
 
 class QCANLibrary : public QObject
 {
     Q_OBJECT
 public:
-    explicit QCANLibrary(QObject *parent = nullptr);
+    explicit QCANLibrary(QObject* parent = nullptr);
 
     static TableData ConstructTableData(const ZCAN_Transmit_Data& CAN);
     static TableData ConstructTableData(const ZCAN_TransmitFD_Data& CAN);
@@ -36,7 +37,6 @@ public:
     static LARGE_INTEGER GetCurrentTime_us();
     static double ElapsedTime(const LARGE_INTEGER& StartTime, const LARGE_INTEGER& EndTime);
 signals:
-
 };
 
 #endif // QCANLIBRARY_H

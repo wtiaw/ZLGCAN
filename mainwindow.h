@@ -23,25 +23,24 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    DEVICE_HANDLE GetDeviceHandle() const { return dhandle; }
-    CHANNEL_HANDLE GetChannelHandle() const { return chHandle; }
-    IProperty* GetProperty(){ return property; }
+    [[nodiscard]] DEVICE_HANDLE GetDeviceHandle() const { return dHandle; }
+    [[nodiscard]] CHANNEL_HANDLE GetChannelHandle() const { return chHandle; }
+    [[nodiscard]] IProperty* GetProperty() const { return property; }
 
-    int GetCanTypeFromUI();
+    [[nodiscard]] int GetCanTypeFromUI() const;
 
 
-
-    bool IsOpenCAN(){ return GetChannelHandle(); }
+    [[nodiscard]] bool IsOpenCAN() const { return GetChannelHandle(); }
 
 public slots:
-    //TransmitMeaasge
+    //TransmitMessage
     void TransmitCANData(ZCAN_Transmit_Data& can_data);
     void TransmitCANData(ZCAN_TransmitFD_Data& canfd_data);
 
     void ReceiveData();
     void TransmitData();
 
-    //MeaasgeTable
+    //MessageTable
     void AddTableData(const ZCAN_Transmit_Data& data);
     void AddTableData(const ZCAN_TransmitFD_Data& data);
     void AddTableData(const ZCAN_Receive_Data* data, UINT len);
@@ -58,38 +57,38 @@ private:
     void Init();
     void InitButtonFunc();
 
-    void InitDeviceNameComboBox();
-    void InitDeviceIDComboBox();
+    void InitDeviceNameComboBox() const;
+    void InitDeviceIDComboBox() const;
 
-    void InitChannelIDComboBox();
-    void InitChannelWorkingModeComboBox();
-    void InitChannelABitComboBox();
-    void InitChannelDBitComboBox();
-    void InitChannelResistanceComboBox();
+    void InitChannelIDComboBox() const;
+    void InitChannelWorkingModeComboBox() const;
+    void InitChannelABitComboBox() const;
+    void InitChannelDBitComboBox() const;
+    void InitChannelResistanceComboBox() const;
 
-    void InitMessageFrameTypeComboBox();
-    void InitMessageTransmitTypeComboBox();
+    void InitMessageFrameTypeComboBox() const;
+    void InitMessageTransmitTypeComboBox() const;
 
     void InitMessageTable();
     void ResetMessageTable();
 
-    void InitMessageID();
-    void InitMessageDLC();
+    void InitMessageID() const;
+    void InitMessageDLC() const;
 
     void InitThread();
 
     //Setting
-    bool SetBaudRate();
-    bool SetCANFDStandard();
+    [[nodiscard]] bool SetBaudRate() const;
+    [[nodiscard]] bool SetCANFDStandard() const;
     bool SetResistance();
 
-    //MeaasgeTable
+    //MessageTable
     int  AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
     void AddDeltaTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
     int  AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
 
     //检查DLC输入格式
-    bool ChackDLCData();
+    bool CheckDLCData() const;
 
     //根据 DLC 生成 Data输入格
     void CreateDataEdit();
@@ -152,14 +151,17 @@ private slots:
     void on_pushButton_3_clicked();
 
 public:
-    class QReceiveThread* ReceiveThread;
+    class QReceiveThread* ReceiveThread{};
+
+    LARGE_INTEGER TStartTime{};
+    UINT64 temp = 0;
 
 private:
     Ui::MainWindow *ui;
-    class AutoSendConfigWindow* AutoSendConfig;
+    class AutoSendConfigWindow* AutoSendConfig{};
     class ACRForm* ACRFromWindow = nullptr;
 
-    QDeviceSettingConfig* SettingConfig;
+    QDeviceSettingConfig* SettingConfig{};
 
 private:
     bool bInit = false;
@@ -173,12 +175,11 @@ private:
     QVector<TableData> DataLog;
 
     UINT64 RStartTime = 0;
-    LARGE_INTEGER TStartTime;
-    UINT64 temp = 0;
 
-    DEVICE_HANDLE dhandle;
-    CHANNEL_HANDLE chHandle;
-    IProperty* property;
+
+    DEVICE_HANDLE dHandle{};
+    CHANNEL_HANDLE chHandle{};
+    IProperty* property{};
 
     class QTimer* UpdateDeltaTableTable;
 

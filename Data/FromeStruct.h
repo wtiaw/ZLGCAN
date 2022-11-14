@@ -2,8 +2,6 @@
 #define FROMESTRUCT_H
 
 
-
-
 enum FrameType
 {
     CAN,

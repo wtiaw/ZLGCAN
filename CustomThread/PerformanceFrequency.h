@@ -8,9 +8,9 @@ class PerformanceFrequency : public QThread
 {
     Q_OBJECT
 public:
-    explicit PerformanceFrequency(QObject *parent = nullptr);
-    void setThreadRunning(uint Delay = 100, bool InSingle = false, uint mTime = 100);
-    void setThreadStop();
+    explicit PerformanceFrequency(QObject* parent = nullptr);
+    void SetThreadRunning(uint Delay = 100, bool InSingle = false, uint mTime = 100);
+    void SetThreadStop();
 
 Q_SIGNALS:
     void TimeOut();

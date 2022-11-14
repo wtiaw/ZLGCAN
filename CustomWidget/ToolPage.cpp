@@ -4,7 +4,7 @@
 #include "Windows/AutoSendConfigWindow.h"
 #include "ui_ToolPage.h"
 
-ToolPage::ToolPage(QWidget *parent) :
+ToolPage::ToolPage(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::ToolPage)
 {
@@ -52,8 +52,10 @@ void ToolPage::InitBase()
     connect(EnableCheckBox, &QCheckBox::clicked, this, &ToolPage::On_EnableCheckBoxClicked);
     connect(ui->SelectCheckBox, &QCheckBox::clicked, this, &ToolPage::On_SelectCheckBoxClicked);
 
-    connect(this, &ToolPage::AddSelectedItem, qobject_cast<AutoSendConfigWindow*>(parent()->parent()), &AutoSendConfigWindow::On_AddSelectedItem);
-    connect(this, &ToolPage::RemoveSelectedItem, qobject_cast<AutoSendConfigWindow*>(parent()->parent()), &AutoSendConfigWindow::On_RemoveSelectedItem);
+    connect(this, &ToolPage::AddSelectedItem, qobject_cast<AutoSendConfigWindow*>(parent()->parent()),
+            &AutoSendConfigWindow::On_AddSelectedItem);
+    connect(this, &ToolPage::RemoveSelectedItem, qobject_cast<AutoSendConfigWindow*>(parent()->parent()),
+            &AutoSendConfigWindow::On_RemoveSelectedItem);
 
     collapse();
 }
@@ -63,7 +65,7 @@ void ToolPage::InitData()
     QWidgetLibrary::CreateDataEdit(ui->DataContainer, ui->DLCEdit, DataEdits);
 }
 
-void ToolPage::InitMessageFrameTypeComboBox()
+void ToolPage::InitMessageFrameTypeComboBox() const
 {
     QWidgetLibrary::InitMessageFrameTypeComboBox(ui->MessageTypeComboBox);
 }
@@ -82,40 +84,41 @@ void ToolPage::InitMessageDLC()
     connect(ui->DLCEdit, &QLineEdit::textChanged, this, &ToolPage::On_MessageDLCChanged);
 }
 
-bool ToolPage::ChackDLCData()
+bool ToolPage::CheckDLCData() const
 {
-    return QWidgetLibrary::ChackDLCData(ui->DLCEdit, ui->MessageTypeComboBox);
+    return QWidgetLibrary::CheckDLCData(ui->DLCEdit, ui->MessageTypeComboBox);
 }
 
-void ToolPage::addWidget(const QString &title, QWidget *widget)
+void ToolPage::AddWidget(const QString& title, QWidget* widget) const
 {
     ui->verticalLayoutContent->addWidget(widget);
 }
 
-void ToolPage::expand()
+void ToolPage::expand() const
 {
     ui->verticalLayoutContent_2->show();
 }
 
-void ToolPage::collapse()
+void ToolPage::collapse() const
 {
     ui->verticalLayoutContent_2->hide();
 }
 
-void ToolPage::On_ExpandClicked(bool bClick)
+void ToolPage::On_ExpandClicked(const bool bClick) const
 {
     if (bClick)
     {
         expand();
-    } else
+    }
+    else
     {
         collapse();
     }
 }
 
-void ToolPage::On_EnableCheckBoxClicked(bool bClick)
+void ToolPage::On_EnableCheckBoxClicked(const bool bClick) const
 {
-    if(bClick)
+    if (bClick)
     {
         DrawerCheckBox->setStyleSheet(QDrawerCheckBox::EnableQss);
         EnableCheckBox->setStyleSheet(R"(
@@ -133,9 +136,9 @@ void ToolPage::On_EnableCheckBoxClicked(bool bClick)
     }
 }
 
-void ToolPage::On_SelectCheckBoxClicked(bool bClick)
+void ToolPage::On_SelectCheckBoxClicked(const bool bClick)
 {
-    if(bClick)
+    if (bClick)
     {
         emit AddSelectedItem(this);
     }
@@ -145,16 +148,15 @@ void ToolPage::On_SelectCheckBoxClicked(bool bClick)
     }
 }
 
-void ToolPage::On_MessageIDChanged(const QString &arg1)
+void ToolPage::On_MessageIDChanged(const QString& arg1) const
 {
     ui->MessageIDEdit->setText(arg1.toUpper());
 }
 
-void ToolPage::On_MessageDLCChanged(const QString &arg1)
+void ToolPage::On_MessageDLCChanged(const QString& arg1)
 {
-    if(ChackDLCData() || ui->DLCEdit->text() == "")
+    if (CheckDLCData() || ui->DLCEdit->text() == "")
     {
         InitData();
     }
 }
-

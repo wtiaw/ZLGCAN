@@ -9,27 +9,27 @@
 #include <QMutex>
 #include "QThreadBase.h"
 
-class QReceiveThread : public QThreadBase
+class QReceiveThread final : public QThreadBase
 {
     Q_OBJECT
 public:
-    explicit QReceiveThread(QObject *parent = nullptr);
-    ~QReceiveThread();
+    explicit QReceiveThread(QObject* parent = nullptr);
+    ~QReceiveThread() override;
 
     void run() override;
     void Stop() override;
 
-    void AddTrigger(uint Id, QVector<BYTE>& FilterData);
+    void AddTrigger(uint Id, const QVector<BYTE>& FilterData);
     void AddTrigger(QReceiveItem* NewItem);
-    void AddTrigger(QVector<QReceiveItem*> NewItems);
+    void AddTrigger(const QVector<QReceiveItem*>& NewItems);
 
 private:
-    void ReceiveData(CHANNEL_HANDLE& ChannelHandle);
+    void ReceiveData(const CHANNEL_HANDLE& ChannelHandle);
 
     void Reception(const CANData& Data);
 
 private slots:
-    void Test();
+    void Test() const;
 
 public:
 signals:

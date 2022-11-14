@@ -5,22 +5,22 @@
 
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::DeviceName = {
-        DisplayAndValue("USBCANFD_200U", ZCAN_USBCANFD_200U)
-    };
+    DisplayAndValue("USBCANFD_200U", ZCAN_USBCANFD_200U)
+};
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::ChannelWorkingMode = {
-        DisplayAndValue("正常模式", 0),
-        DisplayAndValue("只听模式", 1)
-    };
+    DisplayAndValue("正常模式", 0),
+    DisplayAndValue("只听模式", 1)
+};
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::ChannelABitBaudRate = {
-    DisplayAndValue("50kps",  50000),
+    DisplayAndValue("50kps", 50000),
     DisplayAndValue("100kps", 100000),
     DisplayAndValue("125kps", 125000),
     DisplayAndValue("250kps", 250000),
     DisplayAndValue("500kps", 500000),
     DisplayAndValue("800kps", 800000),
-    DisplayAndValue("1Mps",   1000000)
+    DisplayAndValue("1Mps", 1000000)
 };
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::ChannelDBitBaudRate = {
@@ -29,10 +29,10 @@ QVector<DisplayAndValue<int>> QDeviceSettingConfig::ChannelDBitBaudRate = {
     DisplayAndValue("250kps", 250000),
     DisplayAndValue("500kps", 500000),
     DisplayAndValue("800kps", 800000),
-    DisplayAndValue("1Mps",   1000000),
-    DisplayAndValue("2Mps",   2000000),
-    DisplayAndValue("4Mps",   4000000),
-    DisplayAndValue("5Mps",   5000000)
+    DisplayAndValue("1Mps", 1000000),
+    DisplayAndValue("2Mps", 2000000),
+    DisplayAndValue("4Mps", 4000000),
+    DisplayAndValue("5Mps", 5000000)
 };
 
 QVector<DisplayAndValue<int>> QDeviceSettingConfig::ChannelResistanceEnable = {
@@ -51,7 +51,7 @@ QVector<DisplayAndValue<int>> QDeviceSettingConfig::MessageTransmitType = {
     DisplayAndValue("自发自收", 2)
 };
 
-QDeviceSettingConfig::QDeviceSettingConfig(QObject *parent)
+QDeviceSettingConfig::QDeviceSettingConfig(QObject* parent)
     : QSettingConfigBase{parent}
 {
     //路径
@@ -63,7 +63,8 @@ void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObjec
     QSettingConfigBase::ReadConfig(doc, RootObject);
 
     QFile file(ConfigDirPath + ConfigFilePath);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
         qDebug() << "can't open error!";
         return;
     }
@@ -80,50 +81,52 @@ void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObjec
     // 如果解析成功，返回QJsonDocument对象，否则返回null
     doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
     // 判断是否解析失败
-    if (jsonError.error != QJsonParseError::NoError && !doc.isNull()) {
+    if (jsonError.error != QJsonParseError::NoError && !doc.isNull())
+    {
         qDebug() << "Json格式错误！" << jsonError.error;
         return;
     }
 
     RootObject = doc.object();
 
-    QJsonValue interestValue  = RootObject.value("Channel");
-    if (interestValue.type() == QJsonValue::Object) {
-        QJsonObject ChannelObj = interestValue.toObject();
+    QJsonValue interestValue = RootObject.value("Channel");
+    if (interestValue.type() == QJsonValue::Object)
+    {
+        const QJsonObject ChannelObj = interestValue.toObject();
 
-        QJsonValue ChannelABitBaudRateValue = ChannelObj.value("ChannelABitBaudRate");
+        const QJsonValue ChannelABitBaudRateValue = ChannelObj.value("ChannelABitBaudRate");
         Channel.ABitBaudRate = ChannelABitBaudRateValue.toInt();
         qDebug() << "ChannelABitBaudRate = " << ChannelABitBaudRateValue.toInt();
 
-        QJsonValue ChannelDBitBaudRate = ChannelObj.value("ChannelDBitBaudRate");
+        const QJsonValue ChannelDBitBaudRate = ChannelObj.value("ChannelDBitBaudRate");
         Channel.DBitBaudRate = ChannelDBitBaudRate.toInt();
         qDebug() << "ChannelDBitBaudRate = " << ChannelDBitBaudRate.toInt();
 
-        QJsonValue ChannelID = ChannelObj.value("ChannelID");
+        const QJsonValue ChannelID = ChannelObj.value("ChannelID");
         Channel.ID = ChannelID.toInt();
         qDebug() << "ChannelID = " << ChannelID.toInt();
 
-        QJsonValue ChannelResistance = ChannelObj.value("ChannelResistance");
+        const QJsonValue ChannelResistance = ChannelObj.value("ChannelResistance");
         Channel.Resistance = ChannelResistance.toInt();
         qDebug() << "ChannelResistance = " << ChannelResistance.toInt();
 
-        QJsonValue ChannelWorkingMode = ChannelObj.value("ChannelWorkingMode");
+        const QJsonValue ChannelWorkingMode = ChannelObj.value("ChannelWorkingMode");
         Channel.WorkingMode = ChannelWorkingMode.toInt();
         qDebug() << "ChannelWorkingMode = " << ChannelWorkingMode.toInt();
     }
 
-    interestValue  = RootObject.value("Device");
-    if (interestValue.type() == QJsonValue::Object) {
-        QJsonObject ChannelObj = interestValue.toObject();
+    interestValue = RootObject.value("Device");
+    if (interestValue.type() == QJsonValue::Object)
+    {
+        const QJsonObject ChannelObj = interestValue.toObject();
 
-        QJsonValue DeviceID = ChannelObj.value("DeviceID");
+        const QJsonValue DeviceID = ChannelObj.value("DeviceID");
         Device.ID = DeviceID.toInt();
         qDebug() << "DeviceID = " << DeviceID.toInt();
 
-        QJsonValue DeviceName = ChannelObj.value("DeviceName");
+        const QJsonValue DeviceName = ChannelObj.value("DeviceName");
         Device.Name = DeviceName.toInt();
         qDebug() << "DeviceName = " << DeviceName.toInt();
-
     }
 }
 
@@ -151,7 +154,7 @@ void QDeviceSettingConfig::InitConfig()
     doc.setObject(rootObject);
 
     QFile file(ConfigDirPath + ConfigFilePath);
-    file.open(QIODevice::WriteOnly|QIODevice::Truncate);
+    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QTextStream stream(&file);
     stream << doc.toJson();

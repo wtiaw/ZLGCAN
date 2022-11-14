@@ -33,14 +33,14 @@ class ACRForm : public QWidget, public QPanelInterface
 
 public:
     explicit ACRForm(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~ACRForm();
+    ~ACRForm() override;
 
 
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data& CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
-    void StopTimer();
+    void StopTimer() const;
 
     //Interface
     virtual void InitWindow() override;
@@ -55,7 +55,7 @@ private:
     template<typename Transmit_Data>
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
-    BYTE can_e2e_CalculateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
+    BYTE CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
     void Send121();
     void SendGW740();
@@ -132,30 +132,30 @@ private:
 template<typename Transmit_Data>
 void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)(), uint delay, uint msec)
 {
-    if(!cHandle)
+    if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
-//    QTimer* Timer = nullptr;
-//    if(!MessageTimerContainer.contains(InMessageTimerType)){
-//        Timer = new QTimer;
-//        Timer->setTimerType(Qt::PreciseTimer);
-//        connect(Timer, &QTimer::timeout, this, [=]() -> void
-//        {
-//            mainWindow->TransmitCANData(*CANData);
+    //    QTimer* Timer = nullptr;
+    //    if(!MessageTimerContainer.contains(InMessageTimerType)){
+    //        Timer = new QTimer;
+    //        Timer->setTimerType(Qt::PreciseTimer);
+    //        connect(Timer, &QTimer::timeout, this, [=]() -> void
+    //        {
+    //            mainWindow->TransmitCANData(*CANData);
 
-//            if(Function)
-//                (this->*Function)();
-//        });
+    //            if(Function)
+    //                (this->*Function)();
+    //        });
 
-//        MessageTimerContainer.insert(InMessageTimerType, Timer);
-//    }
-//    else
-//    {
-//        Timer = MessageTimerContainer[InMessageTimerType];
-//    }
+    //        MessageTimerContainer.insert(InMessageTimerType, Timer);
+    //    }
+    //    else
+    //    {
+    //        Timer = MessageTimerContainer[InMessageTimerType];
+    //    }
 
-//    Timer->start(msec);
+    //    Timer->start(msec);
     PerformanceFrequency* temp;
-    if(!MessageThreadContainer.contains(InMessageTimerType))
+    if (!MessageThreadContainer.contains(InMessageTimerType))
     {
         temp = new PerformanceFrequency;
 
@@ -163,11 +163,11 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_
         {
             mainWindow->TransmitCANData(*CANData);
 
-            if(Function)
+            if (Function)
                 (this->*Function)();
         }, Qt::QueuedConnection);
 
-        if(InMessageTimerType != EMessageTimer::Single)
+        if (InMessageTimerType != EMessageTimer::Single)
             MessageThreadContainer.insert(InMessageTimerType, temp);
     }
     else
@@ -175,7 +175,7 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_
         temp = MessageThreadContainer[InMessageTimerType];
     }
 
-    temp->setThreadRunning(delay, InMessageTimerType == EMessageTimer::Single, msec);
+    temp->SetThreadRunning(delay, InMessageTimerType == EMessageTimer::Single, msec);
 }
 
 #endif // ACRFORM_H
