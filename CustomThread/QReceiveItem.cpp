@@ -7,7 +7,7 @@ QReceiveItem::QReceiveItem(QObject *parent)
 
 }
 
-bool QReceiveItem::ContaineTrigger(const CANData &Data)
+bool QReceiveItem::ContainedTrigger(const CANData &Data)
 {
     if(FrameId != Data.can_id) return false;
 

@@ -1,5 +1,8 @@
 // ReSharper disable IdentifierTypo
 #include "mainwindow.h"
+
+#include <iostream>
+
 #include "CustomWidget/DataEdit.h"
 #include "Windows/ACRForm.h"
 #include "Windows/AutoSendConfigWindow.h"
@@ -822,17 +825,19 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
 
     if (InTableData.DirType == DirectionType::Receive)
     {
-        if (RStartTime == 0)
-        {
-            RStartTime = InTableData.TimeStamp;
+        // if (RStartTime == 0)
+        // {
+        //     RStartTime = InTableData.TimeStamp;
+        //
+        //     //            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
+        // }
+        //
+        // UINT64 IntervalTimeNs = InTableData.TimeStamp - RStartTime;
+        // IntervalTimeNs += temp;
+        //
+        // CPUIntervalTime = IntervalTimeNs / 1000000.0;
 
-            //            temp = QCANLibrary::ElapsedTime(TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
-        }
-
-        UINT64 intervalTimeNS = InTableData.TimeStamp - RStartTime;
-        intervalTimeNS += temp;
-
-        CPUIntervalTime = intervalTimeNS / 1000000.0;
+        CPUIntervalTime = QCANLibrary::ElapsedTime(TStartTime, InTableData.CPUTime);
     }
     else if (InTableData.DirType == DirectionType::Transmit)
     {
@@ -886,6 +891,11 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
     if (!bIsDragged && ui->EnableScroll->isChecked())
         MessageTableWidget->scrollToBottom();
 
+    // if (MessageTableWidget->rowCount() >= 200)
+    // {
+    //     MessageTableWidget->removeRow(0);
+    // }
+
     return RowIndex;
 }
 
@@ -903,12 +913,20 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
         {
         case DirectionType::Receive:
             {
-                const double temp = InTableData.TimeStamp - TimeStamp;
+                // const double temp = InTableData.TimeStamp - TimeStamp;
+                //
+                // MessageTableWidget->setItem(RowIndex, 0,
+                //                             new QTableWidgetItem(QString::number(temp / 1000000.0, 'f', 6)));
+                //
+                // MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeNS = InTableData.TimeStamp;
+                // break;
+
+                const double CPUIntervalTime = QCANLibrary::ElapsedTime(CPUTime, InTableData.CPUTime);
 
                 MessageTableWidget->setItem(RowIndex, 0,
-                                            new QTableWidgetItem(QString::number(temp / 1000000.0, 'f', 3) + "000"));
+                                            new QTableWidgetItem(QString::number(CPUIntervalTime, 'f', 6)));
 
-                MessageTableWidget->MessageIDMap[KeyInfo].intervalTimeNS = InTableData.TimeStamp;
+                MessageTableWidget->MessageIDMap[KeyInfo].CPUIntervalTimeNS = InTableData.CPUTime;
                 break;
             }
         case DirectionType::Transmit:
@@ -916,7 +934,7 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
                 const double CPUIntervalTime = QCANLibrary::ElapsedTime(CPUTime, InTableData.CPUTime);
 
                 MessageTableWidget->setItem(RowIndex, 0,
-                                            new QTableWidgetItem(QString::number(CPUIntervalTime, 'f', 3) + "000"));
+                                            new QTableWidgetItem(QString::number(CPUIntervalTime, 'f', 6)));
 
                 MessageTableWidget->MessageIDMap[KeyInfo].CPUIntervalTimeNS = InTableData.CPUTime;
                 break;
@@ -955,19 +973,22 @@ int MainWindow::AddDiagTableData(QMessageTableWidget *MessageTableWidget, const 
 
 void MainWindow::TransmitCANData(ZCAN_Transmit_Data& can_data)
 {
-    auto res = QtConcurrent::run([=]() mutable
-    {
-        UINT result = ZCAN_Transmit(chHandle, &can_data, 1);
-    });
-    AddTableData(can_data);
+    // auto res = QtConcurrent::run([=]() mutable
+    // {
+    // });
+    if(UINT result = ZCAN_Transmit(chHandle, &can_data, 1))
+        AddTableData(can_data);
 }
 
 void MainWindow::TransmitCANData(ZCAN_TransmitFD_Data& canfd_data)
 {
     //    QtConcurrent::run([=]() mutable {
     //    });
+    
     if (auto result = ZCAN_TransmitFD(chHandle, &canfd_data, 1))
+    {
         AddTableData(canfd_data);
+    }
 }
 
 bool MainWindow::CheckDLCData() const

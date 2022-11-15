@@ -142,7 +142,7 @@ void QReceiveThread::Reception(const CANData& Data)
 
                 for (auto i : ReceiveItemContainer)
                 {
-                    if (i->ContaineTrigger(can))
+                    if (i->ContainedTrigger(can))
                         i->On_Trigger(can);
                 }
 
@@ -155,7 +155,7 @@ void QReceiveThread::Reception(const CANData& Data)
     {
         for (const auto i : ReceiveItemContainer)
         {
-            if (i->ContaineTrigger(Data))
+            if (i->ContainedTrigger(Data))
                 i->On_Trigger(Data);
         }
     }

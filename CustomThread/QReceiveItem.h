@@ -13,7 +13,7 @@ struct CANData
 //    ZCAN_ReceiveFD_Data canfd;
 //    bool IsCanFD = false;
 
-    CANData(){};
+    CANData() = default;
 
     CANData(const ZCAN_Receive_Data& can)
     {
@@ -93,7 +93,7 @@ class QReceiveItem : public QObject
 public:
     explicit QReceiveItem(QObject *parent = nullptr);
 
-    bool ContaineTrigger(const CANData& Data);
+    bool ContainedTrigger(const CANData& Data);
 
     void ConstructTrigger(uint Id, QVector<BYTE> FilterData, QObject* context, std::function<void (const CANData &)> const Func);
 
