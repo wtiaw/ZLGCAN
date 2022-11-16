@@ -34,20 +34,12 @@ public:
 
 public slots:
     //TransmitMessage
-    void TransmitCANData(ZCAN_Transmit_Data& can_data);
-    void TransmitCANData(ZCAN_TransmitFD_Data& canfd_data);
-
-    void ReceiveData();
-    void TransmitData();
+    void TransmitCANDataObj(ZCANDataObj* DataObj);
+    void TransmitCANDataObj(ZCAN_Transmit_Data& can_data);
+    void TransmitCANDataObj(ZCAN_TransmitFD_Data& canfd_data);
 
     //MessageTable
-    void AddTableData(const ZCAN_Transmit_Data& data);
-    void AddTableData(const ZCAN_TransmitFD_Data& data);
-    void AddTableData(const ZCAN_Receive_Data* data, UINT len);
-    void AddTableData(const ZCAN_ReceiveFD_Data* data, UINT len);
-    void AddTableData(const ZCAN_Receive_Data& data);
-    void AddTableData(const ZCAN_ReceiveFD_Data& data);
-
+    void AddTableData(const ZCANDataObj& DataObj);
     void AddTableData(const TableData& InTableData);
 
 private:
@@ -78,9 +70,10 @@ private:
     void InitThread();
 
     //Setting
+    [[nodiscard]] bool SetMerge() const;
     [[nodiscard]] bool SetBaudRate() const;
     [[nodiscard]] bool SetCANFDStandard() const;
-    bool SetResistance();
+    [[nodiscard]] bool SetResistance();
 
     //MessageTable
     int  AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
@@ -99,6 +92,7 @@ private:
     //获取DATA数据
     BYTE GetDataFromEdit(int Index);
 
+    void ConstructCANFDData(ZCANCANFDData & CANFDData);
     void ConstructCANFrame(ZCAN_Transmit_Data& can_data);
     void ConstructCANFDFrame(ZCAN_TransmitFD_Data& can_data);
 
@@ -152,9 +146,8 @@ private slots:
 
 public:
     class QReceiveThread* ReceiveThread{};
-
-    LARGE_INTEGER TStartTime{};
-    UINT64 temp = 0;
+    
+    UINT64 StartTime = 0;
 
 private:
     Ui::MainWindow *ui;
@@ -173,10 +166,7 @@ private:
     QVector<DataEdit*> DataEdits;
     QVector<QMessageTableWidget*> Tables;
     QVector<TableData> DataLog;
-
-    UINT64 RStartTime = 0;
-
-
+    
     DEVICE_HANDLE dHandle{};
     CHANNEL_HANDLE chHandle{};
     IProperty* property{};
@@ -188,8 +178,7 @@ private:
     HANDLE hFile = INVALID_HANDLE_VALUE;
     int CurrentDataCount = 0;
     int TotalDataCount = 0;
-
-//    QVector<VBLCANFDMessage_t> MessageBuffer;
+    
     CircinalQueue<VBLCANFDMessage_t> *MessageBuffer;
 
     CircinalQueue<int> *test = nullptr;

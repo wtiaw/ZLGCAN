@@ -5,6 +5,26 @@ QCANLibrary::QCANLibrary(QObject* parent)
 {
 }
 
+TableData QCANLibrary::ConstructTableData(const ZCANDataObj& CANDataObj)
+{
+    const auto [timeStamp, flag, extraData, frame] = CANDataObj.data.zcanCANFDData;
+    const canid_t& id = frame.can_id;
+
+    TableData InTableData;
+    InTableData.TimeStamp = timeStamp;
+    InTableData.FrameID = GET_ID(id);
+    InTableData.EventType = flag.unionVal.frameType == 0 ? FrameType::CAN : FrameType::CANFD;
+    InTableData.DirType = flag.unionVal.txEchoed == 0 ? DirectionType::Receive : DirectionType::Transmit;
+    InTableData.DLC = frame.len;
+
+    for (UINT i = 0; i < frame.len; ++i)
+    {
+        InTableData.Data.append(frame.data[i]);
+    }
+
+    return InTableData;
+}
+
 TableData QCANLibrary::ConstructTableData(const ZCAN_Transmit_Data& CAN)
 {
     const canid_t& id = CAN.frame.can_id;

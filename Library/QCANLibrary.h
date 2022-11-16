@@ -9,12 +9,12 @@
 
 struct TableData
 {
-    LARGE_INTEGER CPUTime;
-    UINT64 TimeStamp;
-    canid_t FrameID;
+    LARGE_INTEGER CPUTime{};
+    UINT64 TimeStamp{};
+    canid_t FrameID{};
     FrameType EventType;
     DirectionType DirType;
-    BYTE DLC;
+    BYTE DLC{};
     QVector<BYTE> Data;
     //    QString         Data;
 };
@@ -27,6 +27,8 @@ class QCANLibrary : public QObject
 public:
     explicit QCANLibrary(QObject* parent = nullptr);
 
+    static TableData ConstructTableData(const ZCANDataObj& CANDataObj);
+    
     static TableData ConstructTableData(const ZCAN_Transmit_Data& CAN);
     static TableData ConstructTableData(const ZCAN_TransmitFD_Data& CAN);
 

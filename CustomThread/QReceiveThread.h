@@ -4,9 +4,6 @@
 #include "CustomThread/QReceiveItem.h"
 #include "mainwindow.h"
 #include <QTimer>
-#include <QElapsedTimer>
-#include <QThread>
-#include <QMutex>
 #include "QThreadBase.h"
 
 class QReceiveThread final : public QThreadBase
@@ -26,13 +23,15 @@ public:
 private:
     void ReceiveData(const CHANNEL_HANDLE& ChannelHandle);
 
-    void Reception(const CANData& Data);
+    void Reception(const ZCANCANFDData& Data);
 
 private slots:
     void Test() const;
 
 public:
 signals:
+    void AddCANTableData(const ZCANDataObj& DataObj);
+    
     void AddCANTableData_R(const ZCAN_Receive_Data& data);
     void AddCANFDTableData_R(const ZCAN_ReceiveFD_Data& data);
 

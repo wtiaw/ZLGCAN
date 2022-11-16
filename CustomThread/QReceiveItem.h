@@ -29,6 +29,13 @@ struct CANData
             this->Data.append(canfd.frame.data[i]);
         }
     }
+    CANData(const ZCANCANFDData& Data)
+    {
+        this->can_id = Data.frame.can_id;
+        for (int i = 0; i < Data.frame.len; ++i) {
+            this->Data.append(Data.frame.data[i]);
+        }
+    }
 
     ~CANData()
     {

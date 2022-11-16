@@ -24,15 +24,14 @@ void QReceiveThread::run()
 
     bIsPause = false;
 
-    connect(this, SIGNAL(AddCANTableData_R(const ZCAN_Receive_Data&)), mainWindow,
-            SLOT(AddTableData(const ZCAN_Receive_Data&)));
-    connect(this, SIGNAL(AddCANFDTableData_R(const ZCAN_ReceiveFD_Data&)), mainWindow,
-            SLOT(AddTableData(const ZCAN_ReceiveFD_Data&)));
-    connect(this, SIGNAL(TransmitCAN(ZCAN_Transmit_Data&)), mainWindow, SLOT(TransmitCANData(ZCAN_Transmit_Data&)));
-    connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
-            SLOT(TransmitCANData(ZCAN_TransmitFD_Data&)));
+    connect(this, SIGNAL(AddCANTableData(const ZCANDataObj&)), mainWindow,
+            SLOT(AddTableData(const ZCANDataObj&)));
 
-    CHANNEL_HANDLE chHandle = mainWindow->GetChannelHandle();
+    // connect(this, SIGNAL(TransmitCAN(ZCAN_Transmit_Data&)), mainWindow, SLOT(TransmitCANData(ZCAN_Transmit_Data&)));
+    connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
+            SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
+
+    const CHANNEL_HANDLE chHandle = mainWindow->GetChannelHandle();
 
     while (!isInterruptionRequested())
     {
@@ -40,7 +39,7 @@ void QReceiveThread::run()
         {
             ReceiveData(chHandle);
         }
-        usleep(100);
+        usleep(1000);
     }
 }
 
@@ -70,46 +69,130 @@ void QReceiveThread::AddTrigger(const QVector<QReceiveItem*>& NewItems)
 
 void QReceiveThread::ReceiveData(const CHANNEL_HANDLE& ChannelHandle)
 {
-    UINT len;
-
-    if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CAN))
+    if(UINT len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_ALL_DATA))
     {
-        ZCAN_Receive_Data can_data[10];
-        len = ZCAN_Receive(ChannelHandle, can_data, 100);
+        ZCANDataObj DataObj[100];
+
+        len = ZCAN_ReceiveData(ChannelHandle, DataObj, 100);
 
         for (UINT i = 0; i < len; ++i)
         {
-            const ZCAN_Receive_Data& can = can_data[i];
+            switch (DataObj[i].dataType)
+            {
+            case ZCAN_DT_ZCAN_CAN_CANFD_DATA:
+                {
+                    const ZCANCANFDData CANFDData = DataObj[i].data.zcanCANFDData;
 
-            emit AddCANTableData_R(can);
-            Reception(can);
+                    // qDebug() << "CAN ID:" << CANFDData.frame.can_id;
+                    // qDebug() << "CAN Type:" << (CANFDData.flag.unionVal.frameType == 0 ? "CAN" : "CANFD");
+                    // qDebug() << "time:" << CANFDData.timeStamp;
+                    // qDebug() << "CAN Type:" << (CANFDData.flag.unionVal.txEchoed == 0 ? "Rx" : "Tx");
+                    //
+                    // QString str;
+                    // for (int i = 0; i < CANFDData.frame.len; i++)
+                    // {
+                    //     str += QString("%1 ").arg(CANFDData.frame.data[i], 2, 16, QLatin1Char('0'));
+                    // }
+                    // qDebug() << str;
+                    // qDebug() << "-------------------------------------------------";
+
+                    emit AddCANTableData(DataObj[i]);
+                    Reception(CANFDData);
+
+                    break;
+                }
+            case ZCAN_DT_ZCAN_ERROR_DATA:
+                if (mainWindow->StartTime == 0)
+                {
+                    mainWindow->StartTime = DataObj[i].data.zcanErrData.timeStamp;
+                }
+
+                const ZCANErrorData CANErrData = DataObj[i].data.zcanErrData;
+
+                switch (CANErrData.errType)
+                {
+                case ZCAN_ERR_TYPE_NO_ERR:
+                    qDebug() << "errType: 无错误";
+                    break;
+                case ZCAN_ERR_TYPE_BUS_ERR:
+                    qDebug() << "errType: 总线错误";
+                    break;
+                case ZCAN_ERR_TYPE_CONTROLLER_ERR:
+                    qDebug() << "errType: 控制器错误";
+                    break;
+                case ZCAN_ERR_TYPE_DEVICE_ERR:
+                    qDebug() << "errType: 终端设备错误";
+                    break;
+                }
+
+                switch (CANErrData.errSubType)
+                {
+                case ZCAN_BUS_ERR_NO_ERR:
+                    qDebug() << "errSubType 无错误";
+                    break;
+                case ZCAN_BUS_ERR_BIT_ERR:
+                    qDebug() << "errSubType 位错误";
+                    break;
+                case ZCAN_BUS_ERR_ACK_ERR:
+                    qDebug() << "errSubType 应答错误";
+                    break;
+                case ZCAN_BUS_ERR_CRC_ERR:
+                    qDebug() << "errSubType CRC错误";
+                    break;
+                case ZCAN_BUS_ERR_FORM_ERR:
+                    qDebug() << "errSubType 格式错误";
+                    break;
+                case ZCAN_BUS_ERR_STUFF_ERR:
+                    qDebug() << "errSubType 填充错误";
+                    break;
+                case ZCAN_BUS_ERR_OVERLOAD_ERR:
+                    qDebug() << "errSubType 超载错误";
+                    break;
+                case ZCAN_BUS_ERR_ARBITRATION_LOST:
+                    qDebug() << "errSubType 仲裁丢失";
+                    break;
+                }
+
+                break;
+            }
         }
     }
 
-    if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CANFD))
-    {
-        ZCAN_ReceiveFD_Data canfd_data[10];
-        len = ZCAN_ReceiveFD(ChannelHandle, canfd_data, 100);
-
-        for (UINT i = 0; i < len; ++i)
-        {
-            const ZCAN_ReceiveFD_Data& canfd = canfd_data[i];
-
-            emit AddCANFDTableData_R(canfd);
-            Reception(canfd);
-        }
-    }
+    // if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CAN))
+    // {
+    //     ZCAN_Receive_Data can_data[10];
+    //     len = ZCAN_Receive(ChannelHandle, can_data, 100);
+    //
+    //     for (UINT i = 0; i < len; ++i)
+    //     {
+    //         const ZCAN_Receive_Data& can = can_data[i];
+    //
+    //         emit AddCANTableData_R(can);
+    //         Reception(can);
+    //     }
+    // }
+    //
+    // if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CANFD))
+    // {
+    //     ZCAN_ReceiveFD_Data canfd_data[10];
+    //     len = ZCAN_ReceiveFD(ChannelHandle, canfd_data, 100);
+    //
+    //     for (UINT i = 0; i < len; ++i)
+    //     {
+    //         const ZCAN_ReceiveFD_Data& canfd = canfd_data[i];
+    //
+    //         emit AddCANFDTableData_R(canfd);
+    //         Reception(canfd);
+    //     }
+    // }
 }
 
-void QReceiveThread::Reception(const CANData& Data)
+void QReceiveThread::Reception(const ZCANCANFDData& Data)
 {
-    if (mainWindow->temp == 0)
-        mainWindow->temp = QCANLibrary::ElapsedTime(mainWindow->TStartTime, QCANLibrary::GetCurrentTime_us()) * 1000000;
-
-    if (const BYTE Single = Data.Data[0] >> 4; Single == 1)
+    if (const BYTE Single = Data.frame.data[0] >> 4; Single == 1)
     {
-        FirstFrameId = Data.can_id;
-        length = Data.Data[1];
+        FirstFrameId = Data.frame.can_id;
+        length = Data.frame.data[1];
 
         ZCAN_TransmitFD_Data can_data = {};
 
@@ -119,11 +202,10 @@ void QReceiveThread::Reception(const CANData& Data)
         can_data.frame.data[0] = 0x30;
 
         emit TransmitCANFD(can_data);
-        //        mainWindow->TransmitCANData(can_data);
 
         for (int i = 0; i < 6; i++)
         {
-            canData.append(Data.Data[i + 2]);
+            canData.append(Data.frame.data[i + 2]);
             length--;
         }
     }
@@ -131,7 +213,7 @@ void QReceiveThread::Reception(const CANData& Data)
     {
         for (int i = 0; i < 7; i++)
         {
-            canData.append(Data.Data[i + 1]);
+            canData.append(Data.frame.data[i + 1]);
             length--;
 
             if (length == 0)

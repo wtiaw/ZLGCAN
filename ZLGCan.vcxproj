@@ -220,9 +220,7 @@
     <ClCompile Include="Setting\QSettingConfigBase.cpp" />
     <ClCompile Include="CustomWidget\Frame\QStackedWidget.cpp" />
     <ClCompile Include="CustomThread\QThreadBase.cpp" />
-    <ClCompile Include="CustomThread\QTransmitThread.cpp" />
     <ClCompile Include="Library\QWidgetLibrary.cpp" />
-    <ClCompile Include="CustomThread\QWriteBLFThread.cpp" />
     <ClCompile Include="CustomWidget\ToolBox.cpp" />
     <ClCompile Include="CustomWidget\ToolPage.cpp" />
     <ClCompile Include="main.cpp" />
@@ -260,11 +258,7 @@
     </QtMoc>
     <QtMoc Include="CustomThread\QThreadBase.h">
     </QtMoc>
-    <QtMoc Include="CustomThread\QTransmitThread.h">
-    </QtMoc>
     <ClInclude Include="Library\QWidgetLibrary.h" />
-    <QtMoc Include="CustomThread\QWriteBLFThread.h">
-    </QtMoc>
     <QtMoc Include="CustomWidget\ToolBox.h">
     </QtMoc>
     <QtMoc Include="CustomWidget\ToolPage.h">

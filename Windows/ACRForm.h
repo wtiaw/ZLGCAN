@@ -38,7 +38,6 @@ public:
 
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data& CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     void StopTimer() const;
 
@@ -134,26 +133,7 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_
 {
     if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
-    //    QTimer* Timer = nullptr;
-    //    if(!MessageTimerContainer.contains(InMessageTimerType)){
-    //        Timer = new QTimer;
-    //        Timer->setTimerType(Qt::PreciseTimer);
-    //        connect(Timer, &QTimer::timeout, this, [=]() -> void
-    //        {
-    //            mainWindow->TransmitCANData(*CANData);
 
-    //            if(Function)
-    //                (this->*Function)();
-    //        });
-
-    //        MessageTimerContainer.insert(InMessageTimerType, Timer);
-    //    }
-    //    else
-    //    {
-    //        Timer = MessageTimerContainer[InMessageTimerType];
-    //    }
-
-    //    Timer->start(msec);
     PerformanceFrequency* temp;
     if (!MessageThreadContainer.contains(InMessageTimerType))
     {
@@ -161,8 +141,22 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_
 
         connect(temp, &PerformanceFrequency::TimeOut, this, [=]() mutable -> void
         {
-            mainWindow->TransmitCANData(*CANData);
+            // mainWindow->TransmitCANDataObj(CANData);
 
+            ZCANCANFDData CANCANFDData{};
+        CANCANFDData.flag.unionVal.frameType = 1;
+        CANCANFDData.flag.unionVal.transmitType = 0;
+        CANCANFDData.flag.unionVal.txDelay = ZCAN_TX_DELAY_NO_DELAY;
+        CANCANFDData.flag.unionVal.txEchoed = 1;
+        // CANCANFDData.frame = CANData->frame;
+        
+        ZCANDataObj DataObj{};
+        DataObj.chnl = 0;
+        DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
+        DataObj.data.zcanCANFDData = CANCANFDData;
+
+            mainWindow->TransmitCANDataObj(&DataObj);
+            
             if (Function)
                 (this->*Function)();
         }, Qt::QueuedConnection);

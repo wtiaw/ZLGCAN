@@ -72,7 +72,7 @@ ACRForm::ACRForm(QWidget* parent, Qt::WindowFlags f) :
 
     ACRForm::InitWindow();
     connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
-            SLOT(TransmitCANData(ZCAN_TransmitFD_Data&)), Qt::DirectConnection);
+            SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
 }
 
 ACRForm::~ACRForm()
@@ -89,28 +89,21 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Tran
 void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data* CANData,
                                      void (ACRForm::*Function)(), uint delay, uint msec)
 {
-    TransmitMessageByTimer<ZCAN_TransmitFD_Data>(InMessageTimerType, CANData, Function, delay, msec);
-}
-
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data& CANData,
-                                     void (ACRForm::*Function)(), uint delay, uint msec)
-{
     if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
 
     PerformanceFrequency* temp;
-
     if (!MessageThreadContainer.contains(InMessageTimerType))
     {
         temp = new PerformanceFrequency;
 
         connect(temp, &PerformanceFrequency::TimeOut, this, [=]() mutable -> void
         {
-            emit TransmitCANFD(CANData);
+            mainWindow->TransmitCANDataObj(*CANData);
 
             if (Function)
                 (this->*Function)();
-        });
+        }, Qt::QueuedConnection);
 
         if (InMessageTimerType != EMessageTimer::Single)
             MessageThreadContainer.insert(InMessageTimerType, temp);
@@ -120,7 +113,7 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Tran
         temp = MessageThreadContainer[InMessageTimerType];
     }
 
-    temp->SetThreadRunning(delay, msec, InMessageTimerType == EMessageTimer::Single);
+    temp->SetThreadRunning(delay, InMessageTimerType == EMessageTimer::Single, msec);
 }
 
 void ACRForm::StopTimer() const
@@ -273,7 +266,20 @@ void ACRForm::InitTrigger()
         ui->SV->setText(string_version);
 
         emit TransmitCANFD(canfd_data_GW740);
-        //        mainWindow->TransmitCANData(canfd_data_GW740);
+    });
+
+    Temp = {0x06, 0x50, 0x03, 0x00, 0x32, 0x01, 0xF4};
+    CreateItem(0x748, Temp, [&](const CANData& Data)
+    {
+        ZCAN_TransmitFD_Data can = {};
+        can.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
+        can.frame.len = 8;
+        can.transmit_type = 0;
+        can.frame.data[0] = 0x02;
+        can.frame.data[1] = 0x27;
+        can.frame.data[2] = 0x61;
+
+        emit TransmitCANFD(can);
     });
 
     Temp = {0x07, 0x71, 0x01, 0xCF, 0x81};
@@ -310,9 +316,7 @@ void ACRForm::InitTrigger()
 
         SendGW740();
 
-        //        mainWindow->TransmitCANData(canfd_data_GW740);
         emit TransmitCANFD(canfd_data_GW740);
-        //        TransmitMessageByTimer(EMessageTimer::Single, canfd_data_GW740, nullptr, 0);
     });
 
     ReceiveThread->AddTrigger(Items);
@@ -397,7 +401,7 @@ void ACRForm::on_pushButton_2_clicked()
     can_data.frame.data[2] = 0xFD;
     can_data.frame.data[3] = 0x01;
 
-    emit TransmitCANFD(can_data);
+    mainWindow->TransmitCANDataObj(can_data);
 }
 
 void ACRForm::on_pushButton_5_clicked()
@@ -411,24 +415,5 @@ void ACRForm::on_pushButton_5_clicked()
     can.frame.data[1] = 0x10;
     can.frame.data[2] = 0x03;
 
-    TransmitMessageByTimer(EMessageTimer::Single, can, nullptr, 100);
-
-    memset(&canfd_data_Extended_Session, 0, sizeof(canfd_data_Extended_Session));
-    canfd_data_Extended_Session.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
-    canfd_data_Extended_Session.frame.len = 8;
-    canfd_data_Extended_Session.transmit_type = 0;
-    canfd_data_Extended_Session.frame.data[0] = 0x02;
-    canfd_data_Extended_Session.frame.data[1] = 0x3E;
-    canfd_data_Extended_Session.frame.data[2] = 0x00;
-    //    TransmitMessageByTimer(EMessageTimer::Extended_Session, &canfd_data_Extended_Session, nullptr, 500, 4000);
-
-    memset(&can, 0, sizeof(can));
-    can.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
-    can.frame.len = 8;
-    can.transmit_type = 0;
-    can.frame.data[0] = 0x02;
-    can.frame.data[1] = 0x27;
-    can.frame.data[2] = 0x61;
-
-    TransmitMessageByTimer(EMessageTimer::Single, can, nullptr, 1000);
+    emit TransmitCANFD(can);
 }

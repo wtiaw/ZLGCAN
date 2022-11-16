@@ -10,6 +10,7 @@ public:
 
     [[nodiscard]] int GetHead() const { return m_iHead; }
     int GetLength() const;
+    int GetCapacity() const;
 
     bool EnQueue(T element); //元素入队
     bool DeQueue(T& element); //元素出队
@@ -53,6 +54,12 @@ template <typename T>
 int CircinalQueue<T>::GetLength() const
 {
     return m_iQueueLenth;
+}
+
+template <typename T>
+int CircinalQueue<T>::GetCapacity() const
+{
+    return m_iQueueCapacity;
 }
 
 template <typename T>
