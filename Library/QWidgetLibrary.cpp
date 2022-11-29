@@ -1,4 +1,7 @@
 #include "QWidgetLibrary.h"
+
+#include <QTreeWidget>
+
 #include "CustomWidget/DataEdit.h"
 #include "Setting/QDeviceSettingConfig.h"
 #include "qcombobox.h"
@@ -22,6 +25,16 @@ void QWidgetLibrary::ClearLayoutChildrenWidget(QLayout* InLayout)
         }
 
         delete child;
+    }
+}
+
+void QWidgetLibrary::ClearTreeWidgetChildrenWidget(const QTreeWidget* InTreeWidget)
+{
+    const QTreeWidgetItem* item = InTreeWidget->topLevelItem(0);
+    while(item)
+    {
+        RemoveItem(item);
+        item = InTreeWidget->topLevelItem(0);
     }
 }
 
@@ -158,4 +171,21 @@ void QWidgetLibrary::InitMessageDLC(QLineEdit* DLCEditor)
     const QRegularExpression regx("[0-9]{1,2}");
     const QValidator* validator = new QRegularExpressionValidator(regx, DLCEditor);
     DLCEditor->setValidator(validator);
+}
+
+void QWidgetLibrary::RemoveItem(const QTreeWidgetItem* item)
+{
+    const int count = item->childCount();
+    if(count == 0)//没有子节点，直接删除
+        {
+        delete item;
+        return;
+        }
+ 
+    for(int i=0; i<count; i++)
+    {
+        const QTreeWidgetItem *childItem = item->child(0);//删除子节点
+        RemoveItem(childItem);
+    }
+    delete item;//最后将自己删除
 }

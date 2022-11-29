@@ -8,6 +8,7 @@ class QWidgetLibrary
 
 public:
     static void ClearLayoutChildrenWidget(class QLayout* InLayout);
+    static void ClearTreeWidgetChildrenWidget(const class QTreeWidget* InTreeWidget);
 
     //获取Edit文本信息
     static QString GetLineTextValue(const class QLineEdit* InLineEdit);
@@ -21,6 +22,9 @@ public:
 
     static void InitMessageID(QLineEdit* MessageIDEditor);
     static void InitMessageDLC(QLineEdit* DLCEditor);
+
+private:
+    static void RemoveItem(const class QTreeWidgetItem *item);
 };
 
 #endif // QWIDGETLIBRARY_H

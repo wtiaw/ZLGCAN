@@ -56,6 +56,12 @@
     <ClCompile Include="CustomWidget\DataEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Windows\LoadDBCWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\LoadVariablesWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="CustomThread\PerformanceFrequency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -74,6 +80,9 @@
     <ClCompile Include="CustomWidget\TableWidget\QMessageTableWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Interface\QPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="CustomThread\QReceiveItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,16 +95,13 @@
     <ClCompile Include="CustomWidget\Frame\QStackedWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Setting\QSystemVariables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="CustomThread\QThreadBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CustomThread\QTransmitThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Library\QWidgetLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CustomThread\QWriteBLFThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CustomWidget\ToolBox.cpp">
@@ -127,6 +133,12 @@
     <ClInclude Include="Data\FromeStruct.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <QtMoc Include="Windows\LoadDBCWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Windows\LoadVariablesWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="CustomThread\PerformanceFrequency.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -160,38 +172,95 @@
     <QtMoc Include="CustomWidget\Frame\QStackedWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="CustomThread\QThreadBase.h">
+    <ClInclude Include="Setting\QSystemVariables.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="CustomThread\QTransmitThread.h">
+    </ClInclude>
+    <QtMoc Include="CustomThread\QThreadBase.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="Library\QWidgetLibrary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="CustomThread\QWriteBLFThread.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="CustomWidget\ToolBox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="CustomWidget\ToolPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="Data\VariableStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <CustomBuild Include="debug\moc_predefs.h.cbt">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Windows\ACRForm.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="Windows\AutoSendConfigWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Windows\LoadDBCWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Windows\LoadVariablesWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="CustomWidget\Frame\QStackedWidget.ui">

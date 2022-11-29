@@ -58,9 +58,9 @@ QDeviceSettingConfig::QDeviceSettingConfig(QObject* parent)
     ConfigFilePath = "/DeviceSetting.json";
 }
 
-void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObject)
+void QDeviceSettingConfig::ReadConfig()
 {
-    QSettingConfigBase::ReadConfig(doc, RootObject);
+    QSettingConfigBase::ReadConfig();
 
     QFile file(ConfigDirPath + ConfigFilePath);
     if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -79,7 +79,7 @@ void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObjec
     QJsonParseError jsonError;
     // 将json解析为UTF-8编码的json文档，并从中创建一个QJsonDocument。
     // 如果解析成功，返回QJsonDocument对象，否则返回null
-    doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
+    const QJsonDocument doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
     // 判断是否解析失败
     if (jsonError.error != QJsonParseError::NoError && !doc.isNull())
     {
@@ -87,7 +87,7 @@ void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObjec
         return;
     }
 
-    RootObject = doc.object();
+    const QJsonObject RootObject = doc.object();
 
     QJsonValue interestValue = RootObject.value("Channel");
     if (interestValue.type() == QJsonValue::Object)
@@ -132,6 +132,8 @@ void QDeviceSettingConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObjec
 
 void QDeviceSettingConfig::InitConfig()
 {
+    QSettingConfigBase::InitConfig();
+    
     QJsonObject DeviceObj;
     DeviceObj.insert("DeviceName", 0);
     DeviceObj.insert("DeviceID", 0);
@@ -159,9 +161,4 @@ void QDeviceSettingConfig::InitConfig()
     QTextStream stream(&file);
     stream << doc.toJson();
     file.close();
-}
-
-void QDeviceSettingConfig::SaveConfig(QString ObjectName, QString Key, int Value)
-{
-    Save(ConfigDirPath + ConfigFilePath, ObjectName, Key, Value);
 }

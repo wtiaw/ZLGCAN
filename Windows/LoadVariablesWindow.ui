@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoadVariablesWindow</class>
+ <widget class="QWidget" name="LoadVariablesWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>700</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLineEdit" name="Path"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="SelectPath">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="LoadVariables">
+       <property name="text">
+        <string>加载变量</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTreeWidget" name="VariableViewer">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="columnCount">
+      <number>6</number>
+     </property>
+     <attribute name="headerCascadingSectionResizes">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="headerDefaultSectionSize">
+      <number>100</number>
+     </attribute>
+     <attribute name="headerHighlightSections">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Variable</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>DataType</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Initial Value</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Min</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Max</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Comment</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

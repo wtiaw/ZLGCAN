@@ -89,7 +89,7 @@ bool ToolPage::CheckDLCData() const
     return QWidgetLibrary::CheckDLCData(ui->DLCEdit, ui->MessageTypeComboBox);
 }
 
-void ToolPage::AddWidget(const QString& title, QWidget* widget) const
+void ToolPage::AddWidget([[maybe_unused]] const QString& title, QWidget* widget) const
 {
     ui->verticalLayoutContent->addWidget(widget);
 }
@@ -153,7 +153,7 @@ void ToolPage::On_MessageIDChanged(const QString& arg1) const
     ui->MessageIDEdit->setText(arg1.toUpper());
 }
 
-void ToolPage::On_MessageDLCChanged(const QString& arg1)
+void ToolPage::On_MessageDLCChanged([[maybe_unused]] const QString& arg1)
 {
     if (CheckDLCData() || ui->DLCEdit->text() == "")
     {

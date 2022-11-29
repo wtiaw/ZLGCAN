@@ -18,6 +18,9 @@
 #include <QtGlobal>
 #include <QMessageBox>
 
+#include "Windows/LoadDBCWindow.h"
+#include "Windows/LoadVariablesWindow.h"
+
 
 #define MAX_FILE_DATA_NUM 500000
 
@@ -41,6 +44,8 @@ MainWindow::~MainWindow()
     delete ui;
     ReleaseIProperty(property);
     ZCAN_CloseDevice(dHandle);
+
+    StopLogFile();
 }
 
 int MainWindow::GetCanTypeFromUI() const
@@ -120,11 +125,11 @@ void MainWindow::InitButtonFunc()
 
 void MainWindow::ReadConfig()
 {
-    SettingConfig = new class QDeviceSettingConfig;
+    DeviceSettingConfig = new QDeviceSettingConfig();
+    DeviceSettingConfig->ReadConfig();
 
-    QJsonObject temp;
-    QJsonDocument doc;
-    SettingConfig->ReadConfig(doc, temp);
+    SystemVariablesConfig = new QSystemVariables();
+    SystemVariablesConfig->ReadConfig();
 }
 
 void MainWindow::InitDeviceNameComboBox() const
@@ -134,13 +139,13 @@ void MainWindow::InitDeviceNameComboBox() const
 
 void MainWindow::InitDeviceIDComboBox() const
 {
-    const int ConfigDevice = SettingConfig->GetDevice().ID;
+    const int ConfigDevice = DeviceSettingConfig->GetDevice().ID;
     ui->DeviceIDCamboBox->setCurrentIndex(ConfigDevice);
 }
 
 void MainWindow::InitChannelIDComboBox() const
 {
-    const int ConfigDevice = SettingConfig->GetChannel().ID;
+    const int ConfigDevice = DeviceSettingConfig->GetChannel().ID;
     ui->ChannelIDComboBox->setCurrentIndex(ConfigDevice);
 }
 
@@ -154,7 +159,7 @@ void MainWindow::InitChannelWorkingModeComboBox() const
     }
 
 
-    ui->DeviceNameComboBox->setCurrentIndex(SettingConfig->GetChannel().WorkingMode);
+    ui->DeviceNameComboBox->setCurrentIndex(DeviceSettingConfig->GetChannel().WorkingMode);
 }
 
 void MainWindow::InitChannelABitComboBox() const
@@ -167,7 +172,7 @@ void MainWindow::InitChannelABitComboBox() const
     }
 
 
-    ui->ABitComboBox->setCurrentIndex(SettingConfig->GetChannel().ABitBaudRate);
+    ui->ABitComboBox->setCurrentIndex(DeviceSettingConfig->GetChannel().ABitBaudRate);
 }
 
 void MainWindow::InitChannelDBitComboBox() const
@@ -180,7 +185,7 @@ void MainWindow::InitChannelDBitComboBox() const
     }
 
 
-    ui->DBitComboBox->setCurrentIndex(SettingConfig->GetChannel().DBitBaudRate);
+    ui->DBitComboBox->setCurrentIndex(DeviceSettingConfig->GetChannel().DBitBaudRate);
 }
 
 void MainWindow::InitChannelResistanceComboBox() const
@@ -193,7 +198,7 @@ void MainWindow::InitChannelResistanceComboBox() const
     }
 
 
-    ui->ResistanceComboBox->setCurrentIndex(SettingConfig->GetChannel().Resistance);
+    ui->ResistanceComboBox->setCurrentIndex(DeviceSettingConfig->GetChannel().Resistance);
 }
 
 void MainWindow::InitMessageFrameTypeComboBox() const
@@ -270,7 +275,7 @@ bool MainWindow::SetMerge() const
 {
     if (!property) return false;
 
-    const SChannel ConfigChannel = SettingConfig->GetChannel();
+    const SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
     char path[50] = {0};
     sprintf_s(path, "%d/set_device_recv_merge", ConfigChannel.ID);
     
@@ -279,7 +284,7 @@ bool MainWindow::SetMerge() const
 
 void MainWindow::On_OpenDevice()
 {
-    const auto [Name, ID] = SettingConfig->GetDevice();
+    const auto [Name, ID] = DeviceSettingConfig->GetDevice();
     const std::string DeviceDisplayName = (QDeviceSettingConfig::DeviceName[Name].Display).toStdString();
     const int DeviceName = QDeviceSettingConfig::DeviceName[Name].Value;
     const int DeviceID = ID;
@@ -290,9 +295,9 @@ void MainWindow::On_OpenDevice()
     dHandle = ZCAN_OpenDevice(DeviceName, DeviceID, 0);
     if (nullptr == dHandle)
     {
-        const QString ErrorMessage = QString("设备： %1 打开失败").arg(DeviceDisplayName.c_str());
+        const QString ErrorMessage = QString("设备：%1 打开失败").arg(DeviceDisplayName.c_str());
         QMessageBox::critical(this,
-                              tr("设备打开失败"),
+                              tr("设备打开失败!"),
                               tr(ErrorMessage.toStdString().c_str())
         );
         return;
@@ -301,7 +306,7 @@ void MainWindow::On_OpenDevice()
     property = GetIProperty(dHandle);
     if (nullptr == property)
     {
-        qDebug("设备：%s 打开失败", (DeviceDisplayName.c_str()));
+        qDebug("设备：%s 打开失败!", (DeviceDisplayName.c_str()));
         return;
     }
 
@@ -349,7 +354,7 @@ void MainWindow::On_InitCAN()
         return;
     }
 
-    auto [ID, WorkingMode, ABitBaudRate, DBitBaudRate, Resistance] = SettingConfig->GetChannel();
+    auto [ID, WorkingMode, ABitBaudRate, DBitBaudRate, Resistance] = DeviceSettingConfig->GetChannel();
     ZCAN_CHANNEL_INIT_CONFIG cfg = {};
     cfg.can_type = TYPE_CANFD; //CANFD设备为TYPE_CANFD
     cfg.can.filter = 0;
@@ -359,13 +364,11 @@ void MainWindow::On_InitCAN()
     chHandle = ZCAN_InitCAN(dHandle, ID, &cfg);
     if (nullptr == chHandle)
     {
-        qDebug("初始化通道失败");
+        qDebug("初始化通道失败!");
         return;
     }
 
-    property->SetValue("0/set_send_mode", "1"); 
-
-    qDebug("初始化通道成功");
+    qDebug("初始化通道成功!");
     char path[50] = {0};
     sprintf_s(path, "%d/set_device_recv_merge", ID);
     qDebug("合并模式：%s", property->GetValue(path));
@@ -391,8 +394,13 @@ void MainWindow::On_OpenCAN()
 {
     if (ZCAN_StartCAN(chHandle) != STATUS_OK)
     {
-        qDebug("启动通道失败");
+        qDebug("启动通道失败!");
         return;
+    }
+
+    if(!SetSendMode())
+    {
+        qDebug("设置 队列发送模式 失败!");
     }
 
     qDebug("启动通道成功");
@@ -422,7 +430,7 @@ void MainWindow::On_OpenCAN()
     
     ZCANDataObj CANDataObj;
     CANDataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
-    CANDataObj.chnl = SettingConfig->GetChannel().ID;
+    CANDataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     CANDataObj.data.zcanCANFDData.flag.unionVal.txEchoRequest = 0;
 
     ZCAN_TransmitData(chHandle, &CANDataObj, 1);
@@ -475,9 +483,9 @@ void MainWindow::On_CloseDevice()
     ZCAN_CloseDevice(dHandle);
     dHandle = nullptr;
 
-    const auto [Name, ID] = SettingConfig->GetDevice();
+    const auto [Name, ID] = DeviceSettingConfig->GetDevice();
     const std::string DeviceDisplayName = (QDeviceSettingConfig::DeviceName[Name].Display).toStdString();
-    qDebug("设备：%s 关闭", (DeviceDisplayName.c_str()));
+    qDebug("设备：%s 关闭!", (DeviceDisplayName.c_str()));
 
     UpdateDeltaTableTable->stop();
     if (ACRFromWindow)
@@ -503,50 +511,50 @@ void MainWindow::On_ChannelIDChanged(int index)
 {
     if (!bInit) return;
 
-    SChannel& ConfigChannel = SettingConfig->GetChannel();
+    SChannel& ConfigChannel = DeviceSettingConfig->GetChannel();
     ConfigChannel.ID = index;
 
-    SettingConfig->SaveConfig("Channel", "ChannelID", index);
+    DeviceSettingConfig->SaveConfig("Channel", "ChannelID", index);
 }
 
 void MainWindow::On_WorkingModeChanged(int index)
 {
     if (!bInit) return;
 
-    SChannel& ConfigChannel = SettingConfig->GetChannel();
+    SChannel& ConfigChannel = DeviceSettingConfig->GetChannel();
     ConfigChannel.WorkingMode = index;
 
-    SettingConfig->SaveConfig("Channel", "ChannelWorkingMode", index);
+    DeviceSettingConfig->SaveConfig("Channel", "ChannelWorkingMode", index);
 }
 
 void MainWindow::On_ABitChanged(int index)
 {
     if (!bInit) return;
 
-    SChannel& ConfigChannel = SettingConfig->GetChannel();
+    SChannel& ConfigChannel = DeviceSettingConfig->GetChannel();
     ConfigChannel.ABitBaudRate = index;
 
-    SettingConfig->SaveConfig("Channel", "ChannelABitBaudRate", index);
+    DeviceSettingConfig->SaveConfig("Channel", "ChannelABitBaudRate", index);
 }
 
 void MainWindow::On_DBitChanged(int index)
 {
     if (!bInit) return;
 
-    SChannel& ConfigChannel = SettingConfig->GetChannel();
+    SChannel& ConfigChannel = DeviceSettingConfig->GetChannel();
     ConfigChannel.DBitBaudRate = index;
 
-    SettingConfig->SaveConfig("Channel", "ChannelDBitBaudRate", index);
+    DeviceSettingConfig->SaveConfig("Channel", "ChannelDBitBaudRate", index);
 }
 
 void MainWindow::On_ResistanceChanged(int index)
 {
     if (!bInit) return;
 
-    SChannel& ConfigChannel = SettingConfig->GetChannel();
+    SChannel& ConfigChannel = DeviceSettingConfig->GetChannel();
     ConfigChannel.Resistance = index;
 
-    SettingConfig->SaveConfig("Channel", "ChannelResistance", index);
+    DeviceSettingConfig->SaveConfig("Channel", "ChannelResistance", index);
 }
 
 void MainWindow::On_MessageFrameTypeChanged(int index)
@@ -573,7 +581,7 @@ void MainWindow::On_DataIDChanged(const QString &arg1)
     ui->DataID->setText(arg1.toUpper());
 }
 
-void MainWindow::On_DLCChanged(const QString &arg1)
+void MainWindow::On_DLCChanged([[maybe_unused]] const QString &arg1)
 {
     if (CheckDLCData() || ui->DLCEdit->text() == "")
     {
@@ -605,22 +613,13 @@ void MainWindow::On_AutoSendMessage()
 {
     ZCAN_AUTO_TRANSMIT_OBJ auto_can = {};
 
-    auto_can.index = 0; // 定时列表索引 0
-    auto_can.enable = 1; // 使能此索引，每条可单独设置
-    auto_can.interval = 100; // 定时发送间隔 100ms
-    ConstructCANFrame(auto_can.obj); // 构造 CAN 报文
-
-    //    ZCAN_AUTO_TRANSMIT_OBJ auto_can1;
-
-    //    memset(&auto_can1, 0, sizeof(auto_can1));
-    //    auto_can1.index = 1;  // 定时列表索引 0
-    //    auto_can1.enable = 1; // 使能此索引，每条可单独设置
-    //    auto_can1.interval = 100;  // 定时发送间隔 100ms
-    //    ConstructCANFrame(auto_can1.obj); // 构造 CAN 报文
+    auto_can.index = 0; 
+    auto_can.enable = 1; 
+    auto_can.interval = 100; 
+    ConstructCANFrame(auto_can.obj); 
 
 
     GetProperty()->SetValue("0/auto_send", reinterpret_cast<const char*>(&auto_can));
-    //    GetProperty()->SetValue("0/auto_send", (const char*)&auto_can1);
     GetProperty()->SetValue("0/apply_auto_send", "0");
 }
 
@@ -638,7 +637,7 @@ bool MainWindow::SetBaudRate() const
 {
     if (!property) return false;
 
-    const SChannel ConfigChannel = SettingConfig->GetChannel();
+    const SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
     char path[50] = {0};
     sprintf_s(path, "%d/canfd_abit_baud_rate", ConfigChannel.ID);
     char value[10] = {0};
@@ -653,7 +652,7 @@ bool MainWindow::SetBaudRate() const
 
 bool MainWindow::SetCANFDStandard() const
 {
-    SChannel ConfigChannel = SettingConfig->GetChannel();
+    SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
 
     char path[50] = {0};
     sprintf_s(path, "%d/canfd_standard", ConfigChannel.ID);
@@ -662,16 +661,26 @@ bool MainWindow::SetCANFDStandard() const
     return property->SetValue(path, value);
 }
 
-bool MainWindow::SetResistance()
+bool MainWindow::SetResistance() const
 {
-    SChannel ConfigChannel = SettingConfig->GetChannel();
+    const SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
 
-    //设置终端电阻
+    //??????????
     char path[50] = {0};
     sprintf_s(path, "%d/initenal_resistance", ConfigChannel.ID);
     char value[10] = {0};
     sprintf_s(value, "%d", QDeviceSettingConfig::ChannelResistanceEnable[ConfigChannel.Resistance].Value);
     return property->SetValue(path, value);
+}
+
+bool MainWindow::SetSendMode() const
+{
+    const SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
+    
+    char path[50] = {0};
+    sprintf_s(path, "%d/set_send_mode", ConfigChannel.ID);
+    
+    return property->SetValue(path, "1"); 
 }
 
 void MainWindow::On_SendMessage()
@@ -681,10 +690,9 @@ void MainWindow::On_SendMessage()
 
     ZCANDataObj CANDataObj;
     CANDataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
-    CANDataObj.chnl = SettingConfig->GetChannel().ID;
+    CANDataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     CANDataObj.data.zcanCANFDData = CANFDData;
-
-    // ZCAN_TransmitData(chHandle, &CANDataObj, 1);
+    
     TransmitCANDataObj(&CANDataObj);
 }
 
@@ -718,7 +726,7 @@ void MainWindow::AddTableData(const TableData& InTableData)
         
         
         /* setup CAN message */
-        message.mChannel = SettingConfig->GetChannel().ID + 1;
+        message.mChannel = DeviceSettingConfig->GetChannel().ID + 1;
         message.mFlags = InTableData.DirType & 1;
         message.mDLC = InTableData.DLC;
         message.mValidDataBytes = InTableData.DLC;
@@ -752,9 +760,9 @@ void MainWindow::AddTableData(const TableData& InTableData)
         }
     // });
 
-    // qDebug() << "当前缓存数据：" << MessageBuffer->GetLength();
-    // qDebug() << "当前文件数据：" << CurrentDataCount;
-    // qDebug() << "总体文件数据：" << TotalDataCount;
+    // qDebug() << "当前缓存数据:" << MessageBuffer->GetLength();
+    // qDebug() << "当前文件数据:" << CurrentDataCount;
+    // qDebug() << "总体文件数据:" << TotalDataCount;
 
     if (CurrentDataCount >= MAX_FILE_DATA_NUM)
     {
@@ -872,14 +880,14 @@ void MainWindow::TransmitCANDataObj(ZCANDataObj* DataObj)
     auto res = ZCAN_TransmitData(chHandle, DataObj, 1);
     // if(res)
     // {
-    //     qDebug() << "成功发送报文：" << QString::number(DataObj->data.zcanCANFDData.frame.can_id, 16);
+    //     qDebug() << "成功发送报文" << QString::number(DataObj->data.zcanCANFDData.frame.can_id, 16);
     // }
 }
 
 void MainWindow::TransmitCANDataObj(ZCAN_Transmit_Data& can_data)
 {
     ZCANDataObj DataObj;
-    DataObj.chnl = SettingConfig->GetChannel().ID;
+    DataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
     DataObj.data.zcanCANFDData.flag.unionVal.frameType = 0;
     DataObj.data.zcanCANFDData.flag.unionVal.transmitType = 0;
@@ -904,7 +912,7 @@ void MainWindow::TransmitCANDataObj(ZCAN_TransmitFD_Data& canfd_data)
     CANCANFDData.frame = canfd_data.frame;
     
     ZCANDataObj DataObj{};
-    DataObj.chnl = SettingConfig->GetChannel().ID;
+    DataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
     DataObj.data.zcanCANFDData = CANCANFDData;
 
@@ -996,8 +1004,8 @@ void MainWindow::ConstructCANFrame(ZCAN_Transmit_Data &can_data)
 
     memset(&can_data, 0, sizeof(can_data));
     can_data.frame.can_id = MAKE_CAN_ID(CANID, 0, 0, 0); // CAN ID
-    can_data.frame.can_dlc = DLC; // CAN 数据长度
-    can_data.transmit_type = TransmitType; //发送模式
+    can_data.frame.can_dlc = DLC; 
+    can_data.transmit_type = TransmitType; 
 
     for (int i = 0; i < DLC; ++i)
     {
@@ -1013,7 +1021,7 @@ void MainWindow::ConstructCANFDFrame(ZCAN_TransmitFD_Data& canfd_data)
 
     memset(&canfd_data, 0, sizeof(canfd_data));
     canfd_data.frame.can_id = MAKE_CAN_ID(CANID, 0, 0, 0); // CANFD ID
-    canfd_data.frame.len = DLC; // CANFD 数据长度
+    canfd_data.frame.len = DLC; 
     canfd_data.transmit_type = TransmitType;
     //    canfd_data.frame.flags    =  1;
 
@@ -1051,7 +1059,7 @@ void MainWindow::CreateLogFile()
     bSuccess = bSuccess && BLSetMeasurementStartTime(hFile, &systemTime);
 
     bSuccess = bSuccess && BLSetWriteOptions(hFile, 6, 0);
-    qDebug() << "创建Log文件：" << FileName << bSuccess;
+    qDebug() << "创建Log文件:" << FileName << bSuccess;
 }
 
 void MainWindow::StopLogFile()
@@ -1068,7 +1076,7 @@ void MainWindow::StopLogFile()
             TotalDataCount += WriteSuccess;
         }
 
-        qDebug() << "总体文件数据：" << TotalDataCount;
+        qDebug() << "总体文件数据:" << TotalDataCount;
 
 
         qDebug() << "Close Log" << BLCloseHandle(hFile);
@@ -1102,6 +1110,7 @@ void MainWindow::on_actionACR_triggered()
     }
 
     ACRFromWindow->show();
+    ACRFromWindow->activateWindow();
 }
 
 
@@ -1139,53 +1148,26 @@ void MainWindow::on_SaveLog_clicked(bool checked)
 }
 
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_LoadDBC_triggered()
 {
-    if (!test)
-        test = new CircinalQueue<int>(10);
-
-    const int randa = QRandomGenerator::global()->bounded(10);
-    test->EnQueue(randa);
-
-    QString str;
-    for (int i = 0; i < test->GetLength(); i++)
+    if(!LoadDbcWindowptr)
     {
-        str += QString::number(test->IndexAt(i)) + " ";
+        LoadDbcWindowptr = new LoadDBCWindow(this, Qt::Window);
     }
-
-    qDebug() << str;
+    
+    LoadDbcWindowptr->show();
+    LoadDbcWindowptr->activateWindow();
 }
 
-
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_LoadVariables_triggered()
 {
-    if (!test)
-        test = new CircinalQueue<int>(10);
-    int a;
-    test->DeQueue(a);
-
-    QString str;
-    for (int i = 0; i < test->GetLength(); i++)
+    if(!LoadVariablesWindowptr)
     {
-        str += QString::number(test->IndexAt(i)) + " ";
+        LoadVariablesWindowptr = new LoadVariablesWindow(this, Qt::Window);
     }
 
-    qDebug() << str;
-}
-
-
-void MainWindow::on_pushButton_3_clicked()
-{
-    if (!test)
-        test = new CircinalQueue<int>(10);
-    test->Insert(2, 99);
-
-    QString str;
-    for (int i = 0; i < test->GetLength(); i++)
-    {
-        str += QString::number(test->IndexAt(i)) + " ";
-    }
-
-    qDebug() << str;
+    
+    LoadVariablesWindowptr->show();
+    LoadVariablesWindowptr->activateWindow();
 }
 

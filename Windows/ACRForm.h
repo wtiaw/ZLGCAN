@@ -27,7 +27,7 @@ enum EMessageTimer
     Message_GW740,
 };
 
-class ACRForm : public QWidget, public QPanelInterface
+class ACRForm final : public QWidget, public QPanelInterface
 {
     Q_OBJECT
 
@@ -43,6 +43,7 @@ public:
 
     //Interface
     virtual void InitWindow() override;
+    virtual void InitButtonFunction() override;
 
 public:
 signals:
@@ -50,6 +51,9 @@ signals:
 
 private:
     void InitTrigger();
+
+    void Init();
+    void InitReqButton();
 
     template<typename Transmit_Data>
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);

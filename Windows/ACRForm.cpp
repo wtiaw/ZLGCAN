@@ -19,60 +19,8 @@ ACRForm::ACRForm(QWidget* parent, Qt::WindowFlags f) :
     setWindowTitle(QString("ACR"));
 
     mainWindow = qobject_cast<MainWindow*>(parent);
-    InitTrigger();
 
-    memset(&canfd_data_406, 0, sizeof(canfd_data_406));
-    canfd_data_406.frame.can_id = MAKE_CAN_ID(0x406, 0, 0, 0);
-    canfd_data_406.frame.len = 8;
-    canfd_data_406.transmit_type = 0;
-
-    memset(&canfd_data_121, 0, sizeof(canfd_data_121));
-    canfd_data_121.frame.can_id = MAKE_CAN_ID(0x121, 0, 0, 0);
-    canfd_data_121.frame.len = 8;
-    canfd_data_121.transmit_type = 0;
-    canfd_data_121.frame.data[1] = 0x20;
-
-    memset(&canfd_data_1C2, 0, sizeof(canfd_data_1C2));
-    canfd_data_1C2.frame.can_id = MAKE_CAN_ID(0x1C2, 0, 0, 0);
-    canfd_data_1C2.frame.len = 64;
-    canfd_data_1C2.transmit_type = 0;
-    canfd_data_1C2.frame.data[11] = 0x01;
-    canfd_data_1C2.frame.data[15] = 0x04;
-
-    memset(&canfd_data_50, 0, sizeof(canfd_data_50));
-    canfd_data_50.frame.can_id = MAKE_CAN_ID(0x50, 0, 0, 0);
-    canfd_data_50.frame.len = 8;
-    canfd_data_50.transmit_type = 0;
-
-    memset(&canfd_data_288, 0, sizeof(canfd_data_288));
-    canfd_data_288.frame.can_id = MAKE_CAN_ID(0x288, 0, 0, 0);
-    canfd_data_288.frame.len = 8;
-    canfd_data_288.transmit_type = 0;
-    canfd_data_288.frame.data[5] = 0x08;
-
-    memset(&canfd_data_2D2, 0, sizeof(canfd_data_2D2));
-    canfd_data_2D2.frame.can_id = MAKE_CAN_ID(0x2D2, 0, 0, 0);
-    canfd_data_2D2.frame.len = 64;
-    canfd_data_2D2.transmit_type = 0;
-
-    memset(&canfd_data_2F7, 0, sizeof(canfd_data_2F7));
-    canfd_data_2F7.frame.can_id = MAKE_CAN_ID(0x2F7, 0, 0, 0);
-    canfd_data_2F7.frame.len = 64;
-    canfd_data_2F7.transmit_type = 0;
-
-    memset(&canfd_data_GW740, 0, sizeof(canfd_data_GW740));
-    canfd_data_GW740.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
-    canfd_data_GW740.frame.len = 8;
-    canfd_data_GW740.transmit_type = 0;
-    canfd_data_GW740.frame.data[0] = 0x07;
-    canfd_data_GW740.frame.data[1] = 0x31;
-    canfd_data_GW740.frame.data[2] = 0x01;
-    canfd_data_GW740.frame.data[3] = 0xCF;
-    canfd_data_GW740.frame.data[4] = 0x81;
-
-    ACRForm::InitWindow();
-    connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
-            SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
+    Init();
 }
 
 ACRForm::~ACRForm()
@@ -131,6 +79,8 @@ void ACRForm::StopTimer() const
 
 void ACRForm::InitWindow()
 {
+    QPanelInterface::InitWindow();
+    
     ui->BSW->setText("---");
     ui->SV->setText("---");
     ui->FBL->setText("---");
@@ -144,6 +94,11 @@ void ACRForm::InitWindow()
     ui->VHBH_Phy->setText("0");
     ui->VHBL_Phy->setText("0");
     ui->CANW->setText("0");
+}
+
+void ACRForm::InitButtonFunction()
+{
+    QPanelInterface::InitButtonFunction();
 }
 
 void ACRForm::InitTrigger()
@@ -216,7 +171,7 @@ void ACRForm::InitTrigger()
     });
 
     Temp = {0x02, 0x67, 0x62};
-    CreateItem(0x748, Temp, [&](const CANData& Data)
+    CreateItem(0x748, Temp, [&]([[maybe_unused]] const CANData& Data)
     {
         ZCAN_TransmitFD_Data can_data = {};
 
@@ -269,7 +224,7 @@ void ACRForm::InitTrigger()
     });
 
     Temp = {0x06, 0x50, 0x03, 0x00, 0x32, 0x01, 0xF4};
-    CreateItem(0x748, Temp, [&](const CANData& Data)
+    CreateItem(0x748, Temp, [&]([[maybe_unused]] const CANData& Data)
     {
         ZCAN_TransmitFD_Data can = {};
         can.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
@@ -323,6 +278,77 @@ void ACRForm::InitTrigger()
     qDebug() << "init";
 }
 
+void ACRForm::Init()
+{
+    InitTrigger();
+
+    InitReqButton();
+
+    memset(&canfd_data_406, 0, sizeof(canfd_data_406));
+    canfd_data_406.frame.can_id = MAKE_CAN_ID(0x406, 0, 0, 0);
+    canfd_data_406.frame.len = 8;
+    canfd_data_406.transmit_type = 0;
+
+    memset(&canfd_data_121, 0, sizeof(canfd_data_121));
+    canfd_data_121.frame.can_id = MAKE_CAN_ID(0x121, 0, 0, 0);
+    canfd_data_121.frame.len = 8;
+    canfd_data_121.transmit_type = 0;
+    canfd_data_121.frame.data[1] = 0x20;
+
+    memset(&canfd_data_1C2, 0, sizeof(canfd_data_1C2));
+    canfd_data_1C2.frame.can_id = MAKE_CAN_ID(0x1C2, 0, 0, 0);
+    canfd_data_1C2.frame.len = 64;
+    canfd_data_1C2.transmit_type = 0;
+    canfd_data_1C2.frame.data[11] = 0x01;
+    canfd_data_1C2.frame.data[15] = 0x04;
+
+    memset(&canfd_data_50, 0, sizeof(canfd_data_50));
+    canfd_data_50.frame.can_id = MAKE_CAN_ID(0x50, 0, 0, 0);
+    canfd_data_50.frame.len = 8;
+    canfd_data_50.transmit_type = 0;
+
+    memset(&canfd_data_288, 0, sizeof(canfd_data_288));
+    canfd_data_288.frame.can_id = MAKE_CAN_ID(0x288, 0, 0, 0);
+    canfd_data_288.frame.len = 8;
+    canfd_data_288.transmit_type = 0;
+    canfd_data_288.frame.data[5] = 0x08;
+
+    memset(&canfd_data_2D2, 0, sizeof(canfd_data_2D2));
+    canfd_data_2D2.frame.can_id = MAKE_CAN_ID(0x2D2, 0, 0, 0);
+    canfd_data_2D2.frame.len = 64;
+    canfd_data_2D2.transmit_type = 0;
+
+    memset(&canfd_data_2F7, 0, sizeof(canfd_data_2F7));
+    canfd_data_2F7.frame.can_id = MAKE_CAN_ID(0x2F7, 0, 0, 0);
+    canfd_data_2F7.frame.len = 64;
+    canfd_data_2F7.transmit_type = 0;
+
+    memset(&canfd_data_GW740, 0, sizeof(canfd_data_GW740));
+    canfd_data_GW740.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
+    canfd_data_GW740.frame.len = 8;
+    canfd_data_GW740.transmit_type = 0;
+    canfd_data_GW740.frame.data[0] = 0x07;
+    canfd_data_GW740.frame.data[1] = 0x31;
+    canfd_data_GW740.frame.data[2] = 0x01;
+    canfd_data_GW740.frame.data[3] = 0xCF;
+    canfd_data_GW740.frame.data[4] = 0x81;
+
+    ACRForm::InitWindow();
+    connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
+            SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
+}
+
+void ACRForm::InitReqButton()
+{
+    ui->ACR_Req_LH->clear();
+
+    const auto Value = QSystemVariables::Variables.value("VCU").Variables.value("ACR_Req_LH").ValueTables;
+    for (auto i : Value)
+    {
+        ui->ACR_Req_LH->addItem(i.DisplayName);
+    }
+}
+
 BYTE ACRForm::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length)
 {
     CANE2E_CRC8_STARTVALUE = CANE2E_CRC8_INITIALVALUE;
@@ -338,7 +364,7 @@ BYTE ACRForm::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length)
 void ACRForm::Send121()
 {
     QByteArray ba;
-
+    
     canfd_data_121.frame.data[0] = ui->ACR_Req_LH->currentIndex();
 
     Count_121 = (Count_121 + 1) % 16;

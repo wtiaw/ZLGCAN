@@ -13,12 +13,12 @@ class QSettingConfigBase : public QObject
 public:
     explicit QSettingConfigBase(QObject* parent = nullptr);
 
-    virtual void ReadConfig(QJsonDocument& doc, QJsonObject& RootObject);
+    virtual void ReadConfig();
     virtual void InitConfig();
-    virtual void SaveConfig(QString ObjectName, QString key, int Value);
+    virtual void SaveConfig(const QString& ObjectName, const QString& key, int Value);
 
     template <typename ValueType>
-    void Save(QString FileName, QString ObjectName, QString key, ValueType Value);
+    void Save(const QString& FileName, const QString& ObjectName, const QString& key, ValueType Value);
 signals:
 protected:
     QString ConfigDirPath;
@@ -28,12 +28,12 @@ protected:
 };
 
 template <typename ValueType>
-void QSettingConfigBase::Save(QString FileName, QString ObjectName, QString key, ValueType Value)
+void QSettingConfigBase::Save(const QString& FileName, const QString& ObjectName, const QString& key, ValueType Value)
 {
     QJsonObject RootObject;
     QJsonDocument doc;
 
-    ReadConfig(doc, RootObject);
+    ReadConfig();
     if (const QJsonValue interestValue = RootObject.value(ObjectName); interestValue.type() == QJsonValue::Object)
     {
         QJsonObject interestObject = interestValue.toObject();
@@ -59,7 +59,7 @@ void QSettingConfigBase::Save(QString FileName, QString ObjectName, QString key,
     writeStream << doc.toJson(); // 写入文件
     writeFile.close(); // 关闭文件
 
-    ReadConfig(doc, RootObject);
+    ReadConfig();
 }
 
 #endif // QSETTINGCONFIGBASE_H

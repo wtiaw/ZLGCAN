@@ -54,9 +54,8 @@ void AutoSendConfigWindow::On_RemoveSelectedItem(ToolPage *SelectedItem)
 void AutoSendConfigWindow::Init()
 {
     AutoMessageConfig = new QAutoMessageConfig();
-    QJsonObject temp;
-    QJsonDocument doc;
-    AutoMessageConfig->ReadConfig(doc, temp);
+
+    AutoMessageConfig->ReadConfig();
 
     toolBox = new ToolBox(this);
     ui->verticalLayout->addWidget(toolBox);

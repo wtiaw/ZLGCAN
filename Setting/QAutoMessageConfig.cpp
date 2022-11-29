@@ -8,7 +8,7 @@ QAutoMessageConfig::QAutoMessageConfig(QObject *parent)
     ConfigFilePath = "/AutoMessageSetting.config";
 }
 
-void QAutoMessageConfig::ReadConfig(QJsonDocument& doc, QJsonObject& RootObject)
+void QAutoMessageConfig::ReadConfig()
 {
     return;
 }

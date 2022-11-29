@@ -7,6 +7,12 @@ greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 CONFIG += c++17
 CONFIG += console
 
+
+msvc {
+    QMAKE_CFLAGS += /utf-8
+    QMAKE_CXXFLAGS += /utf-8
+}
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -16,21 +22,23 @@ SOURCES += \
     CustomThread/QReceiveItem.cpp \
     CustomThread/QReceiveThread.cpp \
     CustomThread/QThreadBase.cpp \
-    CustomThread/QTransmitThread.cpp \
-    CustomThread/QWriteBLFThread.cpp \
     CustomWidget/CheckBox/QDrawerCheckBox.cpp \
     CustomWidget/DataEdit.cpp \
     CustomWidget/Frame/QStackedWidget.cpp \
     CustomWidget/TableWidget/QMessageTableWidget.cpp \
     CustomWidget/ToolBox.cpp \
     CustomWidget/ToolPage.cpp \
+    Interface/QPanel.cpp \
     Library/QCANLibrary.cpp \
     Library/QWidgetLibrary.cpp \
     Setting/QAutoMessageConfig.cpp \
     Setting/QDeviceSettingConfig.cpp \
     Setting/QSettingConfigBase.cpp \
+    Setting/QSystemVariables.cpp \
     Windows/ACRForm.cpp \
     Windows/AutoSendConfigWindow.cpp \
+    Windows/LoadDBCWindow.cpp \
+    Windows/LoadVariablesWindow.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -39,8 +47,6 @@ HEADERS += \
     CustomThread/QReceiveItem.h \
     CustomThread/QReceiveThread.h \
     CustomThread/QThreadBase.h \
-    CustomThread/QTransmitThread.h \
-    CustomThread/QWriteBLFThread.h \
     CustomWidget/CheckBox/QDrawerCheckBox.h \
     CustomWidget/DataEdit.h \
     CustomWidget/Frame/QStackedWidget.h \
@@ -48,6 +54,7 @@ HEADERS += \
     CustomWidget/ToolBox.h \
     CustomWidget/ToolPage.h \
     Data/FromeStruct.h \
+    Data/VariableStruct.h \
     Interface/QPanel.h \
     Library/QCANLibrary.h \
     Library/QWidgetLibrary.h \
@@ -55,8 +62,11 @@ HEADERS += \
     Setting/QAutoMessageConfig.h \
     Setting/QDeviceSettingConfig.h \
     Setting/QSettingConfigBase.h \
+    Setting/QSystemVariables.h \
     Windows/ACRForm.h \
     Windows/AutoSendConfigWindow.h \
+    Windows/LoadDBCWindow.h \
+    Windows/LoadVariablesWindow.h \
     mainwindow.h
 
 FORMS += \
@@ -65,6 +75,8 @@ FORMS += \
     CustomWidget/ToolPage.ui \
     Windows/ACRForm.ui \
     Windows/AutoSendConfigWindow.ui \
+    Windows/LoadDBCWindow.ui \
+    Windows/LoadVariablesWindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.

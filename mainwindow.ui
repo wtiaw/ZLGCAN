@@ -597,6 +597,8 @@
     <property name="title">
      <string>工具(Tool)</string>
     </property>
+    <addaction name="LoadVariables"/>
+    <addaction name="LoadDBC"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_Tools"/>
@@ -605,6 +607,16 @@
   <action name="actionACR">
    <property name="text">
     <string>ACR</string>
+   </property>
+  </action>
+  <action name="LoadVariables">
+   <property name="text">
+    <string>加载变量</string>
+   </property>
+  </action>
+  <action name="LoadDBC">
+   <property name="text">
+    <string>加载DBC</string>
    </property>
   </action>
  </widget>

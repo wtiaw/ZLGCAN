@@ -3,7 +3,10 @@
 
 class QPanelInterface
 {
-    virtual void InitWindow(){};
+public:
+    virtual void InitWindow();
+    virtual void InitButtonFunction();
+    
 };
 
 #endif // QPANEL_H

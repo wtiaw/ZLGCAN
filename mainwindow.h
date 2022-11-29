@@ -9,6 +9,8 @@
 #include "qlineedit.h"
 #include "Library/QCANLibrary.h"
 #include "binlog.h"
+#include "Data/VariableStruct.h"
+#include "Setting/QSystemVariables.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -21,14 +23,13 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     [[nodiscard]] DEVICE_HANDLE GetDeviceHandle() const { return dHandle; }
     [[nodiscard]] CHANNEL_HANDLE GetChannelHandle() const { return chHandle; }
     [[nodiscard]] IProperty* GetProperty() const { return property; }
 
     [[nodiscard]] int GetCanTypeFromUI() const;
-
 
     [[nodiscard]] bool IsOpenCAN() const { return GetChannelHandle(); }
 
@@ -73,7 +74,8 @@ private:
     [[nodiscard]] bool SetMerge() const;
     [[nodiscard]] bool SetBaudRate() const;
     [[nodiscard]] bool SetCANFDStandard() const;
-    [[nodiscard]] bool SetResistance();
+    [[nodiscard]] bool SetResistance() const;
+    [[nodiscard]] bool SetSendMode() const;
 
     //MessageTable
     int  AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
@@ -83,7 +85,7 @@ private:
     //检查DLC输入格式
     bool CheckDLCData() const;
 
-    //根据 DLC 生成 Data输入格
+    //根据 DLC 生成 Data输入
     void CreateDataEdit();
 
     //获取Edit文本信息
@@ -138,23 +140,25 @@ private slots:
 
     void on_SaveLog_clicked(bool checked);
 
-    void on_pushButton_clicked();
+    void on_LoadVariables_triggered();
 
-    void on_pushButton_2_clicked();
-
-    void on_pushButton_3_clicked();
+    void on_LoadDBC_triggered();
 
 public:
     class QReceiveThread* ReceiveThread{};
     
     UINT64 StartTime = 0;
-
+    QSystemVariables* SystemVariablesConfig;
+    
 private:
     Ui::MainWindow *ui;
     class AutoSendConfigWindow* AutoSendConfig{};
     class ACRForm* ACRFromWindow = nullptr;
 
-    QDeviceSettingConfig* SettingConfig{};
+    class LoadDBCWindow* LoadDbcWindowptr = nullptr;
+    class LoadVariablesWindow* LoadVariablesWindowptr = nullptr;
+
+    QDeviceSettingConfig* DeviceSettingConfig;
 
 private:
     bool bInit = false;
@@ -180,7 +184,5 @@ private:
     int TotalDataCount = 0;
     
     CircinalQueue<VBLCANFDMessage_t> *MessageBuffer;
-
-    CircinalQueue<int> *test = nullptr;
 };
 #endif // MAINWINDOW_H
