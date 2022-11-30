@@ -1,41 +1,42 @@
-#include "ACRForm.h"
+#include "ACR_E11_Form.h"
 #include "CustomThread/QReceiveItem.h"
 #include "mainwindow.h"
 #include <QByteArray>
 #include <QtConcurrent>
 #include <utility>
-#include "ui_ACRForm.h"
+#include "ui_ACR_E11_Form.h"
 #include "zlgcan.h"
 #include "CustomThread/QReceiveThread.h"
 
-ACRForm::ACRForm(QWidget* parent, Qt::WindowFlags f) :
-    QWidget(parent, f),
-    ui(new Ui::ACRForm)
+ACR_E11_Form::ACR_E11_Form(QWidget* parent, Qt::WindowFlags f) :
+    FormBase(parent, f),
+    ui(new Ui::ACR_E11_Form)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
 
     ui->setupUi(this);
 
     setWindowTitle(QString("ACR"));
+    FromType = CustomEnum::EFormType::ACR_E11;
 
     mainWindow = qobject_cast<MainWindow*>(parent);
 
     Init();
 }
 
-ACRForm::~ACRForm()
+ACR_E11_Form::~ACR_E11_Form()
 {
     delete ui;
 }
 
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data* CANData,
-                                     void (ACRForm::*Function)(), uint delay, uint msec)
+void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data* CANData,
+                                     void (ACR_E11_Form::*Function)(), uint delay, uint msec)
 {
     TransmitMessageByTimer<ZCAN_Transmit_Data>(InMessageTimerType, CANData, Function, delay, msec);
 }
 
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data* CANData,
-                                     void (ACRForm::*Function)(), uint delay, uint msec)
+void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data* CANData,
+                                     void (ACR_E11_Form::*Function)(), uint delay, uint msec)
 {
     if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
@@ -64,7 +65,7 @@ void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Tran
     temp->SetThreadRunning(delay, InMessageTimerType == EMessageTimer::Single, msec);
 }
 
-void ACRForm::StopTimer() const
+void ACR_E11_Form::StopTimer() const
 {
     for (const auto i : MessageThreadContainer.values())
     {
@@ -77,9 +78,9 @@ void ACRForm::StopTimer() const
     }
 }
 
-void ACRForm::InitWindow()
+void ACR_E11_Form::InitWindow()
 {
-    QPanelInterface::InitWindow();
+    FormBase::InitWindow();
     
     ui->BSW->setText("---");
     ui->SV->setText("---");
@@ -96,12 +97,12 @@ void ACRForm::InitWindow()
     ui->CANW->setText("0");
 }
 
-void ACRForm::InitButtonFunction()
+void ACR_E11_Form::InitButtonFunction()
 {
-    QPanelInterface::InitButtonFunction();
+    FormBase::InitButtonFunction();
 }
 
-void ACRForm::InitTrigger()
+void ACR_E11_Form::InitTrigger()
 {
     const auto ReceiveThread = mainWindow->ReceiveThread;
 
@@ -278,7 +279,7 @@ void ACRForm::InitTrigger()
     qDebug() << "init";
 }
 
-void ACRForm::Init()
+void ACR_E11_Form::Init()
 {
     InitTrigger();
 
@@ -333,12 +334,12 @@ void ACRForm::Init()
     canfd_data_GW740.frame.data[3] = 0xCF;
     canfd_data_GW740.frame.data[4] = 0x81;
 
-    ACRForm::InitWindow();
+    ACR_E11_Form::InitWindow();
     connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
             SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
 }
 
-void ACRForm::InitReqButton()
+void ACR_E11_Form::InitReqButton()
 {
     ui->ACR_Req_LH->clear();
 
@@ -349,7 +350,7 @@ void ACRForm::InitReqButton()
     }
 }
 
-BYTE ACRForm::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length)
+BYTE ACR_E11_Form::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length)
 {
     CANE2E_CRC8_STARTVALUE = CANE2E_CRC8_INITIALVALUE;
     for (int i = 0; i < Crc8_Length; ++i)
@@ -361,7 +362,7 @@ BYTE ACRForm::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length)
     return static_cast<BYTE>(CANE2E_CRC8_STARTVALUE ^ CANE2E_CRC8_XORVALUE);
 }
 
-void ACRForm::Send121()
+void ACR_E11_Form::Send121()
 {
     QByteArray ba;
     
@@ -378,7 +379,7 @@ void ACRForm::Send121()
     canfd_data_121.frame.data[7] = CAN_E2E_CalcuelateCRC8(txDataBuffer_temp, 7);
 }
 
-void ACRForm::SendGW740()
+void ACR_E11_Form::SendGW740()
 {
     if (++Count_GW740 == 7) Count_GW740++;
     Count_GW740 %= 10;
@@ -386,7 +387,7 @@ void ACRForm::SendGW740()
     canfd_data_GW740.frame.data[7] = Count_GW740;
 }
 
-void ACRForm::CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func)
+void ACR_E11_Form::CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func)
 {
     auto* NewItem = new QReceiveItem;
     NewItem->ConstructTrigger(Id, std::move(FilterData), this, Func);
@@ -394,11 +395,11 @@ void ACRForm::CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (
     Items.append(NewItem);
 }
 
-void ACRForm::on_pushButton_clicked()
+void ACR_E11_Form::on_pushButton_clicked()
 {
     if (!mainWindow->IsOpenCAN()) return;
 
-    TransmitMessageByTimer(EMessageTimer::Message_121, &canfd_data_121, &ACRForm::Send121, 10, 10);
+    TransmitMessageByTimer(EMessageTimer::Message_121, &canfd_data_121, &ACR_E11_Form::Send121, 10, 10);
     TransmitMessageByTimer(EMessageTimer::Message_1C2, &canfd_data_1C2, nullptr, 10, 10);
     TransmitMessageByTimer(EMessageTimer::Message_50, &canfd_data_50, nullptr, 10, 500);
     TransmitMessageByTimer(EMessageTimer::Message_288, &canfd_data_288, nullptr, 10, 40);
@@ -408,7 +409,7 @@ void ACRForm::on_pushButton_clicked()
 }
 
 
-void ACRForm::on_pushButton_2_clicked()
+void ACR_E11_Form::on_pushButton_2_clicked()
 {
     if (!mainWindow->IsOpenCAN()) return;
 
@@ -430,7 +431,7 @@ void ACRForm::on_pushButton_2_clicked()
     mainWindow->TransmitCANDataObj(can_data);
 }
 
-void ACRForm::on_pushButton_5_clicked()
+void ACR_E11_Form::on_pushButton_5_clicked()
 {
     if (!mainWindow->IsOpenCAN()) return;
     ZCAN_TransmitFD_Data can = {};

@@ -591,7 +591,8 @@
     <property name="title">
      <string>面板(Panel)</string>
     </property>
-    <addaction name="actionACR"/>
+    <addaction name="action_E11"/>
+    <addaction name="action_H53"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -604,9 +605,9 @@
    <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionACR">
+  <action name="action_E11">
    <property name="text">
-    <string>ACR</string>
+    <string>ACR(E11)</string>
    </property>
   </action>
   <action name="LoadVariables">
@@ -617,6 +618,11 @@
   <action name="LoadDBC">
    <property name="text">
     <string>加载DBC</string>
+   </property>
+  </action>
+  <action name="action_H53">
+   <property name="text">
+    <string>ACR(H53)</string>
    </property>
   </action>
  </widget>

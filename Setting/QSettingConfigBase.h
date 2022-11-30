@@ -13,6 +13,8 @@ class QSettingConfigBase : public QObject
 public:
     explicit QSettingConfigBase(QObject* parent = nullptr);
 
+    void SetConfigFilePath(const QString& InConfigFilePath);
+
     virtual void ReadConfig();
     virtual void InitConfig();
     virtual void SaveConfig(const QString& ObjectName, const QString& key, int Value);

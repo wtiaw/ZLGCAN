@@ -35,9 +35,10 @@ QT_BEGIN_NAMESPACE
 class Ui_MainWindow
 {
 public:
-    QAction *actionACR;
+    QAction *action_E11;
     QAction *LoadVariables;
     QAction *LoadDBC;
+    QAction *action_H53;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_3;
     QGridLayout *gridLayout_3;
@@ -106,12 +107,14 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
         MainWindow->resize(748, 554);
-        actionACR = new QAction(MainWindow);
-        actionACR->setObjectName("actionACR");
+        action_E11 = new QAction(MainWindow);
+        action_E11->setObjectName("action_E11");
         LoadVariables = new QAction(MainWindow);
         LoadVariables->setObjectName("LoadVariables");
         LoadDBC = new QAction(MainWindow);
         LoadDBC->setObjectName("LoadDBC");
+        action_H53 = new QAction(MainWindow);
+        action_H53->setObjectName("action_H53");
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         verticalLayout_3 = new QVBoxLayout(centralwidget);
@@ -465,7 +468,8 @@ public:
 
         menubar->addAction(menu->menuAction());
         menubar->addAction(menu_Tools->menuAction());
-        menu->addAction(actionACR);
+        menu->addAction(action_E11);
+        menu->addAction(action_H53);
         menu_Tools->addAction(LoadVariables);
         menu_Tools->addAction(LoadDBC);
 
@@ -477,9 +481,10 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        actionACR->setText(QCoreApplication::translate("MainWindow", "ACR", nullptr));
+        action_E11->setText(QCoreApplication::translate("MainWindow", "ACR(E11)", nullptr));
         LoadVariables->setText(QCoreApplication::translate("MainWindow", "\345\212\240\350\275\275\345\217\230\351\207\217", nullptr));
         LoadDBC->setText(QCoreApplication::translate("MainWindow", "\345\212\240\350\275\275DBC", nullptr));
+        action_H53->setText(QCoreApplication::translate("MainWindow", "ACR(H53)", nullptr));
         groupBox_5->setTitle(QCoreApplication::translate("MainWindow", "\345\217\202\346\225\260\351\205\215\347\275\256", nullptr));
         groupBox->setTitle(QCoreApplication::translate("MainWindow", "\350\256\276\345\244\207\351\200\211\346\213\251", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "\350\256\276\345\244\207\347\261\273\345\236\213", nullptr));

@@ -1,13 +1,13 @@
-/********************************************************************************
-** Form generated from reading UI file 'ACRForm.ui'
+﻿/********************************************************************************
+** Form generated from reading UI file 'ACR_E11_Form.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.4.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_ACRFORM_H
-#define UI_ACRFORM_H
+#ifndef UI_ACR_E11_FORM_H
+#define UI_ACR_E11_FORM_H
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -24,7 +24,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_ACRForm
+class Ui_ACR_E11_Form
 {
 public:
     QFormLayout *formLayout;
@@ -75,14 +75,14 @@ public:
     QLabel *label_3;
     QLabel *label_2;
 
-    void setupUi(QWidget *ACRForm)
+    void setupUi(QWidget *ACR_E11_Form)
     {
-        if (ACRForm->objectName().isEmpty())
-            ACRForm->setObjectName("ACRForm");
-        ACRForm->resize(578, 418);
-        formLayout = new QFormLayout(ACRForm);
+        if (ACR_E11_Form->objectName().isEmpty())
+            ACR_E11_Form->setObjectName("ACR_E11_Form");
+        ACR_E11_Form->resize(578, 418);
+        formLayout = new QFormLayout(ACR_E11_Form);
         formLayout->setObjectName("formLayout");
-        groupBox_3 = new QGroupBox(ACRForm);
+        groupBox_3 = new QGroupBox(ACR_E11_Form);
         groupBox_3->setObjectName("groupBox_3");
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
@@ -156,7 +156,7 @@ public:
         verticalLayout = new QVBoxLayout();
         verticalLayout->setObjectName("verticalLayout");
         verticalLayout->setContentsMargins(-1, 0, -1, -1);
-        groupBox_4 = new QGroupBox(ACRForm);
+        groupBox_4 = new QGroupBox(ACR_E11_Form);
         groupBox_4->setObjectName("groupBox_4");
         QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
         sizePolicy1.setHorizontalStretch(0);
@@ -191,7 +191,7 @@ public:
 
         verticalLayout->addWidget(groupBox_4);
 
-        groupBox_5 = new QGroupBox(ACRForm);
+        groupBox_5 = new QGroupBox(ACR_E11_Form);
         groupBox_5->setObjectName("groupBox_5");
         gridLayout = new QGridLayout(groupBox_5);
         gridLayout->setObjectName("gridLayout");
@@ -276,7 +276,7 @@ public:
 
         formLayout->setLayout(0, QFormLayout::FieldRole, verticalLayout);
 
-        groupBox = new QGroupBox(ACRForm);
+        groupBox = new QGroupBox(ACR_E11_Form);
         groupBox->setObjectName("groupBox");
         QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
         sizePolicy3.setHorizontalStretch(0);
@@ -303,7 +303,7 @@ public:
 
         formLayout->setWidget(1, QFormLayout::LabelRole, groupBox);
 
-        groupBox_2 = new QGroupBox(ACRForm);
+        groupBox_2 = new QGroupBox(ACR_E11_Form);
         groupBox_2->setObjectName("groupBox_2");
         sizePolicy1.setHeightForWidth(groupBox_2->sizePolicy().hasHeightForWidth());
         groupBox_2->setSizePolicy(sizePolicy1);
@@ -372,59 +372,59 @@ public:
         formLayout->setWidget(1, QFormLayout::FieldRole, groupBox_2);
 
 
-        retranslateUi(ACRForm);
+        retranslateUi(ACR_E11_Form);
 
-        QMetaObject::connectSlotsByName(ACRForm);
+        QMetaObject::connectSlotsByName(ACR_E11_Form);
     } // setupUi
 
-    void retranslateUi(QWidget *ACRForm)
+    void retranslateUi(QWidget *ACR_E11_Form)
     {
-        ACRForm->setWindowTitle(QCoreApplication::translate("ACRForm", "Form", nullptr));
-        groupBox_3->setTitle(QCoreApplication::translate("ACRForm", "ACR_122", nullptr));
-        label_4->setText(QCoreApplication::translate("ACRForm", "ACR_Key", nullptr));
-        label_5->setText(QCoreApplication::translate("ACRForm", "ACRCrcChk122", nullptr));
-        label_6->setText(QCoreApplication::translate("ACRForm", "ACRCycCntr122", nullptr));
-        label_7->setText(QCoreApplication::translate("ACRForm", "Activation_Status", nullptr));
-        label_8->setText(QCoreApplication::translate("ACRForm", "TextLabel", nullptr));
-        label_9->setText(QCoreApplication::translate("ACRForm", "TextLabel", nullptr));
-        label_10->setText(QCoreApplication::translate("ACRForm", "TextLabel", nullptr));
-        groupBox_4->setTitle(QCoreApplication::translate("ACRForm", "ACR_121", nullptr));
-        label_11->setText(QCoreApplication::translate("ACRForm", "ACR_Req_LH", nullptr));
-        ACR_Req_LH->setItemText(0, QCoreApplication::translate("ACRForm", "No Request", nullptr));
-        ACR_Req_LH->setItemText(1, QCoreApplication::translate("ACRForm", "Belt Park", nullptr));
-        ACR_Req_LH->setItemText(2, QCoreApplication::translate("ACRForm", "Belt Slack Remove", nullptr));
-        ACR_Req_LH->setItemText(3, QCoreApplication::translate("ACRForm", "Haptic Warning Level 1", nullptr));
-        ACR_Req_LH->setItemText(4, QCoreApplication::translate("ACRForm", "Haptic Warning Level 2", nullptr));
-        ACR_Req_LH->setItemText(5, QCoreApplication::translate("ACRForm", "Haptic Warning Level 3", nullptr));
-        ACR_Req_LH->setItemText(6, QCoreApplication::translate("ACRForm", "Retract Activation Level 1", nullptr));
-        ACR_Req_LH->setItemText(7, QCoreApplication::translate("ACRForm", "Retract Activation Level 2", nullptr));
-        ACR_Req_LH->setItemText(8, QCoreApplication::translate("ACRForm", "Retract Activation Level 3", nullptr));
-        ACR_Req_LH->setItemText(9, QCoreApplication::translate("ACRForm", "Retract Activation Level 4", nullptr));
-        ACR_Req_LH->setItemText(10, QCoreApplication::translate("ACRForm", "Retract Activation Level 5", nullptr));
-        ACR_Req_LH->setItemText(11, QCoreApplication::translate("ACRForm", "Retract Activation Level 6", nullptr));
-        ACR_Req_LH->setItemText(12, QCoreApplication::translate("ACRForm", "Retract Activation Level 7", nullptr));
+        ACR_E11_Form->setWindowTitle(QCoreApplication::translate("ACR_E11_Form", "Form", nullptr));
+        groupBox_3->setTitle(QCoreApplication::translate("ACR_E11_Form", "ACR_122", nullptr));
+        label_4->setText(QCoreApplication::translate("ACR_E11_Form", "ACR_Key", nullptr));
+        label_5->setText(QCoreApplication::translate("ACR_E11_Form", "ACRCrcChk122", nullptr));
+        label_6->setText(QCoreApplication::translate("ACR_E11_Form", "ACRCycCntr122", nullptr));
+        label_7->setText(QCoreApplication::translate("ACR_E11_Form", "Activation_Status", nullptr));
+        label_8->setText(QCoreApplication::translate("ACR_E11_Form", "TextLabel", nullptr));
+        label_9->setText(QCoreApplication::translate("ACR_E11_Form", "TextLabel", nullptr));
+        label_10->setText(QCoreApplication::translate("ACR_E11_Form", "TextLabel", nullptr));
+        groupBox_4->setTitle(QCoreApplication::translate("ACR_E11_Form", "ACR_121", nullptr));
+        label_11->setText(QCoreApplication::translate("ACR_E11_Form", "ACR_Req_LH", nullptr));
+        ACR_Req_LH->setItemText(0, QCoreApplication::translate("ACR_E11_Form", "No Request", nullptr));
+        ACR_Req_LH->setItemText(1, QCoreApplication::translate("ACR_E11_Form", "Belt Park", nullptr));
+        ACR_Req_LH->setItemText(2, QCoreApplication::translate("ACR_E11_Form", "Belt Slack Remove", nullptr));
+        ACR_Req_LH->setItemText(3, QCoreApplication::translate("ACR_E11_Form", "Haptic Warning Level 1", nullptr));
+        ACR_Req_LH->setItemText(4, QCoreApplication::translate("ACR_E11_Form", "Haptic Warning Level 2", nullptr));
+        ACR_Req_LH->setItemText(5, QCoreApplication::translate("ACR_E11_Form", "Haptic Warning Level 3", nullptr));
+        ACR_Req_LH->setItemText(6, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 1", nullptr));
+        ACR_Req_LH->setItemText(7, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 2", nullptr));
+        ACR_Req_LH->setItemText(8, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 3", nullptr));
+        ACR_Req_LH->setItemText(9, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 4", nullptr));
+        ACR_Req_LH->setItemText(10, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 5", nullptr));
+        ACR_Req_LH->setItemText(11, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 6", nullptr));
+        ACR_Req_LH->setItemText(12, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 7", nullptr));
 
-        groupBox_5->setTitle(QCoreApplication::translate("ACRForm", "ACR_Probe", nullptr));
-        label_13->setText(QCoreApplication::translate("ACRForm", "VHBH", nullptr));
-        label_12->setText(QCoreApplication::translate("ACRForm", "VHBL", nullptr));
-        label_14->setText(QCoreApplication::translate("ACRForm", "Tem", nullptr));
-        label_15->setText(QCoreApplication::translate("ACRForm", "CANW", nullptr));
-        groupBox->setTitle(QCoreApplication::translate("ACRForm", "\346\223\215\344\275\234", nullptr));
-        pushButton_5->setText(QCoreApplication::translate("ACRForm", "\350\247\243\351\224\201", nullptr));
-        pushButton_2->setText(QCoreApplication::translate("ACRForm", "\347\211\210\346\234\254", nullptr));
-        pushButton->setText(QCoreApplication::translate("ACRForm", "\345\224\244\351\206\222", nullptr));
-        groupBox_2->setTitle(QCoreApplication::translate("ACRForm", "\350\275\257\344\273\266\347\211\210\346\234\254", nullptr));
-        label->setText(QCoreApplication::translate("ACRForm", "BSW", nullptr));
-        label_3->setText(QCoreApplication::translate("ACRForm", "FBL", nullptr));
-        label_2->setText(QCoreApplication::translate("ACRForm", "SV", nullptr));
+        groupBox_5->setTitle(QCoreApplication::translate("ACR_E11_Form", "ACR_Probe", nullptr));
+        label_13->setText(QCoreApplication::translate("ACR_E11_Form", "VHBH", nullptr));
+        label_12->setText(QCoreApplication::translate("ACR_E11_Form", "VHBL", nullptr));
+        label_14->setText(QCoreApplication::translate("ACR_E11_Form", "Tem", nullptr));
+        label_15->setText(QCoreApplication::translate("ACR_E11_Form", "CANW", nullptr));
+        groupBox->setTitle(QCoreApplication::translate("ACR_E11_Form", "\346\223\215\344\275\234", nullptr));
+        pushButton_5->setText(QCoreApplication::translate("ACR_E11_Form", "\350\247\243\351\224\201", nullptr));
+        pushButton_2->setText(QCoreApplication::translate("ACR_E11_Form", "\347\211\210\346\234\254", nullptr));
+        pushButton->setText(QCoreApplication::translate("ACR_E11_Form", "\345\224\244\351\206\222", nullptr));
+        groupBox_2->setTitle(QCoreApplication::translate("ACR_E11_Form", "\350\275\257\344\273\266\347\211\210\346\234\254", nullptr));
+        label->setText(QCoreApplication::translate("ACR_E11_Form", "BSW", nullptr));
+        label_3->setText(QCoreApplication::translate("ACR_E11_Form", "FBL", nullptr));
+        label_2->setText(QCoreApplication::translate("ACR_E11_Form", "SV", nullptr));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class ACRForm: public Ui_ACRForm {};
+    class ACR_E11_Form: public Ui_ACR_E11_Form {};
 } // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // UI_ACRFORM_H
+#endif // UI_ACR_E11_FORM_H

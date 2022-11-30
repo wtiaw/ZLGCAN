@@ -28,17 +28,18 @@ SOURCES += \
     CustomWidget/TableWidget/QMessageTableWidget.cpp \
     CustomWidget/ToolBox.cpp \
     CustomWidget/ToolPage.cpp \
-    Interface/QPanel.cpp \
     Library/QCANLibrary.cpp \
     Library/QWidgetLibrary.cpp \
     Setting/QAutoMessageConfig.cpp \
     Setting/QDeviceSettingConfig.cpp \
     Setting/QSettingConfigBase.cpp \
     Setting/QSystemVariables.cpp \
-    Windows/ACRForm.cpp \
     Windows/AutoSendConfigWindow.cpp \
     Windows/LoadDBCWindow.cpp \
     Windows/LoadVariablesWindow.cpp \
+    Windows/Pannel/FormBase.cpp \
+    Windows/Pannel/ACR_E11_Form.cpp \
+    Windows/Pannel/ACR_H53_Form.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -53,9 +54,9 @@ HEADERS += \
     CustomWidget/TableWidget/QMessageTableWidget.h \
     CustomWidget/ToolBox.h \
     CustomWidget/ToolPage.h \
+    Data/CustomEnum.h \
     Data/FromeStruct.h \
     Data/VariableStruct.h \
-    Interface/QPanel.h \
     Library/QCANLibrary.h \
     Library/QWidgetLibrary.h \
     Library/CircinalQueue.h \
@@ -63,20 +64,23 @@ HEADERS += \
     Setting/QDeviceSettingConfig.h \
     Setting/QSettingConfigBase.h \
     Setting/QSystemVariables.h \
-    Windows/ACRForm.h \
     Windows/AutoSendConfigWindow.h \
     Windows/LoadDBCWindow.h \
     Windows/LoadVariablesWindow.h \
+    Windows/Pannel/FormBase.h \
+    Windows/Pannel/ACR_E11_Form.h \
+    Windows/Pannel/ACR_H53_Form.h \
     mainwindow.h
 
 FORMS += \
     CustomWidget/Frame/QStackedWidget.ui \
     CustomWidget/ToolBox.ui \
     CustomWidget/ToolPage.ui \
-    Windows/ACRForm.ui \
     Windows/AutoSendConfigWindow.ui \
     Windows/LoadDBCWindow.ui \
     Windows/LoadVariablesWindow.ui \
+    Windows/Pannel/ACR_E11_Form.ui \
+    Windows/Pannel/ACR_H53_Form.ui \
     mainwindow.ui
 
 # Default rules for deployment.

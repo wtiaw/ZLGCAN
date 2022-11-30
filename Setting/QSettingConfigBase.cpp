@@ -8,6 +8,11 @@ QSettingConfigBase::QSettingConfigBase(QObject* parent)
     ConfigDirPath = QDir::currentPath() + "/Config";
 }
 
+void QSettingConfigBase::SetConfigFilePath(const QString& InConfigFilePath)
+{
+    this->ConfigFilePath = InConfigFilePath;
+}
+
 void QSettingConfigBase::ReadConfig()
 {
     if (const QDir dir(ConfigDirPath); !dir.exists())

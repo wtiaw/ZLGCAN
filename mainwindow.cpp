@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "CustomWidget/DataEdit.h"
-#include "Windows/ACRForm.h"
 #include "Windows/AutoSendConfigWindow.h"
 #include "ui_mainwindow.h"
 #include "CustomThread/QReceiveThread.h"
@@ -20,13 +19,15 @@
 
 #include "Windows/LoadDBCWindow.h"
 #include "Windows/LoadVariablesWindow.h"
+#include "Windows/Pannel/ACR_E11_Form.h"
+#include "Windows/Pannel/ACR_H53_Form.h"
 
 
 #define MAX_FILE_DATA_NUM 500000
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+      , ui(new Ui::MainWindow)
 {
     setAttribute(Qt::WA_QuitOnClose, true);
 
@@ -88,37 +89,39 @@ void MainWindow::Init()
 
 void MainWindow::InitButtonFunc()
 {
-    ui->InitCAN->       setEnabled(false);
-    ui->OpenCAN->       setEnabled(false);
-    ui->Reset->         setEnabled(false);
-    ui->CloseDevice->   setEnabled(false);
-    ui->Send->          setEnabled(false);
+    ui->InitCAN->setEnabled(false);
+    ui->OpenCAN->setEnabled(false);
+    ui->Reset->setEnabled(false);
+    ui->CloseDevice->setEnabled(false);
+    ui->Send->setEnabled(false);
 
 
     //Button
-    connect(ui->OpenDevice,     SIGNAL(clicked()), this, SLOT(On_OpenDevice()));
-    connect(ui->InitCAN,        SIGNAL(clicked()), this, SLOT(On_InitCAN()));
-    connect(ui->OpenCAN,        SIGNAL(clicked()), this, SLOT(On_OpenCAN()));
-    connect(ui->Reset,          SIGNAL(clicked()), this, SLOT(On_Reset()));
-    connect(ui->CloseDevice,    SIGNAL(clicked()), this, SLOT(On_CloseDevice()));
-    connect(ui->Send,           SIGNAL(clicked()), this, SLOT(On_SendMessage()));
+    connect(ui->OpenDevice, SIGNAL(clicked()), this, SLOT(On_OpenDevice()));
+    connect(ui->InitCAN, SIGNAL(clicked()), this, SLOT(On_InitCAN()));
+    connect(ui->OpenCAN, SIGNAL(clicked()), this, SLOT(On_OpenCAN()));
+    connect(ui->Reset, SIGNAL(clicked()), this, SLOT(On_Reset()));
+    connect(ui->CloseDevice, SIGNAL(clicked()), this, SLOT(On_CloseDevice()));
+    connect(ui->Send, SIGNAL(clicked()), this, SLOT(On_SendMessage()));
     connect(ui->ConfigAutoSend, SIGNAL(clicked()), this, SLOT(On_OpenAutoSendConfigWindow()));
-    connect(ui->AutoSend,       SIGNAL(clicked()), this, SLOT(On_AutoSendMessage()));
+    connect(ui->AutoSend, SIGNAL(clicked()), this, SLOT(On_AutoSendMessage()));
 
     //ComboBox
-    connect(ui->ChannelIDComboBox,        SIGNAL(currentIndexChanged(int)), this, SLOT(On_ChannelIDChanged(int)));
-    connect(ui->WorkingModeComboBox,      SIGNAL(currentIndexChanged(int)), this, SLOT(On_WorkingModeChanged(int)));
-    connect(ui->ABitComboBox,             SIGNAL(currentIndexChanged(int)), this, SLOT(On_ABitChanged(int)));
-    connect(ui->DBitComboBox,             SIGNAL(currentIndexChanged(int)), this, SLOT(On_DBitChanged(int)));
-    connect(ui->ResistanceComboBox,       SIGNAL(currentIndexChanged(int)), this, SLOT(On_ResistanceChanged(int)));
-    connect(ui->MessageFrameTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(On_MessageFrameTypeChanged(int)));
+    connect(ui->ChannelIDComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(On_ChannelIDChanged(int)));
+    connect(ui->WorkingModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(On_WorkingModeChanged(int)));
+    connect(ui->ABitComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(On_ABitChanged(int)));
+    connect(ui->DBitComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(On_DBitChanged(int)));
+    connect(ui->ResistanceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(On_ResistanceChanged(int)));
+    connect(ui->MessageFrameTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(On_MessageFrameTypeChanged(int)));
 
     //Edit
-    connect(ui->DataID,  SIGNAL(textChanged(const QString)), this, SLOT(On_DataIDChanged(const QString)));
+    connect(ui->DataID, SIGNAL(textChanged(const QString)), this, SLOT(On_DataIDChanged(const QString)));
     connect(ui->DLCEdit, SIGNAL(textChanged(const QString)), this, SLOT(On_DLCChanged(const QString)));
 
-    for(const auto i : Tables){
-        connect(i->verticalScrollBar(), SIGNAL(sliderPressed()),  this, SLOT(On_MessageTableScrollPressed()));
+    for (const auto i : Tables)
+    {
+        connect(i->verticalScrollBar(), SIGNAL(sliderPressed()), this, SLOT(On_MessageTableScrollPressed()));
         connect(i->verticalScrollBar(), SIGNAL(sliderReleased()), this, SLOT(On_MessageTableScrollReleased()));
     }
 }
@@ -278,7 +281,7 @@ bool MainWindow::SetMerge() const
     const SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
     char path[50] = {0};
     sprintf_s(path, "%d/set_device_recv_merge", ConfigChannel.ID);
-    
+
     return GetProperty()->SetValue(path, "1");
 }
 
@@ -322,7 +325,7 @@ void MainWindow::On_OpenDevice()
 
     qDebug("设备：%s 打开成功", (DeviceDisplayName.c_str()));
 
-    if (ACRFromWindow) ACRFromWindow->InitWindow();
+    if (ACR_E11_FromWindow) ACR_E11_FromWindow->InitWindow();
 }
 
 void MainWindow::On_InitCAN()
@@ -335,7 +338,7 @@ void MainWindow::On_InitCAN()
         qDebug("设置 合并接收模式 失败!");
         return;
     }
-    
+
     if (!SetCANFDStandard())
     {
         qDebug("设置 CANFD标准 失败!");
@@ -398,7 +401,7 @@ void MainWindow::On_OpenCAN()
         return;
     }
 
-    if(!SetSendMode())
+    if (!SetSendMode())
     {
         qDebug("设置 队列发送模式 失败!");
     }
@@ -422,12 +425,12 @@ void MainWindow::On_OpenCAN()
     }
 
     UpdateDeltaTableTable->start(10);
-    
+
     if (bShouldSaveLog)
     {
         CreateLogFile();
     }
-    
+
     ZCANDataObj CANDataObj;
     CANDataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
     CANDataObj.chnl = DeviceSettingConfig->GetChannel().ID;
@@ -451,9 +454,9 @@ void MainWindow::On_Reset()
 
     ReceiveThread->Pause();
 
-    if (ACRFromWindow)
+    if (ACR_E11_FromWindow)
     {
-        ACRFromWindow->StopTimer();
+        ACR_E11_FromWindow->StopTimer();
     }
 }
 
@@ -488,9 +491,9 @@ void MainWindow::On_CloseDevice()
     qDebug("设备：%s 关闭!", (DeviceDisplayName.c_str()));
 
     UpdateDeltaTableTable->stop();
-    if (ACRFromWindow)
+    if (ACR_E11_FromWindow)
     {
-        ACRFromWindow->StopTimer();
+        ACR_E11_FromWindow->StopTimer();
     }
 
     StopLogFile();
@@ -576,12 +579,12 @@ void MainWindow::On_MessageFrameTypeChanged(int index)
     CheckDLCData();
 }
 
-void MainWindow::On_DataIDChanged(const QString &arg1)
+void MainWindow::On_DataIDChanged(const QString& arg1)
 {
     ui->DataID->setText(arg1.toUpper());
 }
 
-void MainWindow::On_DLCChanged([[maybe_unused]] const QString &arg1)
+void MainWindow::On_DLCChanged([[maybe_unused]] const QString& arg1)
 {
     if (CheckDLCData() || ui->DLCEdit->text() == "")
     {
@@ -613,10 +616,10 @@ void MainWindow::On_AutoSendMessage()
 {
     ZCAN_AUTO_TRANSMIT_OBJ auto_can = {};
 
-    auto_can.index = 0; 
-    auto_can.enable = 1; 
-    auto_can.interval = 100; 
-    ConstructCANFrame(auto_can.obj); 
+    auto_can.index = 0;
+    auto_can.enable = 1;
+    auto_can.interval = 100;
+    ConstructCANFrame(auto_can.obj);
 
 
     GetProperty()->SetValue("0/auto_send", reinterpret_cast<const char*>(&auto_can));
@@ -676,11 +679,11 @@ bool MainWindow::SetResistance() const
 bool MainWindow::SetSendMode() const
 {
     const SChannel ConfigChannel = DeviceSettingConfig->GetChannel();
-    
+
     char path[50] = {0};
     sprintf_s(path, "%d/set_send_mode", ConfigChannel.ID);
-    
-    return property->SetValue(path, "1"); 
+
+    return property->SetValue(path, "1");
 }
 
 void MainWindow::On_SendMessage()
@@ -692,7 +695,7 @@ void MainWindow::On_SendMessage()
     CANDataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
     CANDataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     CANDataObj.data.zcanCANFDData = CANFDData;
-    
+
     TransmitCANDataObj(&CANDataObj);
 }
 
@@ -711,53 +714,53 @@ void MainWindow::AddTableData(const TableData& InTableData)
 
     // QFuture<void> future = QtConcurrent::run([=]()
     // {
-        VBLCANFDMessage_t message = {};
-        
-        message.mHeader.mBase.mSignature = BL_OBJ_SIGNATURE;
-        message.mHeader.mBase.mHeaderSize = sizeof(message.mHeader);
-        message.mHeader.mBase.mHeaderVersion = 1;
-        message.mHeader.mBase.mObjectSize = sizeof(VBLCANFDMessage_t);
-        message.mHeader.mBase.mObjectType = BL_OBJ_TYPE_CAN_FD_MESSAGE;
-        message.mHeader.mObjectFlags = BL_OBJ_FLAG_TIME_ONE_NANS;
-        
-        /* setup CAN object header */
-        ULONGLONG time = (InTableData.TimeStamp - StartTime) * 1000;
-        message.mHeader.mObjectTimeStamp = time;
-        
-        
-        /* setup CAN message */
-        message.mChannel = DeviceSettingConfig->GetChannel().ID + 1;
-        message.mFlags = InTableData.DirType & 1;
-        message.mDLC = InTableData.DLC;
-        message.mValidDataBytes = InTableData.DLC;
-        message.mID = InTableData.FrameID;
-        message.mCANFDFlags = 1;
-        for (int i = 0; i < InTableData.Data.length(); i++)
+    VBLCANFDMessage_t message = {};
+
+    message.mHeader.mBase.mSignature = BL_OBJ_SIGNATURE;
+    message.mHeader.mBase.mHeaderSize = sizeof(message.mHeader);
+    message.mHeader.mBase.mHeaderVersion = 1;
+    message.mHeader.mBase.mObjectSize = sizeof(VBLCANFDMessage_t);
+    message.mHeader.mBase.mObjectType = BL_OBJ_TYPE_CAN_FD_MESSAGE;
+    message.mHeader.mObjectFlags = BL_OBJ_FLAG_TIME_ONE_NANS;
+
+    /* setup CAN object header */
+    ULONGLONG time = (InTableData.TimeStamp - StartTime) * 1000;
+    message.mHeader.mObjectTimeStamp = time;
+
+
+    /* setup CAN message */
+    message.mChannel = DeviceSettingConfig->GetChannel().ID + 1;
+    message.mFlags = InTableData.DirType & 1;
+    message.mDLC = InTableData.DLC;
+    message.mValidDataBytes = InTableData.DLC;
+    message.mID = InTableData.FrameID;
+    message.mCANFDFlags = 1;
+    for (int i = 0; i < InTableData.Data.length(); i++)
+    {
+        message.mData[i] = InTableData.Data[i];
+    }
+
+    int InsertIndex = MessageBuffer->GetLength() - 1;
+
+    while (InsertIndex >= 0 && MessageBuffer->IndexAt(InsertIndex).mHeader.mObjectTimeStamp > time)
+    {
+        InsertIndex--;
+    }
+    MessageBuffer->Insert(InsertIndex + 1, message);
+
+    int half = MessageBuffer->GetCapacity() / 2;
+    if (hFile != INVALID_HANDLE_VALUE && MessageBuffer->GetLength() >= (half + half * 0.1))
+    {
+        for (int i = 0; i < half; i++)
         {
-            message.mData[i] = InTableData.Data[i];
+            VBLCANFDMessage_t temp;
+            MessageBuffer->DeQueue(temp);
+
+            const bool WriteSuccess = BLWriteObject(hFile, &temp.mHeader.mBase);
+            CurrentDataCount += WriteSuccess;
+            TotalDataCount += WriteSuccess;
         }
-        
-        int InsertIndex = MessageBuffer->GetLength() - 1;
-        
-        while (InsertIndex >= 0 && MessageBuffer->IndexAt(InsertIndex).mHeader.mObjectTimeStamp > time)
-        {
-            InsertIndex--;
-        }
-        MessageBuffer->Insert(InsertIndex + 1, message);
-        
-        int half = MessageBuffer->GetCapacity() / 2;
-        if (hFile != INVALID_HANDLE_VALUE && MessageBuffer->GetLength() >= (half + half * 0.1))
-        {
-            for (int i = 0; i < half; i++)
-            {
-                VBLCANFDMessage_t temp;
-                MessageBuffer->DeQueue(temp);
-        
-                const bool WriteSuccess = BLWriteObject(hFile, &temp.mHeader.mBase);
-                CurrentDataCount += WriteSuccess;
-                TotalDataCount += WriteSuccess;
-            }
-        }
+    }
     // });
 
     // qDebug() << "当前缓存数据:" << MessageBuffer->GetLength();
@@ -771,9 +774,8 @@ void MainWindow::AddTableData(const TableData& InTableData)
     }
 }
 
-int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
+int MainWindow::AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData)
 {
-
     const double CPUIntervalTime = (InTableData.TimeStamp - StartTime) / 1000000.0;
     int RowIndex = MessageTableWidget->rowCount(); //当前表格的行数
 
@@ -816,7 +818,7 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
         str += QString("%1 ").arg(i, 2, 16, QLatin1Char('0'));
     }
     MessageTableWidget->setItem(RowIndex, 5, new QTableWidgetItem(str.toUpper()));
-    
+
     // if (MessageTableWidget->rowCount() >= 500)
     // {
     //     MessageTableWidget->removeRow(0);
@@ -828,7 +830,7 @@ int MainWindow::AddTotalTableData(QMessageTableWidget *MessageTableWidget, const
     return RowIndex;
 }
 
-void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
+void MainWindow::AddDeltaTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData)
 {
     if (const auto& KeyInfo = MessageKeyInfo(InTableData.FrameID, InTableData.DirType); MessageTableWidget->MessageIDMap
         .contains(KeyInfo))
@@ -862,7 +864,7 @@ void MainWindow::AddDeltaTableData(QMessageTableWidget *MessageTableWidget, cons
     }
 }
 
-int MainWindow::AddDiagTableData(QMessageTableWidget *MessageTableWidget, const TableData &InTableData)
+int MainWindow::AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData)
 {
     QByteArray ba;
     if (const uint ID = ba.setNum(InTableData.FrameID, 16).toUInt(nullptr, 16); (ID != 0x740) && (ID != 0x748))
@@ -891,14 +893,14 @@ void MainWindow::TransmitCANDataObj(ZCAN_Transmit_Data& can_data)
     DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
     DataObj.data.zcanCANFDData.flag.unionVal.frameType = 0;
     DataObj.data.zcanCANFDData.flag.unionVal.transmitType = 0;
-    DataObj.data.zcanCANFDData.flag.unionVal.txDelay =  ZCAN_TX_DELAY_NO_DELAY;
+    DataObj.data.zcanCANFDData.flag.unionVal.txDelay = ZCAN_TX_DELAY_NO_DELAY;
     DataObj.data.zcanCANFDData.flag.unionVal.txEchoed = 1;
-    
-    
+
+
     DataObj.data.zcanCANFDData.frame.can_id = can_data.frame.can_id;
     memcpy(&DataObj.data.zcanCANFDData.frame.data, &can_data.frame.data, 8);
     DataObj.data.zcanCANFDData.frame.len = can_data.frame.can_dlc;
-    
+
     TransmitCANDataObj(&DataObj);
 }
 
@@ -910,7 +912,7 @@ void MainWindow::TransmitCANDataObj(ZCAN_TransmitFD_Data& canfd_data)
     CANCANFDData.flag.unionVal.txDelay = ZCAN_TX_DELAY_NO_DELAY;
     CANCANFDData.flag.unionVal.txEchoRequest = 1;
     CANCANFDData.frame = canfd_data.frame;
-    
+
     ZCANDataObj DataObj{};
     DataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
@@ -953,7 +955,7 @@ void MainWindow::CreateDataEdit()
     QWidgetLibrary::CreateDataEdit(ui->DataContainer, ui->DLCEdit, DataEdits);
 }
 
-QString MainWindow::GetLineTextValue(const QLineEdit *InLineEdit)
+QString MainWindow::GetLineTextValue(const QLineEdit* InLineEdit)
 {
     QString Result = InLineEdit->text();
     if (Result == "")
@@ -996,7 +998,7 @@ void MainWindow::ConstructCANFDData(ZCANCANFDData& CANFDData)
     }
 }
 
-void MainWindow::ConstructCANFrame(ZCAN_Transmit_Data &can_data)
+void MainWindow::ConstructCANFrame(ZCAN_Transmit_Data& can_data)
 {
     const canid_t CANID = GetLineTextValue(ui->DataID).toInt(nullptr, 16);
     const BYTE DLC = GetLineTextValue(ui->DLCEdit).toInt();
@@ -1004,8 +1006,8 @@ void MainWindow::ConstructCANFrame(ZCAN_Transmit_Data &can_data)
 
     memset(&can_data, 0, sizeof(can_data));
     can_data.frame.can_id = MAKE_CAN_ID(CANID, 0, 0, 0); // CAN ID
-    can_data.frame.can_dlc = DLC; 
-    can_data.transmit_type = TransmitType; 
+    can_data.frame.can_dlc = DLC;
+    can_data.transmit_type = TransmitType;
 
     for (int i = 0; i < DLC; ++i)
     {
@@ -1021,7 +1023,7 @@ void MainWindow::ConstructCANFDFrame(ZCAN_TransmitFD_Data& canfd_data)
 
     memset(&canfd_data, 0, sizeof(canfd_data));
     canfd_data.frame.can_id = MAKE_CAN_ID(CANID, 0, 0, 0); // CANFD ID
-    canfd_data.frame.len = DLC; 
+    canfd_data.frame.len = DLC;
     canfd_data.transmit_type = TransmitType;
     //    canfd_data.frame.flags    =  1;
 
@@ -1086,6 +1088,53 @@ void MainWindow::StopLogFile()
     }
 }
 
+void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
+{
+    // const QMetaEnum metaEnum = QMetaEnum::fromType<CustomEnum::EFormType>();
+    // qDebug() << "CurrentFromType" << metaEnum.valueToKey(CurrentFromType) << "FormType" << metaEnum.valueToKey(FormType);
+
+    if (ActiveForms.contains(FormType))
+    {
+        const auto Form = ActiveForms.constFind(FormType).value();
+        if (CurrentFromType != FormType)
+        {
+            if (ActiveForms.contains(CurrentFromType))
+            {
+                const auto Form2 = ActiveForms.constFind(CurrentFromType).value();
+                Form2->close();
+            }
+        }
+        Form->show();
+        Form->activateWindow();
+    }
+    else
+    {
+        FormBase* Temp;
+        switch (FormType)
+        {
+        case CustomEnum::ACR_E11:
+            Temp = new ACR_E11_Form(this, Qt::Window);
+            break;
+
+        case CustomEnum::ACR_H53:
+            Temp = new ACR_H53_Form(this, Qt::Window);
+            break;
+        }
+
+        ActiveForms.insert(FormType, Temp);
+
+        if (ActiveForms.contains(CurrentFromType))
+        {
+            const auto Form2 = ActiveForms.constFind(CurrentFromType).value();
+            Form2->close();
+        }
+        Temp->show();
+        Temp->activateWindow();
+    }
+    
+    CurrentFromType = FormType;
+}
+
 
 void MainWindow::on_ChangeTable_clicked(bool checked)
 {
@@ -1102,15 +1151,14 @@ void MainWindow::on_ChangeTable_clicked(bool checked)
 }
 
 
-void MainWindow::on_actionACR_triggered()
+void MainWindow::on_action_E11_triggered()
 {
-    if (!ACRFromWindow)
-    {
-        ACRFromWindow = new ACRForm(this, Qt::Window);
-    }
+    OpenFrom(CustomEnum::ACR_E11);
+}
 
-    ACRFromWindow->show();
-    ACRFromWindow->activateWindow();
+void MainWindow::on_action_H53_triggered()
+{
+    OpenFrom(CustomEnum::ACR_H53);
 }
 
 
@@ -1150,24 +1198,23 @@ void MainWindow::on_SaveLog_clicked(bool checked)
 
 void MainWindow::on_LoadDBC_triggered()
 {
-    if(!LoadDbcWindowptr)
+    if (!LoadDbcWindowptr)
     {
         LoadDbcWindowptr = new LoadDBCWindow(this, Qt::Window);
     }
-    
+
     LoadDbcWindowptr->show();
     LoadDbcWindowptr->activateWindow();
 }
 
 void MainWindow::on_LoadVariables_triggered()
 {
-    if(!LoadVariablesWindowptr)
+    if (!LoadVariablesWindowptr)
     {
         LoadVariablesWindowptr = new LoadVariablesWindow(this, Qt::Window);
     }
 
-    
+
     LoadVariablesWindowptr->show();
     LoadVariablesWindowptr->activateWindow();
 }
-

@@ -479,7 +479,7 @@ void LoadVariablesWindow::On_SelectPathClicked()
 {
     auto* FileDialog = new QFileDialog(this);
     FileDialog->setWindowTitle("加载变量");
-    FileDialog->setNameFilter("*.cfg");
+    FileDialog->setNameFilter("File(*.cfg;*.json)");
     FileDialog->setViewMode(QFileDialog::Detail);
 
     if (FileDialog->exec() == QDialog::Accepted)

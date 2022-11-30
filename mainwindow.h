@@ -9,8 +9,10 @@
 #include "qlineedit.h"
 #include "Library/QCANLibrary.h"
 #include "binlog.h"
+#include "Data/CustomEnum.h"
 #include "Data/VariableStruct.h"
 #include "Setting/QSystemVariables.h"
+#include "Windows/Pannel/FormBase.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -102,6 +104,8 @@ private:
     void CreateLogFile();
     void StopLogFile();
 
+    void OpenFrom(CustomEnum::EFormType FormType);
+
 private slots:
     //ButtonClick
     void On_OpenDevice();
@@ -134,7 +138,7 @@ private slots:
 
     void on_ChangeTable_clicked(bool checked);
 
-    void on_actionACR_triggered();
+    
 
     void on_comboBox_currentIndexChanged(int index);
 
@@ -143,6 +147,10 @@ private slots:
     void on_LoadVariables_triggered();
 
     void on_LoadDBC_triggered();
+
+    //WindowAction
+    void on_action_E11_triggered();
+    void on_action_H53_triggered();
 
 public:
     class QReceiveThread* ReceiveThread{};
@@ -153,7 +161,8 @@ public:
 private:
     Ui::MainWindow *ui;
     class AutoSendConfigWindow* AutoSendConfig{};
-    class ACRForm* ACRFromWindow = nullptr;
+    class ACR_E11_Form* ACR_E11_FromWindow = nullptr;
+    class ACR_H53_Form* ACR_H53_FromWindow = nullptr;
 
     class LoadDBCWindow* LoadDbcWindowptr = nullptr;
     class LoadVariablesWindow* LoadVariablesWindowptr = nullptr;
@@ -184,5 +193,8 @@ private:
     int TotalDataCount = 0;
     
     CircinalQueue<VBLCANFDMessage_t> *MessageBuffer;
+
+    QMap<CustomEnum::EFormType, FormBase*> ActiveForms;
+    CustomEnum::EFormType CurrentFromType = CustomEnum::EFormType::None;
 };
 #endif // MAINWINDOW_H

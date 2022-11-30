@@ -7,10 +7,11 @@
 #include "qtimer.h"
 #include "typedef.h"
 #include <QWidget>
-#include "Interface/QPanel.h"
+
+#include "FormBase.h"
 
 namespace Ui {
-class ACRForm;
+class ACR_E11_Form;
 }
 
 enum EMessageTimer
@@ -27,17 +28,17 @@ enum EMessageTimer
     Message_GW740,
 };
 
-class ACRForm final : public QWidget, public QPanelInterface
+class ACR_E11_Form final : public FormBase
 {
     Q_OBJECT
 
 public:
-    explicit ACRForm(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~ACRForm() override;
+    explicit ACR_E11_Form(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~ACR_E11_Form() override;
 
 
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data *CANData, void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data *CANData, void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     void StopTimer() const;
 
@@ -56,7 +57,7 @@ private:
     void InitReqButton();
 
     template<typename Transmit_Data>
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     BYTE CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
@@ -73,7 +74,7 @@ private slots:
     void on_pushButton_5_clicked();
 
 private:
-    Ui::ACRForm *ui;
+    Ui::ACR_E11_Form *ui;
 
     QVector<QReceiveItem*> Items;
 
@@ -133,7 +134,7 @@ private:
 };
 
 template<typename Transmit_Data>
-void ACRForm::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACRForm::*Function)(), uint delay, uint msec)
+void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACR_E11_Form::*Function)(), uint delay, uint msec)
 {
     if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
