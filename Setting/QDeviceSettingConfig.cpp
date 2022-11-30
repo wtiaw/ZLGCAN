@@ -55,14 +55,14 @@ QDeviceSettingConfig::QDeviceSettingConfig(QObject* parent)
     : QSettingConfigBase{parent}
 {
     //路径
-    ConfigFilePath = "/DeviceSetting.json";
+    SetConfigFilePath("DeviceSetting");
 }
 
 void QDeviceSettingConfig::ReadConfig()
 {
     QSettingConfigBase::ReadConfig();
 
-    QFile file(ConfigDirPath + ConfigFilePath);
+    QFile file(FullFilePath);
     if (!file.open(QFile::ReadOnly | QFile::Text))
     {
         qDebug() << "can't open error!";
@@ -155,7 +155,7 @@ void QDeviceSettingConfig::InitConfig()
     // 将object设置为本文档的主要对象
     doc.setObject(rootObject);
 
-    QFile file(ConfigDirPath + ConfigFilePath);
+    QFile file(FullFilePath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QTextStream stream(&file);

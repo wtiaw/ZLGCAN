@@ -47,13 +47,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Windows\ACRForm.cpp">
+    <ClCompile Include="Windows\Pannel\ACR_E11_Form.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Pannel\ACR_H53_Form.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\AutoSendConfigWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CustomWidget\DataEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Pannel\FormBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\LoadDBCWindow.cpp">
@@ -78,9 +84,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CustomWidget\TableWidget\QMessageTableWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Interface\QPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CustomThread\QReceiveItem.cpp">
@@ -118,7 +121,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Windows\ACRForm.h">
+    <QtMoc Include="Windows\Pannel\ACR_E11_Form.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Windows\Pannel\ACR_H53_Form.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Windows\AutoSendConfigWindow.h">
@@ -127,7 +133,13 @@
     <ClInclude Include="Library\CircinalQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <QtMoc Include="Data\CustomEnum.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="CustomWidget\DataEdit.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Windows\Pannel\FormBase.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="Data\FromeStruct.h">
@@ -157,9 +169,6 @@
     <QtMoc Include="CustomWidget\TableWidget\QMessageTableWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="Interface\QPanel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="CustomThread\QReceiveItem.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -233,6 +242,12 @@
     
     
     
+    
+    
+    
+    
+    
+    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
@@ -249,9 +264,13 @@
     
     
     
+    
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="Windows\ACRForm.ui">
+    <QtUic Include="Windows\Pannel\ACR_E11_Form.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Windows\Pannel\ACR_H53_Form.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="Windows\AutoSendConfigWindow.ui">

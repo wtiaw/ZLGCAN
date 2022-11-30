@@ -11,6 +11,7 @@ QSettingConfigBase::QSettingConfigBase(QObject* parent)
 void QSettingConfigBase::SetConfigFilePath(const QString& InConfigFilePath)
 {
     this->ConfigFilePath = InConfigFilePath;
+    this->FullFilePath = QString("%1/%2.json").arg(ConfigDirPath, ConfigFilePath);
 }
 
 void QSettingConfigBase::ReadConfig()
@@ -20,10 +21,10 @@ void QSettingConfigBase::ReadConfig()
         if (const bool ismkdir = dir.mkdir(ConfigDirPath); !ismkdir)
             qDebug() << "Create path fail" << Qt::endl;
         else
-            qDebug() << "Create fullpath success" << Qt::endl;
+            qDebug() << "Create full path success" << Qt::endl;
     }
-
-    if (const QFileInfo fi(ConfigDirPath + ConfigFilePath); !fi.isFile())
+    
+    if (const QFileInfo fi(FullFilePath); !fi.isFile())
     {
         InitConfig();
     }
@@ -31,15 +32,15 @@ void QSettingConfigBase::ReadConfig()
 
 void QSettingConfigBase::InitConfig()
 {
-    QFile file(ConfigDirPath + ConfigFilePath);
+    QFile file(FullFilePath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     file.close();
 
-    qDebug() << "Create File" << ConfigDirPath + ConfigFilePath;
+    qDebug() << "Create File" << FullFilePath;
 }
 
 void QSettingConfigBase::SaveConfig(const QString& ObjectName, const QString& key, int Value)
 {
-    Save(ConfigDirPath + ConfigFilePath, ObjectName, key, Value);
+    Save(FullFilePath, ObjectName, key, Value);
 }

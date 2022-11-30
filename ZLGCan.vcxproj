@@ -133,9 +133,11 @@
     </ResourceCompile>
   <QtMoc><CompilerFlavor>msvc</CompilerFlavor><Include>./$(Configuration)/moc_predefs.h</Include><ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription><DynamicSource>output</DynamicSource><QtMocDir>$(Configuration)</QtMocDir><QtMocFileName>moc_%(Filename).cpp</QtMocFileName></QtMoc><QtRcc><ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription><Compression>default</Compression><InitFuncName>Icon</InitFuncName><QtRccDir>$(Configuration)</QtRccDir><QtRccFileName>qrc_%(Filename).cpp</QtRccFileName></QtRcc><QtUic><ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription><QtUicDir>$(ProjectDir)</QtUicDir><QtUicFileName>ui_%(Filename).h</QtUicFileName></QtUic></ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Windows\ACRForm.cpp" />
+    <ClCompile Include="Windows\Pannel\ACR_E11_Form.cpp" />
+    <ClCompile Include="Windows\Pannel\ACR_H53_Form.cpp" />
     <ClCompile Include="Windows\AutoSendConfigWindow.cpp" />
     <ClCompile Include="CustomWidget\DataEdit.cpp" />
+    <ClCompile Include="Windows\Pannel\FormBase.cpp" />
     <ClCompile Include="Windows\LoadDBCWindow.cpp" />
     <ClCompile Include="Windows\LoadVariablesWindow.cpp" />
     <ClCompile Include="CustomThread\PerformanceFrequency.cpp" />
@@ -144,7 +146,6 @@
     <ClCompile Include="Setting\QDeviceSettingConfig.cpp" />
     <ClCompile Include="CustomWidget\CheckBox\QDrawerCheckBox.cpp" />
     <ClCompile Include="CustomWidget\TableWidget\QMessageTableWidget.cpp" />
-    <ClCompile Include="Interface\QPanel.cpp" />
     <ClCompile Include="CustomThread\QReceiveItem.cpp" />
     <ClCompile Include="CustomThread\QReceiveThread.cpp" />
     <ClCompile Include="Setting\QSettingConfigBase.cpp" />
@@ -158,7 +159,17 @@
     <ClCompile Include="mainwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Windows\ACRForm.h">
+    <QtMoc Include="Windows\Pannel\ACR_E11_Form.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="Windows\Pannel\ACR_H53_Form.h">
       
       
       
@@ -178,9 +189,28 @@
       
       
     </QtMoc>
-    <ClInclude Include="Data\WindowType.h" />
     <ClInclude Include="Library\CircinalQueue.h" />
+    <QtMoc Include="Data\CustomEnum.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
     <QtMoc Include="CustomWidget\DataEdit.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="Windows\Pannel\FormBase.h">
       
       
       
@@ -271,7 +301,6 @@
       
       
     </QtMoc>
-    <ClInclude Include="Interface\QPanel.h" />
     <QtMoc Include="CustomThread\QReceiveItem.h">
       
       
@@ -395,6 +424,12 @@
     
     
     
+    
+    
+    
+    
+    
+    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -421,9 +456,21 @@
     
     
     
+    
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="Windows\ACRForm.ui">
+    <QtUic Include="Windows\Pannel\ACR_E11_Form.ui">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtUic>
+    <QtUic Include="Windows\Pannel\ACR_H53_Form.ui">
       
       
       

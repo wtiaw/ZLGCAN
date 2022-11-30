@@ -6,14 +6,28 @@ QMultiMap<QString, VariableNamespace> QSystemVariables::Variables;
 
 QSystemVariables::QSystemVariables([[maybe_unused]] QObject* parent)
 {
-    ConfigFilePath = "/SystemVariables.json";
+    ConfigDirPath += "/SystemVariables";
+    SetConfigFilePath("SystemVariables");
 }
 
 void QSystemVariables::ReadConfig()
 {
-    QSettingConfigBase::ReadConfig();
+    if (const QDir dir(ConfigDirPath); !dir.exists())
+    {
+        if (const bool ismkdir = dir.mkdir(ConfigDirPath); !ismkdir)
+            qDebug() << "Create path fail" << Qt::endl;
+        else
+            qDebug() << "Create full path success" << Qt::endl;
+    }
+    
+    if (const QFileInfo fi(FullFilePath); !fi.isFile())
+    {
+        InitConfig();
+        return;
+    }
 
-    QFile file(ConfigDirPath + ConfigFilePath);
+    QFile file(FullFilePath);
+    qDebug() << "ReadConfig" << FullFilePath;
     if (!file.open(QFile::ReadOnly | QFile::Text))
     {
         qDebug() << "can't open error!";
@@ -45,8 +59,8 @@ void QSystemVariables::ReadConfig()
     QJsonValue interestValue = RootObject.value("namespace");
     if (interestValue.isUndefined())
     {
-        qDebug() << "No Log";
-        return;;
+        qDebug() << "No Config!";
+        return;
     }
 
 
@@ -181,15 +195,35 @@ void QSystemVariables::ReadConfig()
 
 void QSystemVariables::InitConfig()
 {
-    QSettingConfigBase::InitConfig();
+    if (CurrentType == CustomEnum::None)
+    {
+        return;
+    }
+    
+    QFile file(FullFilePath);
+    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+
+    file.close();
+
+    qDebug() << "Create File" << FullFilePath;
 }
 
 void QSystemVariables::SaveConfig(const QJsonDocument& doc) const
 {
-    QFile file(ConfigDirPath + ConfigFilePath);
+    QFile file(FullFilePath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QTextStream stream(&file);
     stream << doc.toJson();
     file.close();
+}
+
+CustomEnum::EFormType QSystemVariables::GetCurrentType() const
+{
+    return CurrentType;
+}
+
+void QSystemVariables::SetCurrentType(const CustomEnum::EFormType CurrentType)
+{
+    this->CurrentType = CurrentType;
 }

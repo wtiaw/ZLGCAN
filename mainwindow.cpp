@@ -25,6 +25,8 @@
 
 #define MAX_FILE_DATA_NUM 500000
 
+QSystemVariables* MainWindow::SystemVariablesConfig = new QSystemVariables();
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
       , ui(new Ui::MainWindow)
@@ -131,8 +133,8 @@ void MainWindow::ReadConfig()
     DeviceSettingConfig = new QDeviceSettingConfig();
     DeviceSettingConfig->ReadConfig();
 
-    SystemVariablesConfig = new QSystemVariables();
-    SystemVariablesConfig->ReadConfig();
+    // SystemVariablesConfig = new QSystemVariables();
+    // SystemVariablesConfig->ReadConfig();
 }
 
 void MainWindow::InitDeviceNameComboBox() const
@@ -1090,26 +1092,12 @@ void MainWindow::StopLogFile()
 
 void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
 {
-    // const QMetaEnum metaEnum = QMetaEnum::fromType<CustomEnum::EFormType>();
+    const QMetaEnum metaEnum = QMetaEnum::fromType<CustomEnum::EFormType>();
     // qDebug() << "CurrentFromType" << metaEnum.valueToKey(CurrentFromType) << "FormType" << metaEnum.valueToKey(FormType);
 
-    if (ActiveForms.contains(FormType))
+    if (!ActiveForms.contains(FormType))
     {
-        const auto Form = ActiveForms.constFind(FormType).value();
-        if (CurrentFromType != FormType)
-        {
-            if (ActiveForms.contains(CurrentFromType))
-            {
-                const auto Form2 = ActiveForms.constFind(CurrentFromType).value();
-                Form2->close();
-            }
-        }
-        Form->show();
-        Form->activateWindow();
-    }
-    else
-    {
-        FormBase* Temp;
+        FormBase* Temp = nullptr;
         switch (FormType)
         {
         case CustomEnum::ACR_E11:
@@ -1122,17 +1110,28 @@ void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
         }
 
         ActiveForms.insert(FormType, Temp);
+    }
 
+    const auto Form = ActiveForms.constFind(FormType).value();
+    const CustomEnum::EFormType CurrentFromType = SystemVariablesConfig->GetCurrentType();
+    
+    if (CurrentFromType != FormType)
+    {
         if (ActiveForms.contains(CurrentFromType))
         {
-            const auto Form2 = ActiveForms.constFind(CurrentFromType).value();
-            Form2->close();
+            ActiveForms.constFind(CurrentFromType).value()->close();
         }
-        Temp->show();
-        Temp->activateWindow();
     }
+    Form->show();
+    Form->activateWindow();
+
+    SystemVariablesConfig->SetCurrentType(FormType);
     
-    CurrentFromType = FormType;
+    const QString NewPath = QString("%1_SystemVariables").arg(metaEnum.valueToKey(FormType));
+    SystemVariablesConfig->SetConfigFilePath(NewPath);
+    SystemVariablesConfig->ReadConfig();
+
+    if(LoadVariablesWindowptr) LoadVariablesWindowptr->ChangeWindowType();
 }
 
 

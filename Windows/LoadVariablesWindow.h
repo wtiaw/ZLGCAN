@@ -24,6 +24,7 @@ public:
     explicit LoadVariablesWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~LoadVariablesWindow() override;
 
+    void ChangeWindowType();
     void ShowData();
 
 private:
@@ -44,6 +45,8 @@ private:
     void UpdateParentItem(QTreeWidgetItem *item);
 
 private slots:
+    void showEvent(QShowEvent* event) override;
+    
     void On_LoadVariablesClicked();
     void On_SelectPathClicked();
 

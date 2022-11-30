@@ -16,7 +16,12 @@
 
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+
+namespace Ui
+{
+    class MainWindow;
+}
+
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -24,7 +29,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
     [[nodiscard]] DEVICE_HANDLE GetDeviceHandle() const { return dHandle; }
@@ -80,9 +85,9 @@ private:
     [[nodiscard]] bool SetSendMode() const;
 
     //MessageTable
-    int  AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
+    int AddTotalTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
     void AddDeltaTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
-    int  AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
+    int AddDiagTableData(QMessageTableWidget* MessageTableWidget, const TableData& InTableData);
 
     //检查DLC输入格式
     bool CheckDLCData() const;
@@ -96,7 +101,7 @@ private:
     //获取DATA数据
     BYTE GetDataFromEdit(int Index);
 
-    void ConstructCANFDData(ZCANCANFDData & CANFDData);
+    void ConstructCANFDData(ZCANCANFDData& CANFDData);
     void ConstructCANFrame(ZCAN_Transmit_Data& can_data);
     void ConstructCANFDFrame(ZCAN_TransmitFD_Data& can_data);
 
@@ -125,8 +130,8 @@ private slots:
     void On_MessageFrameTypeChanged(int index);
 
     //LineEdit
-    void On_DataIDChanged(const QString &arg1);
-    void On_DLCChanged(const QString &arg1);
+    void On_DataIDChanged(const QString& arg1);
+    void On_DLCChanged(const QString& arg1);
 
     //Timer
     void On_UpdateDeltaTableTableTimeOut();
@@ -138,7 +143,6 @@ private slots:
 
     void on_ChangeTable_clicked(bool checked);
 
-    
 
     void on_comboBox_currentIndexChanged(int index);
 
@@ -154,12 +158,13 @@ private slots:
 
 public:
     class QReceiveThread* ReceiveThread{};
-    
+
     UINT64 StartTime = 0;
-    QSystemVariables* SystemVariablesConfig;
-    
+
+    static QSystemVariables* SystemVariablesConfig;
+
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
     class AutoSendConfigWindow* AutoSendConfig{};
     class ACR_E11_Form* ACR_E11_FromWindow = nullptr;
     class ACR_H53_Form* ACR_H53_FromWindow = nullptr;
@@ -179,7 +184,7 @@ private:
     QVector<DataEdit*> DataEdits;
     QVector<QMessageTableWidget*> Tables;
     QVector<TableData> DataLog;
-    
+
     DEVICE_HANDLE dHandle{};
     CHANNEL_HANDLE chHandle{};
     IProperty* property{};
@@ -191,10 +196,10 @@ private:
     HANDLE hFile = INVALID_HANDLE_VALUE;
     int CurrentDataCount = 0;
     int TotalDataCount = 0;
-    
-    CircinalQueue<VBLCANFDMessage_t> *MessageBuffer;
 
+    CircinalQueue<VBLCANFDMessage_t>* MessageBuffer;
+
+    //Form
     QMap<CustomEnum::EFormType, FormBase*> ActiveForms;
-    CustomEnum::EFormType CurrentFromType = CustomEnum::EFormType::None;
 };
 #endif // MAINWINDOW_H

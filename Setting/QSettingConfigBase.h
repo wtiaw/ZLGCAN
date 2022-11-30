@@ -13,6 +13,7 @@ class QSettingConfigBase : public QObject
 public:
     explicit QSettingConfigBase(QObject* parent = nullptr);
 
+    [[nodiscard]] QString GetConfigFilePath() const { return ConfigFilePath; }
     void SetConfigFilePath(const QString& InConfigFilePath);
 
     virtual void ReadConfig();
@@ -25,8 +26,7 @@ signals:
 protected:
     QString ConfigDirPath;
     QString ConfigFilePath;
-
-    QSettings* psetting = nullptr;
+    QString FullFilePath;
 };
 
 template <typename ValueType>

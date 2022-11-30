@@ -2,6 +2,7 @@
 #include "ui_LoadVariablesWindow.h"
 #include <QFileDialog>
 #include <qjsonarray.h>
+#include <qmetaobject.h>
 #include <QScrollBar>
 #include <qstack.h>
 #include <qstandarditemmodel.h>
@@ -27,7 +28,7 @@ LoadVariablesWindow::LoadVariablesWindow(QWidget* parent, Qt::WindowFlags f) :
     mainWindow = qobject_cast<MainWindow*>(parent);
 
     setAttribute(Qt::WA_QuitOnClose, false);
-    setWindowTitle("加载变量");
+    
 
     ui->VariableViewer->setColumnWidth(0, 200);
     ui->VariableViewer->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -45,13 +46,22 @@ LoadVariablesWindow::LoadVariablesWindow(QWidget* parent, Qt::WindowFlags f) :
     connect(ui->VariableViewer, &QTreeWidget::expanded, this, &LoadVariablesWindow::expanded);
 
     connect(ui->VariableViewer, &QTreeWidget::itemClicked, this, &LoadVariablesWindow::ItemClicked);
-
-    ShowData();
 }
 
 LoadVariablesWindow::~LoadVariablesWindow()
 {
     delete ui;
+}
+
+void LoadVariablesWindow::ChangeWindowType()
+{
+    const CustomEnum::EFormType type = MainWindow::SystemVariablesConfig->GetCurrentType();
+    const QMetaEnum metaEnum = QMetaEnum::fromType<CustomEnum::EFormType>();
+    const QString Name = metaEnum.valueToKey(type);
+
+    setWindowTitle(QString("加载变量 [%1]").arg(Name));
+
+    ShowData();
 }
 
 void LoadVariablesWindow::ShowData()
@@ -104,10 +114,10 @@ void LoadVariablesWindow::ShowData()
                 const auto TableWidget = new QTableWidget;
 
                 Widget->setLayout(HBoxLayout);
-                HBoxLayout->setContentsMargins(0,0,0,0);
+                HBoxLayout->setContentsMargins(0, 0, 0, 0);
                 HBoxLayout->addWidget(TableWidget);
-                HBoxLayout->addItem(new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Fixed));
-                
+                HBoxLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+
                 TableWidget->setColumnCount(2);
                 QStringList strs = {"Value", "DisplayName"};
                 TableWidget->setHorizontalHeaderLabels(strs);
@@ -290,6 +300,13 @@ void LoadVariablesWindow::UpdateParentItem(QTreeWidgetItem* item)
         //选中状态
         parent->setCheckState(0, Qt::Checked);
     }
+}
+
+void LoadVariablesWindow::showEvent(QShowEvent* event)
+{
+    QWidget::showEvent(event);
+
+    ChangeWindowType();
 }
 
 void LoadVariablesWindow::On_LoadVariablesClicked()
