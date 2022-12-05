@@ -30,13 +30,13 @@ ACR_E11_Form::~ACR_E11_Form()
 }
 
 void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data* CANData,
-                                     void (ACR_E11_Form::*Function)(), uint delay, uint msec)
+                                          void (ACR_E11_Form::*Function)(), uint delay, uint msec)
 {
     TransmitMessageByTimer<ZCAN_Transmit_Data>(InMessageTimerType, CANData, Function, delay, msec);
 }
 
 void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data* CANData,
-                                     void (ACR_E11_Form::*Function)(), uint delay, uint msec)
+                                          void (ACR_E11_Form::*Function)(), uint delay, uint msec)
 {
     if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
@@ -81,7 +81,9 @@ void ACR_E11_Form::StopTimer() const
 void ACR_E11_Form::InitWindow()
 {
     FormBase::InitWindow();
-    
+
+    InitReqButton();
+
     ui->BSW->setText("---");
     ui->SV->setText("---");
     ui->FBL->setText("---");
@@ -276,14 +278,13 @@ void ACR_E11_Form::InitTrigger()
     });
 
     ReceiveThread->AddTrigger(Items);
-    qDebug() << "init";
 }
 
 void ACR_E11_Form::Init()
 {
-    InitTrigger();
+    FormBase::Init();
 
-    InitReqButton();
+    InitTrigger();
 
     memset(&canfd_data_406, 0, sizeof(canfd_data_406));
     canfd_data_406.frame.can_id = MAKE_CAN_ID(0x406, 0, 0, 0);
@@ -334,17 +335,20 @@ void ACR_E11_Form::Init()
     canfd_data_GW740.frame.data[3] = 0xCF;
     canfd_data_GW740.frame.data[4] = 0x81;
 
-    ACR_E11_Form::InitWindow();
     connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
             SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
+}
+
+void ACR_E11_Form::InitVariable()
+{
+    Variable_ACR_Req_LH = GetVariablesByNamespaceAndName("VCU", "ACR_Req_LH");
 }
 
 void ACR_E11_Form::InitReqButton()
 {
     ui->ACR_Req_LH->clear();
 
-    const auto Value = QSystemVariables::Variables.value("VCU").Variables.value("ACR_Req_LH").ValueTables;
-    for (auto i : Value)
+    for (auto i : Variable_ACR_Req_LH)
     {
         ui->ACR_Req_LH->addItem(i.DisplayName);
     }
@@ -365,8 +369,8 @@ BYTE ACR_E11_Form::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Lengt
 void ACR_E11_Form::Send121()
 {
     QByteArray ba;
-    
-    canfd_data_121.frame.data[0] = ui->ACR_Req_LH->currentIndex();
+
+    canfd_data_121.frame.data[0] = GetTableValueByIndex(Variable_ACR_Req_LH, ui->ACR_Req_LH->currentIndex());
 
     Count_121 = (Count_121 + 1) % 16;
     canfd_data_121.frame.data[6] = ba.setNum(Count_121, 16).toInt(nullptr, 16) << 4;

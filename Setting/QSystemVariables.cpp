@@ -89,6 +89,7 @@ void QSystemVariables::ReadConfig()
                 QString BitCount = VariableObj.value("bitcount").toString();
                 QString IsSigned = VariableObj.value("isSigned").toString();
                 QString Type = VariableObj.value("type").toString();
+                bool bShouldSave = VariableObj.value("shouldSave").toBool();
                 QString Comment;
                 QString StartValue;
                 QString MaxValue;
@@ -101,6 +102,8 @@ void QSystemVariables::ReadConfig()
                 QJsonValue CommentJV = VariableObj.value("comment");
                 QJsonValue ValueTableJV = VariableObj.value("valuetable");
 
+                VariableStruct.bShouldSave = bShouldSave;
+                
                 if (!StartValueJV.isUndefined())
                 {
                     StartValue = StartValueJV.toString();
@@ -226,4 +229,16 @@ CustomEnum::EFormType QSystemVariables::GetCurrentType() const
 void QSystemVariables::SetCurrentType(const CustomEnum::EFormType CurrentType)
 {
     this->CurrentType = CurrentType;
+}
+
+QList<ValueTable> GetVariablesByNamespaceAndName(const QString& Namespace, const QString& Name)
+{
+    return QSystemVariables::Variables.value(Namespace).Variables.value(Name).ValueTables;
+}
+
+int GetTableValueByIndex(const QList<ValueTable>& InValueTable, const int Index)
+{
+    if(InValueTable.length() <= Index) return -1;
+
+    return InValueTable[Index].Value;
 }

@@ -28,7 +28,7 @@ LoadVariablesWindow::LoadVariablesWindow(QWidget* parent, Qt::WindowFlags f) :
     mainWindow = qobject_cast<MainWindow*>(parent);
 
     setAttribute(Qt::WA_QuitOnClose, false);
-    
+
 
     ui->VariableViewer->setColumnWidth(0, 200);
     ui->VariableViewer->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -75,11 +75,11 @@ void LoadVariablesWindow::ShowData()
         ui->VariableViewer->addTopLevelItem(topItem);
         topItem->setCheckState(0, Qt::Unchecked);
 
+        QTreeWidgetItem* CurrentVariableItem = nullptr;
         for (const auto& Namespace : QSystemVariables::Variables.value(Key).Variables.keys())
         {
-            // QStringList ValueStrList;
-
             const auto& Variable = QSystemVariables::Variables.value(Key).Variables.value(Namespace);
+            const bool bShouldSave = Variable.bShouldSave;
             const EDataType Type = Variable.DataType;
             QString DisplayType;
             const QString StartValue = Variable.InitialValue;
@@ -103,9 +103,10 @@ void LoadVariablesWindow::ShowData()
                 break;
             }
 
-            const auto CurrentVariableItem = new QTreeWidgetItem(topItem);
+            CurrentVariableItem = new QTreeWidgetItem(topItem);
             SetItemData(CurrentVariableItem, Namespace, DisplayType, StartValue, MinValue, MaxValue, Comment);
-            CurrentVariableItem->setCheckState(0, Qt::Unchecked);
+
+            CurrentVariableItem->setCheckState(0, bShouldSave ? Qt::Checked : Qt::Unchecked);
 
             if (Variable.ValueTables.count() > 0)
             {
@@ -151,6 +152,8 @@ void LoadVariablesWindow::ShowData()
                 ui->VariableViewer->setItemWidget(CurrentValueTable, 0, Widget);
             }
         }
+
+        UpdateParentItem(CurrentVariableItem);
     }
 }
 
@@ -267,20 +270,19 @@ void LoadVariablesWindow::SetItemData(QTreeWidgetItem* CurrentItem, const QStrin
     CurrentItem->setText(COMMENT_COLUMN, Comment);
 }
 
-void LoadVariablesWindow::UpdateParentItem(QTreeWidgetItem* item)
+void LoadVariablesWindow::UpdateParentItem(const QTreeWidgetItem* item)
 {
     QTreeWidgetItem* parent = item->parent();
-    if (parent == NULL)
+    if (parent == nullptr)
     {
         return;
     }
     //选中的子节点个数
     int selectedCount = 0;
-    int childCount = parent->childCount();
+    const int childCount = parent->childCount();
     for (int i = 0; i < childCount; i++)
     {
-        QTreeWidgetItem* childItem = parent->child(i);
-        if (childItem->checkState(0) == Qt::Checked)
+        if (const QTreeWidgetItem* childItem = parent->child(i); childItem->checkState(0) == Qt::Checked)
         {
             selectedCount++;
         }
@@ -443,6 +445,8 @@ void LoadVariablesWindow::On_LoadVariablesClicked()
             //-----------------------------注释-----------------------------//
             SetVariableComment(KeyValue, VariableTempObj);
 
+            VariableTempObj.insert("shouldSave", false);
+
             VariableArray.append(VariableTempObj);
             VariableObj = VariableTempObj;
         }
@@ -517,9 +521,8 @@ void LoadVariablesWindow::expanded(const QModelIndex& index)
     ui->VariableViewer->header()->setSortIndicator(2, Qt::AscendingOrder);
 }
 
-void LoadVariablesWindow::ItemClicked(QTreeWidgetItem* item)
+void LoadVariablesWindow::ItemClicked(const QTreeWidgetItem* item)
 {
-    const auto Widget = ui->VariableViewer->itemWidget(item, 0);
     const int cnt = item->childCount();
 
     if (cnt >= 0 && !ui->VariableViewer->itemWidget(item->child(0), 0))

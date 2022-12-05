@@ -19,7 +19,8 @@ struct ValueTable
 struct VariableStruct
 {
     EDataType DataType;
-    
+
+    bool bShouldSave{};
     bool bHasComment{};
     bool bHasInitialValue{};
     bool bHasMin{};

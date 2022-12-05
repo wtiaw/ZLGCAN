@@ -10,8 +10,9 @@
 
 #include "FormBase.h"
 
-namespace Ui {
-class ACR_E11_Form;
+namespace Ui
+{
+    class ACR_E11_Form;
 }
 
 enum EMessageTimer
@@ -33,18 +34,24 @@ class ACR_E11_Form final : public FormBase
     Q_OBJECT
 
 public:
-    explicit ACR_E11_Form(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit ACR_E11_Form(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~ACR_E11_Form() override;
 
 
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data *CANData, void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data *CANData, void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_Transmit_Data* CANData,
+                                void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data* CANData,
+                                void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     void StopTimer() const;
 
+
+    void InitWindow() override;
+protected:
     //Interface
-    virtual void InitWindow() override;
-    virtual void InitButtonFunction() override;
+    void InitButtonFunction() override;
+    void Init() override;
+    void InitVariable() override;
 
 public:
 signals:
@@ -52,19 +59,19 @@ signals:
 
 private:
     void InitTrigger();
-
-    void Init();
+    
     void InitReqButton();
 
-    template<typename Transmit_Data>
-    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
+    template <typename Transmit_Data>
+    void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data* CANData,
+                                void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     BYTE CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
     void Send121();
     void SendGW740();
 
-    void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData &)> const Func);
+    void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func);
 
 private slots:
     void on_pushButton_clicked();
@@ -74,7 +81,7 @@ private slots:
     void on_pushButton_5_clicked();
 
 private:
-    Ui::ACR_E11_Form *ui;
+    Ui::ACR_E11_Form* ui;
 
     QVector<QReceiveItem*> Items;
 
@@ -89,10 +96,10 @@ private:
     BYTE CANE2E_CRC8_XORVALUE = 0xFF;
     BYTE CANE2E_CRC8_STARTVALUE = 0xFF;
 
-    BYTE txDataBuffer_temp[7] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    BYTE txDataBuffer_temp[7] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     BYTE cane2e_CrcTable8[256] =
-      {
+    {
         0x00, 0x1D, 0x3A, 0x27, 0x74, 0x69, 0x4E, 0x53, 0xE8, 0xF5, 0xD2,
         0xCF, 0x9C, 0x81, 0xA6, 0xBB, 0xCD, 0xD0, 0xF7, 0xEA, 0xB9, 0xA4,
         0x83, 0x9E, 0x25, 0x38, 0x1F, 0x02, 0x51, 0x4C, 0x6B, 0x76, 0x87,
@@ -117,7 +124,7 @@ private:
         0xE1, 0x5A, 0x47, 0x60, 0x7D, 0x2E, 0x33, 0x14, 0x09, 0x7F, 0x62,
         0x45, 0x58, 0x0B, 0x16, 0x31, 0x2C, 0x97, 0x8A, 0xAD, 0xB0, 0xE3,
         0xFE, 0xD9, 0xC4
-      };
+    };
 
     ZCAN_TransmitFD_Data canfd_data_406;
     ZCAN_TransmitFD_Data canfd_data_121;
@@ -131,10 +138,14 @@ private:
     ZCAN_TransmitFD_Data canfd_data_Extended_Session;
     int Count_121 = 0;
     int Count_GW740 = 0;
+
+    //Variable
+    QList<ValueTable> Variable_ACR_Req_LH;
 };
 
-template<typename Transmit_Data>
-void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data *CANData, void (ACR_E11_Form::*Function)(), uint delay, uint msec)
+template <typename Transmit_Data>
+void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data* CANData,
+                                          void (ACR_E11_Form::*Function)(), uint delay, uint msec)
 {
     if (!cHandle)
         cHandle = mainWindow->GetChannelHandle();
@@ -149,19 +160,19 @@ void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, Tran
             // mainWindow->TransmitCANDataObj(CANData);
 
             ZCANCANFDData CANCANFDData{};
-        CANCANFDData.flag.unionVal.frameType = 1;
-        CANCANFDData.flag.unionVal.transmitType = 0;
-        CANCANFDData.flag.unionVal.txDelay = ZCAN_TX_DELAY_NO_DELAY;
-        CANCANFDData.flag.unionVal.txEchoed = 1;
-        // CANCANFDData.frame = CANData->frame;
-        
-        ZCANDataObj DataObj{};
-        DataObj.chnl = 0;
-        DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
-        DataObj.data.zcanCANFDData = CANCANFDData;
+            CANCANFDData.flag.unionVal.frameType = 1;
+            CANCANFDData.flag.unionVal.transmitType = 0;
+            CANCANFDData.flag.unionVal.txDelay = ZCAN_TX_DELAY_NO_DELAY;
+            CANCANFDData.flag.unionVal.txEchoed = 1;
+            // CANCANFDData.frame = CANData->frame;
+
+            ZCANDataObj DataObj{};
+            DataObj.chnl = 0;
+            DataObj.dataType = ZCAN_DT_ZCAN_CAN_CANFD_DATA;
+            DataObj.data.zcanCANFDData = CANCANFDData;
 
             mainWindow->TransmitCANDataObj(&DataObj);
-            
+
             if (Function)
                 (this->*Function)();
         }, Qt::QueuedConnection);

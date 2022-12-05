@@ -42,7 +42,7 @@ private:
                      const QString& DisplayType = "-", const QString& StartValue = "-", const QString& MinValue = "-",
                      const QString& MaxValue = "-", const QString& Comment = "-");
 
-    void UpdateParentItem(QTreeWidgetItem *item);
+    void UpdateParentItem(const QTreeWidgetItem *item);
 
 private slots:
     void showEvent(QShowEvent* event) override;
@@ -53,7 +53,7 @@ private slots:
     void TreeClicked(const QModelIndex& index);
     void expanded(const QModelIndex& index);
 
-    void ItemClicked(QTreeWidgetItem * item);
+    void ItemClicked(const QTreeWidgetItem * item);
 
 private:
     Ui::LoadVariablesWindow* ui;

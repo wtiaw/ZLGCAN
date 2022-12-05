@@ -1092,8 +1092,6 @@ void MainWindow::StopLogFile()
 
 void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
 {
-    const QMetaEnum metaEnum = QMetaEnum::fromType<CustomEnum::EFormType>();
-    // qDebug() << "CurrentFromType" << metaEnum.valueToKey(CurrentFromType) << "FormType" << metaEnum.valueToKey(FormType);
 
     if (!ActiveForms.contains(FormType))
     {
@@ -1122,14 +1120,15 @@ void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
             ActiveForms.constFind(CurrentFromType).value()->close();
         }
     }
-    Form->show();
-    Form->activateWindow();
 
     SystemVariablesConfig->SetCurrentType(FormType);
     
-    const QString NewPath = QString("%1_SystemVariables").arg(metaEnum.valueToKey(FormType));
+    const QString NewPath = QString("%1_SystemVariables").arg(GetEnumKeyStr<CustomEnum::EFormType>(FormType));
     SystemVariablesConfig->SetConfigFilePath(NewPath);
     SystemVariablesConfig->ReadConfig();
+
+    Form->show();
+    Form->activateWindow();
 
     if(LoadVariablesWindowptr) LoadVariablesWindowptr->ChangeWindowType();
 }

@@ -25,4 +25,8 @@ private:
     CustomEnum::EFormType CurrentType = CustomEnum::EFormType::None;
 };
 
+QList<ValueTable> GetVariablesByNamespaceAndName(const QString& Namespace, const QString& Name);
+
+int GetTableValueByIndex(const QList<ValueTable>&, int Index);
+
 #endif
