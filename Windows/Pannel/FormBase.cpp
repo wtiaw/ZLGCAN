@@ -16,8 +16,6 @@ FormBase::~FormBase()
 void FormBase::Init()
 {
     qDebug() << GetEnumKeyStr<CustomEnum::EFormType>(FromType) << "init";
-
-    InitVariable();
 }
 
 void FormBase::InitVariable()
@@ -38,6 +36,7 @@ void FormBase::InitButtonFunction()
 void FormBase::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
-
+    
+    InitVariable();
     InitWindow();
 }
