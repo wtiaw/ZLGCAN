@@ -341,7 +341,7 @@ void ACR_E11_Form::Init()
 
 void ACR_E11_Form::InitVariable()
 {
-    Variable_ACR_Req_LH = GetVariablesByNamespaceAndName("VCU", "ACR_Req_LH");
+    Variable_ACR_Req_LH = GetVariablesByNamespaceAndName("VCU.ACR_Req_LH");
 }
 
 void ACR_E11_Form::InitReqButton()

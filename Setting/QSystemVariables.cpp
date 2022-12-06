@@ -19,7 +19,7 @@ void QSystemVariables::ReadConfig()
         else
             qDebug() << "Create full path success" << Qt::endl;
     }
-    
+
     if (const QFileInfo fi(FullFilePath); !fi.isFile())
     {
         InitConfig();
@@ -82,7 +82,6 @@ void QSystemVariables::ReadConfig()
             QJsonArray VariableArr = NamespaceObj.value("variable").toArray();
             for (auto VariableRef : VariableArr)
             {
-                VariableStruct VariableStruct;
                 QJsonObject VariableObj = VariableRef.toObject();
 
                 QString VariableName = VariableObj.value("name").toString();
@@ -91,49 +90,43 @@ void QSystemVariables::ReadConfig()
                 QString Type = VariableObj.value("type").toString();
                 bool bShouldSave = VariableObj.value("shouldSave").toBool();
                 QString Comment;
-                QString StartValue;
-                QString MaxValue;
-                QString MinValue;
 
-
-                QJsonValue StartValueJV = VariableObj.value("startValue");
-                QJsonValue MaxValueJV = VariableObj.value("maxValue");
-                QJsonValue MinValueJV = VariableObj.value("minValue");
                 QJsonValue CommentJV = VariableObj.value("comment");
                 QJsonValue ValueTableJV = VariableObj.value("valuetable");
 
-                VariableStruct.bShouldSave = bShouldSave;
-                
-                if (!StartValueJV.isUndefined())
+                VariableBase* VariableBase = nullptr;
+                if (Type == "int")
                 {
-                    StartValue = StartValueJV.toString();
-                    VariableStruct.bHasInitialValue = true;
-
-                    VariableStruct.InitialValue = StartValue;
+                    if (IsSigned == "true")
+                    {
+                        VariableBase = new VariableEntity<uint>;
+                        SetVariable<uint>(dynamic_cast<VariableEntity<uint>*>(VariableBase), VariableObj);
+                    }
+                    else
+                    {
+                        VariableBase = new VariableEntity<int>;
+                        SetVariable<int>(dynamic_cast<VariableEntity<int>*>(VariableBase), VariableObj);
+                    }
+                }
+                else if (Type == "float")
+                {
+                    VariableBase = new VariableEntity<double>;
+                    SetVariable<double>(dynamic_cast<VariableEntity<double>*>(VariableBase), VariableObj);
+                }
+                else
+                {
+                    VariableBase = new VariableEntity<QString>;
+                    SetVariable<QString>(dynamic_cast<VariableEntity<QString>*>(VariableBase), VariableObj);
                 }
 
-                if (!MaxValueJV.isUndefined())
-                {
-                    MaxValue = MaxValueJV.toString();
-                    VariableStruct.bHasMax = true;
-
-                    VariableStruct.Max = MaxValue;
-                }
-
-                if (!MinValueJV.isUndefined())
-                {
-                    MinValue = MinValueJV.toString();
-                    VariableStruct.bHasMin = true;
-
-                    VariableStruct.Min = MinValue;
-                }
+                VariableBase->bShouldSave = bShouldSave;
 
                 if (!CommentJV.isUndefined())
                 {
                     Comment = CommentJV.toString();
-                    VariableStruct.bHasComment = true;
+                    VariableBase->bHasComment = true;
 
-                    VariableStruct.Comment = Comment;
+                    VariableBase->Comment = Comment;
                 }
 
                 if (!ValueTableJV.isUndefined())
@@ -153,20 +146,20 @@ void QSystemVariables::ReadConfig()
                 {
                     if (IsSigned == "true")
                     {
-                        VariableStruct.DataType = EDataType::UInt32;
+                        VariableBase->DataType = EDataType::UInt32;
                     }
                     else
                     {
-                        VariableStruct.DataType = EDataType::Int32;
+                        VariableBase->DataType = EDataType::Int32;
                     }
                 }
                 else if (Type == "float")
                 {
-                    VariableStruct.DataType = EDataType::Double;
+                    VariableBase->DataType = EDataType::Double;
                 }
                 else if (Type == "string")
                 {
-                    VariableStruct.DataType = EDataType::String;
+                    VariableBase->DataType = EDataType::String;
                 }
 
 
@@ -184,11 +177,11 @@ void QSystemVariables::ReadConfig()
                         TempValue.DisplayName = DisplayString;
                         TempValue.Value = Value.toInt();
 
-                        VariableStruct.ValueTables.append(TempValue);
+                        VariableBase->ValueTables.append(TempValue);
                     }
                 }
 
-                Variable.Variables.insert(VariableName, VariableStruct);
+                Variable.Variables.insert(VariableName, VariableBase);
             }
 
             Variables.insert(NamespaceName, Variable);
@@ -202,7 +195,7 @@ void QSystemVariables::InitConfig()
     {
         return;
     }
-    
+
     QFile file(FullFilePath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
@@ -231,14 +224,32 @@ void QSystemVariables::SetCurrentType(const CustomEnum::EFormType CurrentType)
     this->CurrentType = CurrentType;
 }
 
-QList<ValueTable> GetVariablesByNamespaceAndName(const QString& Namespace, const QString& Name)
+QList<ValueTable> GetVariablesByNamespaceAndName(const QString& NamespaceAndName)
 {
-    return QSystemVariables::Variables.value(Namespace).Variables.value(Name).ValueTables;
+    QList<ValueTable> Result;
+
+    auto sre = NamespaceAndName.split(".");
+    const auto Namespace = sre[0];
+    const auto Name = sre[1];
+
+    if (!QSystemVariables::Variables.contains(Namespace))
+    {
+        qDebug() << "Namespace:" << Namespace << "Not Found!";
+        return Result;
+    }
+
+    if (!QSystemVariables::Variables.value(Namespace).Variables.contains(Name))
+    {
+        qDebug() << "Variable:" << Namespace << ":" << Name << "Not Found!";
+        return Result;
+    }
+
+    return QSystemVariables::Variables.value(Namespace).Variables.value(Name)->ValueTables;
 }
 
 int GetTableValueByIndex(const QList<ValueTable>& InValueTable, const int Index)
 {
-    if(InValueTable.length() <= Index) return -1;
+    if (InValueTable.length() <= Index) return -1;
 
     return InValueTable[Index].Value;
 }

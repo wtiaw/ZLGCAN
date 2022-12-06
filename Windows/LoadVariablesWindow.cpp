@@ -78,37 +78,86 @@ void LoadVariablesWindow::ShowData()
         QTreeWidgetItem* CurrentVariableItem = nullptr;
         for (const auto& Namespace : QSystemVariables::Variables.value(Key).Variables.keys())
         {
-            const auto& Variable = QSystemVariables::Variables.value(Key).Variables.value(Namespace);
-            const bool bShouldSave = Variable.bShouldSave;
-            const EDataType Type = Variable.DataType;
+            const auto Variable = QSystemVariables::Variables.value(Key).Variables.value(Namespace);
+            const bool bShouldSave = Variable->bShouldSave;
+            const EDataType Type = Variable->DataType;
             QString DisplayType;
-            const QString StartValue = Variable.InitialValue;
-            const QString MinValue = Variable.Min;
-            const QString MaxValue = Variable.Max;
-            const QString Comment = Variable.Comment;
+            QString StartValue;
+            QString MinValue;
+            QString MaxValue;
+            QString Comment = Variable->Comment;
 
             switch (Type)
             {
             case Int32:
-                DisplayType = "int32";
-                break;
+                {
+                    const auto temp = dynamic_cast<VariableEntity<int>*>(Variable);
+                    DisplayType = "int32";
+                    
+                    StartValue = QString::number(temp->InitialValue);
+                    MinValue = QString::number(temp->Min);
+                    MaxValue = QString::number(temp->Max);
+                    break;
+                }
             case UInt32:
-                DisplayType = "uint32";
-                break;
+                {
+                    const auto temp = dynamic_cast<VariableEntity<uint>*>(Variable);
+                    DisplayType = "uint32";
+
+                    StartValue = QString::number(temp->InitialValue);
+                    MinValue = QString::number(temp->Min);
+                    MaxValue = QString::number(temp->Max);
+                    break;
+                }
             case Double:
-                DisplayType = "double";
-                break;
+                {
+                    const auto temp = dynamic_cast<VariableEntity<double>*>(Variable);
+                    DisplayType = "double";
+
+                    StartValue = QString::number(temp->InitialValue, 'f', 1);
+                    MinValue = QString::number(temp->Min, 'f', 1);
+                    MaxValue = QString::number(temp->Max, 'f', 1);
+                    break;
+                }
             case String:
-                DisplayType = "string";
-                break;
+                {
+                    const auto temp = dynamic_cast<VariableEntity<QString>*>(Variable);
+                    DisplayType = "string";
+
+                    StartValue = temp->InitialValue;
+                    MinValue = temp->Min;
+                    MaxValue = temp->Max;
+                    break;
+                }
             }
+
+            if (!Variable->bHasComment)
+            {
+                Comment = "-";
+            }
+
+            if (!Variable->bHasMax)
+            {
+                MaxValue = "-";
+            }
+
+            if (!Variable->bHasMin)
+            {
+                MinValue = "-";
+            }
+
+            if (!Variable->bHasInitialValue)
+            {
+                StartValue = "-";
+            }
+
 
             CurrentVariableItem = new QTreeWidgetItem(topItem);
             SetItemData(CurrentVariableItem, Namespace, DisplayType, StartValue, MinValue, MaxValue, Comment);
 
             CurrentVariableItem->setCheckState(0, bShouldSave ? Qt::Checked : Qt::Unchecked);
 
-            if (Variable.ValueTables.count() > 0)
+            if (Variable->ValueTables.count() > 0)
             {
                 const auto Widget = new QWidget;
                 const auto HBoxLayout = new QHBoxLayout;
@@ -137,7 +186,7 @@ void LoadVariablesWindow::ShowData()
                 CurrentValueTable->setFirstColumnSpanned(true);
 
 
-                for (const auto& TableValue : Variable.ValueTables)
+                for (const auto& TableValue : Variable->ValueTables)
                 {
                     const QString DisplayName = TableValue.DisplayName;
                     const QString Value = QString("%1").arg(TableValue.Value, 2, 16, QLatin1Char('0')).toUpper();
@@ -518,7 +567,7 @@ void LoadVariablesWindow::TreeClicked(const QModelIndex& index)
 void LoadVariablesWindow::expanded(const QModelIndex& index)
 {
     ui->VariableViewer->resizeColumnToContents(5);
-    ui->VariableViewer->header()->setSortIndicator(2, Qt::AscendingOrder);
+    // ui->VariableViewer->header()->setSortIndicator(2, Qt::AscendingOrder);
 }
 
 void LoadVariablesWindow::ItemClicked(const QTreeWidgetItem* item)
