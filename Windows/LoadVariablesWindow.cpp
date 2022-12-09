@@ -80,55 +80,34 @@ void LoadVariablesWindow::ShowData()
         {
             const auto Variable = QSystemVariables::Variables.value(Key).Variables.value(Namespace);
             const bool bShouldSave = Variable->bShouldSave;
-            const EDataType Type = Variable->DataType;
+            const ValueType Type = Variable->DataType;
             QString DisplayType;
             QString StartValue;
             QString MinValue;
             QString MaxValue;
             QString Comment = Variable->Comment;
 
+            StartValue = Variable->InitialValue;
+            MinValue = Variable->MinValue;
+            MaxValue = Variable->MaxValue;
+
             switch (Type)
             {
-            case Int32:
-                {
-                    const auto temp = dynamic_cast<VariableEntity<int>*>(Variable);
-                    DisplayType = "int32";
-                    
-                    StartValue = QString::number(temp->InitialValue);
-                    MinValue = QString::number(temp->Min);
-                    MaxValue = QString::number(temp->Max);
-                    break;
-                }
-            case UInt32:
-                {
-                    const auto temp = dynamic_cast<VariableEntity<uint>*>(Variable);
-                    DisplayType = "uint32";
+            case ValueType::Int:
+                DisplayType = "int32";
+                break;
+                
+            case ValueType::UInt:
+                DisplayType = "uint32";
+                break;
 
-                    StartValue = QString::number(temp->InitialValue);
-                    MinValue = QString::number(temp->Min);
-                    MaxValue = QString::number(temp->Max);
-                    break;
-                }
-            case Double:
-                {
-                    const auto temp = dynamic_cast<VariableEntity<double>*>(Variable);
-                    DisplayType = "double";
+            case ValueType::Double:
+                DisplayType = "double";
+                break;
 
-                    StartValue = QString::number(temp->InitialValue, 'f', 1);
-                    MinValue = QString::number(temp->Min, 'f', 1);
-                    MaxValue = QString::number(temp->Max, 'f', 1);
-                    break;
-                }
-            case String:
-                {
-                    const auto temp = dynamic_cast<VariableEntity<QString>*>(Variable);
-                    DisplayType = "string";
-
-                    StartValue = temp->InitialValue;
-                    MinValue = temp->Min;
-                    MaxValue = temp->Max;
-                    break;
-                }
+            case ValueType::String:
+                DisplayType = "string";
+                break;
             }
 
             if (!Variable->bHasComment)
@@ -370,7 +349,7 @@ void LoadVariablesWindow::On_LoadVariablesClicked()
         return;
     }
 
-    QMultiMap<QString, VariableNamespace> temp;
+    QMultiMap<QString, VariableNamespacePair> temp;
     QSystemVariables::Variables.swap(temp);
     QFile File(FilePath);
 

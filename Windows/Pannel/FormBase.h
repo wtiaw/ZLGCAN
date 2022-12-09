@@ -2,7 +2,8 @@
 #define FORMBASE_H
 
 #include <QWidget>
-
+#include <QTimer>
+#include "CustomThread/PerformanceFrequency.h"
 #include "Data/CustomEnum.h"
 
 // namespace Ui {
@@ -29,6 +30,7 @@ public:
     
     //界面显示时调用
     virtual void InitWindow();
+    virtual void StopTimer();
     
 protected:
     //构造函数中调用
@@ -39,9 +41,9 @@ protected:
 
 protected:
     CustomEnum::EFormType FromType = CustomEnum::None;
-    //
-    // private:
-    //     Ui::ACR_H53_Form *ui;
+    
+    QMap<int, QTimer*> MessageTimerContainer;
+    QMap<int, PerformanceFrequency*> MessageThreadContainer;
 };
 
 #endif // ACR_H53_FORM_H

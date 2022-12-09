@@ -23,7 +23,7 @@
 #include "Windows/Pannel/ACR_H53_Form.h"
 
 
-#define MAX_FILE_DATA_NUM 500000
+#define MAX_FILE_DATA_NUM 1000000
 
 QSystemVariables* MainWindow::SystemVariablesConfig = new QSystemVariables();
 
@@ -327,7 +327,9 @@ void MainWindow::On_OpenDevice()
 
     qDebug("设备：%s 打开成功", (DeviceDisplayName.c_str()));
 
-    if (ACR_E11_FromWindow) ACR_E11_FromWindow->InitWindow();
+    if(CurrentFromType == CustomEnum::None) return;
+    
+    ActiveForms.value(CurrentFromType)->InitWindow();
 }
 
 void MainWindow::On_InitCAN()
@@ -438,13 +440,17 @@ void MainWindow::On_OpenCAN()
     CANDataObj.chnl = DeviceSettingConfig->GetChannel().ID;
     CANDataObj.data.zcanCANFDData.flag.unionVal.txEchoRequest = 0;
 
-    ZCAN_TransmitData(chHandle, &CANDataObj, 1);
+    // ZCAN_TransmitData(chHandle, &CANDataObj, 1);
 }
 
 void MainWindow::On_Reset()
 {
-    ReleaseIProperty(property);
-    chHandle = nullptr;
+    if (ReleaseIProperty(property) != STATUS_OK)
+    {
+        qDebug("复位通道失败!");
+        return;
+    }
+    // chHandle = nullptr;
 
     qDebug("复位通道成功");
     bIsOpenCAN = false;
@@ -456,10 +462,9 @@ void MainWindow::On_Reset()
 
     ReceiveThread->Pause();
 
-    if (ACR_E11_FromWindow)
-    {
-        ACR_E11_FromWindow->StopTimer();
-    }
+    if(CurrentFromType == CustomEnum::None) return;
+    
+    ActiveForms.value(CurrentFromType)->StopTimer();
 }
 
 void MainWindow::On_CloseDevice()
@@ -493,10 +498,9 @@ void MainWindow::On_CloseDevice()
     qDebug("设备：%s 关闭!", (DeviceDisplayName.c_str()));
 
     UpdateDeltaTableTable->stop();
-    if (ACR_E11_FromWindow)
-    {
-        ACR_E11_FromWindow->StopTimer();
-    }
+    if(CurrentFromType == CustomEnum::None) return;
+    
+    ActiveForms.value(CurrentFromType)->StopTimer();
 
     StopLogFile();
 }
@@ -726,7 +730,7 @@ void MainWindow::AddTableData(const TableData& InTableData)
     message.mHeader.mObjectFlags = BL_OBJ_FLAG_TIME_ONE_NANS;
 
     /* setup CAN object header */
-    ULONGLONG time = (InTableData.TimeStamp - StartTime) * 1000;
+    const ULONGLONG time = (InTableData.TimeStamp - StartTime) * 1000;
     message.mHeader.mObjectTimeStamp = time;
 
 
@@ -750,12 +754,12 @@ void MainWindow::AddTableData(const TableData& InTableData)
     }
     MessageBuffer->Insert(InsertIndex + 1, message);
 
-    int half = MessageBuffer->GetCapacity() / 2;
-    if (hFile != INVALID_HANDLE_VALUE && MessageBuffer->GetLength() >= (half + half * 0.1))
+    if (const int half = MessageBuffer->GetCapacity() / 2; hFile != INVALID_HANDLE_VALUE && MessageBuffer->GetLength()
+        >= (half + half * 0.1))
     {
         for (int i = 0; i < half; i++)
         {
-            VBLCANFDMessage_t temp;
+            VBLCANFDMessage_t temp{};
             MessageBuffer->DeQueue(temp);
 
             const bool WriteSuccess = BLWriteObject(hFile, &temp.mHeader.mBase);
@@ -763,6 +767,8 @@ void MainWindow::AddTableData(const TableData& InTableData)
             TotalDataCount += WriteSuccess;
         }
     }
+
+    SaveSystemVariable(time);
     // });
 
     // qDebug() << "当前缓存数据:" << MessageBuffer->GetLength();
@@ -821,10 +827,10 @@ int MainWindow::AddTotalTableData(QMessageTableWidget* MessageTableWidget, const
     }
     MessageTableWidget->setItem(RowIndex, 5, new QTableWidgetItem(str.toUpper()));
 
-    // if (MessageTableWidget->rowCount() >= 500)
-    // {
-    //     MessageTableWidget->removeRow(0);
-    // }
+    if (MessageTableWidget->rowCount() >= 500)
+    {
+        MessageTableWidget->removeRow(0);
+    }
 
     if (!bIsDragged && ui->EnableScroll->isChecked())
         MessageTableWidget->scrollToBottom();
@@ -1080,6 +1086,8 @@ void MainWindow::StopLogFile()
             TotalDataCount += WriteSuccess;
         }
 
+        // SaveSystemVariable()
+
         qDebug() << "总体文件数据:" << TotalDataCount;
 
 
@@ -1090,9 +1098,76 @@ void MainWindow::StopLogFile()
     }
 }
 
+void MainWindow::SaveSystemVariable(const ULONGLONG& time)
+{
+    for (auto& Variable : QSystemVariables::NeedSaveVariables)
+    {
+        if (Variable.PreValue == Variable.QVariableBase->GetCurrentValue())
+        {
+            if (Variable.count++ < 500)
+            {
+                continue;
+            }
+        }
+        // Variable.PreValue = Variable.QVariableBase->GetCurrentValue();
+        Variable.count = 0;
+
+        VBLSystemVariable variable_Sys{};
+
+        variable_Sys.mHeader.mBase.mSignature = BL_OBJ_SIGNATURE;
+        variable_Sys.mHeader.mBase.mHeaderSize = sizeof(variable_Sys.mHeader);
+        variable_Sys.mHeader.mBase.mHeaderVersion = 1;
+        variable_Sys.mHeader.mBase.mObjectType = BL_OBJ_TYPE_SYS_VARIABLE;
+        variable_Sys.mHeader.mObjectFlags = BL_OBJ_FLAG_TIME_ONE_NANS;
+        variable_Sys.mHeader.mObjectTimeStamp = time;
+
+        auto Name = GET_VARIABLE_NAME(Variable.Namespace, Variable.Name);
+        Variable.PreValue = Variable.QVariableBase->GetCurrentValue();
+
+        variable_Sys.mNameLength = static_cast<DWORD>(Name.length());
+
+        QByteArray ba = Name.toLatin1(); // must
+        char* Name_ch = ba.data();
+
+        variable_Sys.mName = Name_ch;
+
+        switch (Variable.QVariableBase->DataType)
+        {
+        case ValueType::Int:
+            {
+                auto temp = Variable.QVariableBase->GetCurrentValue().toInt();
+                variable_Sys.mDataLength = sizeof(int);
+                variable_Sys.mData = reinterpret_cast<LPBYTE>(&temp);
+            }
+        case ValueType::UInt:
+            {
+                auto temp = Variable.QVariableBase->GetCurrentValue().toUInt();
+                variable_Sys.mDataLength = sizeof(uint);
+                variable_Sys.mData = reinterpret_cast<LPBYTE>(&temp);
+                variable_Sys.mType = BL_SYSVAR_TYPE_LONG;
+                break;
+            }
+        case ValueType::Double:
+            auto temp = Variable.QVariableBase->GetCurrentValue().toDouble();
+            variable_Sys.mDataLength = sizeof(double);
+            variable_Sys.mData = reinterpret_cast<LPBYTE>(&temp);
+            variable_Sys.mType = BL_SYSVAR_TYPE_DOUBLE;
+            break;
+        }
+
+        variable_Sys.mHeader.mBase.mObjectSize = sizeof(VBLSystemVariable) + variable_Sys.mNameLength + variable_Sys.mDataLength;
+
+        if (hFile != INVALID_HANDLE_VALUE)
+        {
+            const bool WriteSuccess = BLWriteObject(hFile, &variable_Sys.mHeader.mBase);
+            CurrentDataCount += WriteSuccess;
+            TotalDataCount += WriteSuccess;
+        }
+    }
+}
+
 void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
 {
-
     if (!ActiveForms.contains(FormType))
     {
         FormBase* Temp = nullptr;
@@ -1111,18 +1186,19 @@ void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
     }
 
     const auto Form = ActiveForms.constFind(FormType).value();
-    const CustomEnum::EFormType CurrentFromType = SystemVariablesConfig->GetCurrentType();
-    
-    if (CurrentFromType != FormType)
+    const auto& PreFromType = SystemVariablesConfig->GetCurrentType();
+
+    if (PreFromType != FormType)
     {
-        if (ActiveForms.contains(CurrentFromType))
+        if (ActiveForms.contains(PreFromType))
         {
-            ActiveForms.constFind(CurrentFromType).value()->close();
+            ActiveForms.constFind(PreFromType).value()->close();
         }
     }
 
     SystemVariablesConfig->SetCurrentType(FormType);
-    
+    CurrentFromType = SystemVariablesConfig->GetCurrentType();
+
     const QString NewPath = QString("%1_SystemVariables").arg(GetEnumKeyStr<CustomEnum::EFormType>(FormType));
     SystemVariablesConfig->SetConfigFilePath(NewPath);
     SystemVariablesConfig->ReadConfig();
@@ -1130,7 +1206,7 @@ void MainWindow::OpenFrom(CustomEnum::EFormType FormType)
     Form->show();
     Form->activateWindow();
 
-    if(LoadVariablesWindowptr) LoadVariablesWindowptr->ChangeWindowType();
+    if (LoadVariablesWindowptr) LoadVariablesWindowptr->ChangeWindowType();
 }
 
 
@@ -1211,8 +1287,4 @@ void MainWindow::on_LoadVariables_triggered()
     {
         LoadVariablesWindowptr = new LoadVariablesWindow(this, Qt::Window);
     }
-
-
-    LoadVariablesWindowptr->show();
-    LoadVariablesWindowptr->activateWindow();
 }

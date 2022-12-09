@@ -65,18 +65,18 @@ void ACR_E11_Form::TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN
     temp->SetThreadRunning(delay, InMessageTimerType == EMessageTimer::Single, msec);
 }
 
-void ACR_E11_Form::StopTimer() const
-{
-    for (const auto i : MessageThreadContainer.values())
-    {
-        i->SetThreadStop();
-    }
-
-    for (const auto& i : MessageTimerContainer.values())
-    {
-        i->stop();
-    }
-}
+// void ACR_E11_Form::StopTimer() const
+// {
+//     for (const auto i : MessageThreadContainer.values())
+//     {
+//         i->SetThreadStop();
+//     }
+//
+//     for (const auto& i : MessageTimerContainer.values())
+//     {
+//         i->stop();
+//     }
+// }
 
 void ACR_E11_Form::InitWindow()
 {
@@ -249,25 +249,41 @@ void ACR_E11_Form::InitTrigger()
         case 0x02:
             {
                 hex_value = (Data.Data[6] << 8) | Data.Data[7];
-                ui->Tem->setText(QString::number(hex_value / 100.f));
+
+                const auto Variable = QSystemVariables::GetVariableBaseByNamespaceAndName("ACR_Probe", "I_A_TEM_M");
+                Variable->SetCurrentValue((hex_value / 100.f));
+
+                ui->Tem->setText(Variable->GetCurrentValue());
                 break;
             }
         case 0x03:
             {
                 hex_value = (Data.Data[6] << 8) | Data.Data[7];
-                ui->VHBH_Phy->setText(QString::number(hex_value));
+
+                const auto Variable = QSystemVariables::GetVariableBaseByNamespaceAndName("ACR_Probe", "I_A_VHBH_M");
+                Variable->SetCurrentValue(hex_value);
+
+                ui->VHBH_Phy->setText(Variable->GetCurrentValue());
                 break;
             }
         case 0x04:
             {
                 hex_value = (Data.Data[6] << 8) | Data.Data[7];
-                ui->VHBL_Phy->setText(QString::number(hex_value));
+
+                const auto Variable = QSystemVariables::GetVariableBaseByNamespaceAndName("ACR_Probe", "I_A_VHBL_M");
+                Variable->SetCurrentValue(hex_value);
+
+                ui->VHBL_Phy->setText(Variable->GetCurrentValue());
                 break;
             }
         case 0x06:
             {
                 hex_value = (Data.Data[6] << 8) | Data.Data[7];
-                ui->CANW->setText(QString::number(hex_value));
+
+                const auto Variable = QSystemVariables::GetVariableBaseByNamespaceAndName("ACR_Probe", "I_A_CANWAKE_M");
+                Variable->SetCurrentValue(static_cast<double>(hex_value));
+                
+                ui->CANW->setText(Variable->GetCurrentValue());
                 break;
             }
         }
@@ -337,18 +353,19 @@ void ACR_E11_Form::Init()
 
     connect(this, SIGNAL(TransmitCANFD(ZCAN_TransmitFD_Data&)), mainWindow,
             SLOT(TransmitCANDataObj(ZCAN_TransmitFD_Data&)));
+    connect(ui->ACR_Req_LH, &QComboBox::currentIndexChanged, this,
+            &ACR_E11_Form::On_ACR_Req_LH_ComboBox_CurrentIndexChanged);
 }
 
 void ACR_E11_Form::InitVariable()
 {
-    Variable_ACR_Req_LH = GetVariablesByNamespaceAndName("VCU.ACR_Req_LH");
 }
 
 void ACR_E11_Form::InitReqButton()
 {
     ui->ACR_Req_LH->clear();
 
-    for (auto i : Variable_ACR_Req_LH)
+    for (auto i : QSystemVariables::GetVariablesByNamespaceAndName("VCU", "ACR_Req_LH"))
     {
         ui->ACR_Req_LH->addItem(i.DisplayName);
     }
@@ -360,7 +377,6 @@ BYTE ACR_E11_Form::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Lengt
     for (int i = 0; i < Crc8_Length; ++i)
     {
         CANE2E_CRC8_STARTVALUE = cane2e_CrcTable8[(CANE2E_CRC8_STARTVALUE ^ Crc8_DataArray[i])];
-        /* PRQAJ S 492 General usage, no function effect */
     }
 
     return static_cast<BYTE>(CANE2E_CRC8_STARTVALUE ^ CANE2E_CRC8_XORVALUE);
@@ -370,7 +386,8 @@ void ACR_E11_Form::Send121()
 {
     QByteArray ba;
 
-    canfd_data_121.frame.data[0] = GetTableValueByIndex(Variable_ACR_Req_LH, ui->ACR_Req_LH->currentIndex());
+    const auto VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName("VCU", "ACR_Req_LH");
+    canfd_data_121.frame.data[0] = VariableBase->GetCurrentValue().toInt();
 
     Count_121 = (Count_121 + 1) % 16;
     canfd_data_121.frame.data[6] = ba.setNum(Count_121, 16).toInt(nullptr, 16) << 4;
@@ -447,4 +464,17 @@ void ACR_E11_Form::on_pushButton_5_clicked()
     can.frame.data[2] = 0x03;
 
     emit TransmitCANFD(can);
+}
+
+void ACR_E11_Form::On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index)
+{
+    QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName("VCU", "ACR_Req_LH");
+
+    if (!VariableBase) return;
+    const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
+
+    VariableBase->SetCurrentValue(CurrentValue);
+    // auto test = QSystemVariables::NeedSaveVariables.first();
+    //
+    // qDebug() << test.Namespace + "::" + test.Name<<GET_VARIABLE_NAME(test.Namespace,test.Name);
 }

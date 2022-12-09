@@ -19,37 +19,30 @@ public:
 
     void SetCurrentType(const CustomEnum::EFormType CurrentType);
 
-    static QMultiMap<QString, VariableNamespace> Variables;
+public:
+    //静态
+    static bool IsValidNamespaceAndName(const QString& Namespace, const QString& Name);
+    static QList<ValueTable> GetVariablesByNamespaceAndName(const QString& Namespace, const QString& Name);
+    static QVariableBase* GetVariableBaseByNamespaceAndName(const QString& Namespace, const QString& Name);
 
 private:
     CustomEnum::EFormType CurrentType = CustomEnum::EFormType::None;
 
+public:
+    //静态
+    static QMultiMap<QString, VariableNamespacePair> Variables;
+    static QList<VariableSavedStruct> NeedSaveVariables;
+    
 private:
     template <typename T>
-    void SetVariable(VariableEntity<T>* InVariableBase, const QJsonObject& InJsonValue);
-
-    template <typename T>
-    T GetJsonValue(const QJsonValue& InJsonValue);
-
-    template <>
-    int GetJsonValue(const QJsonValue& InJsonValue);
-
-    template <>
-    uint GetJsonValue(const QJsonValue& InJsonValue);
-
-    template <>
-    double GetJsonValue(const QJsonValue& InJsonValue);
-
-    template <>
-    QString GetJsonValue(const QJsonValue& InJsonValue);
+    void SetVariable(QVariableBase* InVariableBase, const QJsonObject& InJsonValue);
 };
 
-QList<ValueTable> GetVariablesByNamespaceAndName(const QString& NamespaceAndName);
 
 int GetTableValueByIndex(const QList<ValueTable>&, int Index);
 
 template <typename T>
-void QSystemVariables::SetVariable(VariableEntity<T>* InVariableBase, const QJsonObject& InJsonValue)
+void QSystemVariables::SetVariable(QVariableBase* InVariableBase, const QJsonObject& InJsonValue)
 {
     QJsonValue StartValueJV = InJsonValue.value("startValue");
     QJsonValue MaxValueJV = InJsonValue.value("maxValue");
@@ -62,55 +55,22 @@ void QSystemVariables::SetVariable(VariableEntity<T>* InVariableBase, const QJso
     {
         InVariableBase->bHasInitialValue = true;
 
-        InVariableBase->InitialValue = GetJsonValue<T>(StartValueJV);
+        InVariableBase->InitialValue = StartValueJV.toString();
     }
 
     if (!MaxValueJV.isUndefined())
     {
         InVariableBase->bHasMax = true;
 
-        InVariableBase->Max = GetJsonValue<T>(MaxValueJV);
+        InVariableBase->MaxValue = MaxValueJV.toString();
     }
 
     if (!MinValueJV.isUndefined())
     {
         InVariableBase->bHasMin = true;
 
-        InVariableBase->Min = GetJsonValue<T>(MinValueJV);
+        InVariableBase->MinValue = MinValueJV.toString();
     }
-}
-
-template <typename T>
-T QSystemVariables::GetJsonValue(const QJsonValue& InJsonValue)
-{
-    return InJsonValue.toInt();
-}
-
-template <>
-inline int QSystemVariables::GetJsonValue(const QJsonValue& InJsonValue)
-{
-    const QString Value = InJsonValue.toString();
-    return Value.toInt();
-}
-
-template <>
-inline uint QSystemVariables::GetJsonValue(const QJsonValue& InJsonValue)
-{
-    const QString Value = InJsonValue.toString();
-    return Value.toUInt();
-}
-
-template <>
-inline double QSystemVariables::GetJsonValue(const QJsonValue& InJsonValue)
-{
-    const QString Value = InJsonValue.toString();
-    return Value.toDouble();
-}
-
-template <>
-inline QString QSystemVariables::GetJsonValue(const QJsonValue& InJsonValue)
-{
-    return InJsonValue.toString();
 }
 
 #endif

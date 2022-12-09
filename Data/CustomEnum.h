@@ -1,6 +1,6 @@
 #pragma once
 #include <qmetaobject.h>
-#include <QObject>
+
 
 namespace CustomEnum
 {

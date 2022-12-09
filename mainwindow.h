@@ -108,6 +108,7 @@ private:
     //Log
     void CreateLogFile();
     void StopLogFile();
+    void SaveSystemVariable(const ULONGLONG& time);
 
     void OpenFrom(CustomEnum::EFormType FormType);
 
@@ -201,5 +202,6 @@ private:
 
     //Form
     QMap<CustomEnum::EFormType, FormBase*> ActiveForms;
+    CustomEnum::EFormType CurrentFromType = SystemVariablesConfig->GetCurrentType();
 };
 #endif // MAINWINDOW_H

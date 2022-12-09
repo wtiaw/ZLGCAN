@@ -22,6 +22,12 @@ public:
 
     template <typename ValueType>
     void Save(const QString& FileName, const QString& ObjectName, const QString& key, ValueType Value);
+
+protected:
+    bool IsFileValid(QFile& file) const;
+    QString ReadFileData(QFile& file) const;
+    bool ReadJsonFile(const QString& str, QJsonDocument& doc) const;
+    
 signals:
 protected:
     QString ConfigDirPath;

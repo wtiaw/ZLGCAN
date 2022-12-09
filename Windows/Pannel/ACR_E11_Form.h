@@ -43,7 +43,7 @@ public:
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, ZCAN_TransmitFD_Data* CANData,
                                 void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
-    void StopTimer() const;
+    // void StopTimer() const;
 
 
     void InitWindow() override;
@@ -80,15 +80,15 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    void On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index);
+
 private:
     Ui::ACR_E11_Form* ui;
 
     QVector<QReceiveItem*> Items;
 
     CHANNEL_HANDLE cHandle;
-
-    QMap<EMessageTimer, QTimer*> MessageTimerContainer;
-    QMap<EMessageTimer, class PerformanceFrequency*> MessageThreadContainer;
+    
 
     MainWindow* mainWindow;
 
@@ -140,7 +140,7 @@ private:
     int Count_GW740 = 0;
 
     //Variable
-    QList<ValueTable> Variable_ACR_Req_LH;
+    
 };
 
 template <typename Transmit_Data>

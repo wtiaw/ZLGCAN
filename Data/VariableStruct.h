@@ -1,15 +1,19 @@
 #ifndef VARIABLESTRUCT_H
 #define VARIABLESTRUCT_H
 #include <QString>
+#include <QObject>
+#include <qmetaobject.h>
 
-enum EDataType
+#define GET_VARIABLE_NAME(Namespace,Name) QString("%1::%2").arg(Namespace, Name)
+
+
+enum ValueType
 {
     Null,
-    Int32,
-    UInt32,
+    Int,
+    UInt,
     Double,
     String,
-    intarray,
 };
 
 struct ValueTable
@@ -18,11 +22,13 @@ struct ValueTable
     int Value;
 };
 
-class VariableBase
+class QVariableBase : public QObject
 {
+    Q_OBJECT
+    // friend class VariableEntity;
 public:
-    virtual ~VariableBase() = default;
-    EDataType DataType{};
+    virtual ~QVariableBase() = default;
+    ValueType DataType{};
 
     bool bShouldSave{};
     bool bHasComment{};
@@ -30,61 +36,53 @@ public:
     bool bHasMin{};
     bool bHasMax{};
 
+    QString InitialValue{};
+    QString MinValue{};
+    QString MaxValue{};
+
     QString Comment = "-";
-    // T InitialValue;
-    // T Min;
-    // T Max;
-    // T CurrentValue;
 
     QList<ValueTable> ValueTables;
 
-    virtual void NullFuc(){}
-};
+private:
+    QString CurrentValue{};
 
-template<typename T>
-class VariableEntity : public VariableBase
-{
 public:
-    T InitialValue{};
-    T Min{};
-    T Max{};
-    T CurrentValue{};
+    QString GetCurrentValue() const
+    {
+        return CurrentValue;
+    }
+
+    template <typename T>
+    void SetCurrentValue(const T& InCurrentValue)
+    {
+        CurrentValue = QString::number(InCurrentValue);
+    }
+
+    template <>
+    void SetCurrentValue(const QString& InCurrentValue)
+    {
+        if (InCurrentValue != CurrentValue)
+        {
+            CurrentValue = InCurrentValue;
+        }
+    }
 };
-// class Int32Value : public VariableBase
-// {
-//     int InitialValue = 0;
-//     int Min = 0;
-//     int Max = 0;
-//     int CurrentValue = 0;
-// };
 
-// class UInt32Value : public VariableBase
-// {
-//     uint InitialValue = 0;
-//     uint Min = 0;
-//     uint Max = 0;
-//     uint CurrentValue = 0;
-// };
-//
-// class DoubleValue : public VariableBase
-// {
-//     double InitialValue = 0;
-//     double Min = 0;
-//     double Max = 0;
-//     double CurrentValue = 0;
-// };
-//
-// class StringValue : public VariableBase
-// {
-//     QString InitialValue;
-//     QString Min;
-//     QString Max;
-//     QString CurrentValue;
-// };
-
-struct VariableNamespace
+struct VariableNamespacePair
 {
-    QMap<QString, VariableBase*> Variables{};
+    QMap<QString, QVariableBase*> Variables{};
+};
+
+struct VariableSavedStruct
+{
+    QString Namespace;
+    QString Name;
+
+    QVariableBase* QVariableBase;
+    QString PreValue;
+
+    int count{0};
 };
 
 #endif

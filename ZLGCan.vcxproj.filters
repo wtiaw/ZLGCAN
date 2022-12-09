@@ -196,14 +196,16 @@
     <QtMoc Include="CustomWidget\ToolPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="Data\VariableStruct.h">
+    <QtMoc Include="Data\VariableStruct.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </QtMoc>
     <QtMoc Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    
+    
     
     
     

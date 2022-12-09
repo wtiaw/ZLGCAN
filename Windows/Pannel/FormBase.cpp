@@ -29,6 +29,19 @@ void FormBase::InitWindow()
     InitButtonFunction();
 }
 
+void FormBase::StopTimer()
+{
+    for (const auto i : MessageThreadContainer.values())
+    {
+        i->SetThreadStop();
+    }
+
+    for (const auto& i : MessageTimerContainer.values())
+    {
+        i->stop();
+    }
+}
+
 void FormBase::InitButtonFunction()
 {
 }

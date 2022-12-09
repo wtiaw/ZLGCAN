@@ -81,20 +81,12 @@ void QReceiveThread::ReceiveData(const CHANNEL_HANDLE& ChannelHandle)
             {
             case ZCAN_DT_ZCAN_CAN_CANFD_DATA:
                 {
+                    if (mainWindow->StartTime == 0)
+                    {
+                        mainWindow->StartTime = DataObj[i].data.zcanCANFDData.timeStamp;
+                    }
+                    
                     const ZCANCANFDData CANFDData = DataObj[i].data.zcanCANFDData;
-
-                    // qDebug() << "CAN ID:" << CANFDData.frame.can_id;
-                    // qDebug() << "CAN Type:" << (CANFDData.flag.unionVal.frameType == 0 ? "CAN" : "CANFD");
-                    // qDebug() << "time:" << CANFDData.timeStamp;
-                    // qDebug() << "CAN Type:" << (CANFDData.flag.unionVal.txEchoed == 0 ? "Rx" : "Tx");
-                    //
-                    // QString str;
-                    // for (int i = 0; i < CANFDData.frame.len; i++)
-                    // {
-                    //     str += QString("%1 ").arg(CANFDData.frame.data[i], 2, 16, QLatin1Char('0'));
-                    // }
-                    // qDebug() << str;
-                    // qDebug() << "-------------------------------------------------";
 
                     emit AddCANTableData(DataObj[i]);
                     Reception(CANFDData);
@@ -157,34 +149,6 @@ void QReceiveThread::ReceiveData(const CHANNEL_HANDLE& ChannelHandle)
             }
         }
     }
-
-    // if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CAN))
-    // {
-    //     ZCAN_Receive_Data can_data[10];
-    //     len = ZCAN_Receive(ChannelHandle, can_data, 100);
-    //
-    //     for (UINT i = 0; i < len; ++i)
-    //     {
-    //         const ZCAN_Receive_Data& can = can_data[i];
-    //
-    //         emit AddCANTableData_R(can);
-    //         Reception(can);
-    //     }
-    // }
-    //
-    // if (len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_CANFD))
-    // {
-    //     ZCAN_ReceiveFD_Data canfd_data[10];
-    //     len = ZCAN_ReceiveFD(ChannelHandle, canfd_data, 100);
-    //
-    //     for (UINT i = 0; i < len; ++i)
-    //     {
-    //         const ZCAN_ReceiveFD_Data& canfd = canfd_data[i];
-    //
-    //         emit AddCANFDTableData_R(canfd);
-    //         Reception(canfd);
-    //     }
-    // }
 }
 
 void QReceiveThread::Reception(const ZCANCANFDData& Data)

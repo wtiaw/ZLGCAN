@@ -2,7 +2,8 @@
 
 #include <qjsonarray.h>
 
-QMultiMap<QString, VariableNamespace> QSystemVariables::Variables;
+QMultiMap<QString, VariableNamespacePair> QSystemVariables::Variables;
+QList<VariableSavedStruct> QSystemVariables::NeedSaveVariables;
 
 QSystemVariables::QSystemVariables([[maybe_unused]] QObject* parent)
 {
@@ -12,47 +13,19 @@ QSystemVariables::QSystemVariables([[maybe_unused]] QObject* parent)
 
 void QSystemVariables::ReadConfig()
 {
-    if (const QDir dir(ConfigDirPath); !dir.exists())
-    {
-        if (const bool ismkdir = dir.mkdir(ConfigDirPath); !ismkdir)
-            qDebug() << "Create path fail" << Qt::endl;
-        else
-            qDebug() << "Create full path success" << Qt::endl;
-    }
-
-    if (const QFileInfo fi(FullFilePath); !fi.isFile())
-    {
-        InitConfig();
-        return;
-    }
+    QSettingConfigBase::ReadConfig();
 
     QFile file(FullFilePath);
-    qDebug() << "ReadConfig" << FullFilePath;
-    if (!file.open(QFile::ReadOnly | QFile::Text))
-    {
-        qDebug() << "can't open error!";
-        return;
-    }
+    if (!IsFileValid(file)) return;
 
     // 读取文件的全部内容
-    QTextStream stream(&file);
-    const QString str = stream.readAll();
+    const QString str = ReadFileData(file);
 
-    file.close();
+    // 读取Json
+    QJsonDocument doc;
+    if (!ReadJsonFile(str, doc)) return;
 
-    // QJsonParseError类用于在JSON解析期间报告错误。
-    QJsonParseError jsonError;
-    // 将json解析为UTF-8编码的json文档，并从中创建一个QJsonDocument。
-    // 如果解析成功，返回QJsonDocument对象，否则返回null
-    const QJsonDocument doc = QJsonDocument::fromJson(str.toUtf8(), &jsonError);
-    // 判断是否解析失败
-    if (jsonError.error != QJsonParseError::NoError && !doc.isNull())
-    {
-        qDebug() << "Json格式错误！" << jsonError.error;
-        return;
-    }
-
-    QMultiMap<QString, VariableNamespace> temp;
+    QMultiMap<QString, VariableNamespacePair> temp;
     Variables.swap(temp);
 
     const QJsonObject RootObject = doc.object();
@@ -69,7 +42,7 @@ void QSystemVariables::ReadConfig()
     for (int i = 0; i < NameSpaceArr.count(); i++)
     {
         QJsonValue NamespaceValueChild = NameSpaceArr.at(i);
-        VariableNamespace Variable;
+        VariableNamespacePair Variable;
 
         if (NamespaceValueChild.type() == QJsonValue::Object)
         {
@@ -94,29 +67,25 @@ void QSystemVariables::ReadConfig()
                 QJsonValue CommentJV = VariableObj.value("comment");
                 QJsonValue ValueTableJV = VariableObj.value("valuetable");
 
-                VariableBase* VariableBase = nullptr;
+                QVariableBase* VariableBase = new QVariableBase;
                 if (Type == "int")
                 {
                     if (IsSigned == "true")
                     {
-                        VariableBase = new VariableEntity<uint>;
-                        SetVariable<uint>(dynamic_cast<VariableEntity<uint>*>(VariableBase), VariableObj);
+                        SetVariable<uint>(VariableBase, VariableObj);
                     }
                     else
                     {
-                        VariableBase = new VariableEntity<int>;
-                        SetVariable<int>(dynamic_cast<VariableEntity<int>*>(VariableBase), VariableObj);
+                        SetVariable<int>(VariableBase, VariableObj);
                     }
                 }
                 else if (Type == "float")
                 {
-                    VariableBase = new VariableEntity<double>;
-                    SetVariable<double>(dynamic_cast<VariableEntity<double>*>(VariableBase), VariableObj);
+                    SetVariable<double>(VariableBase, VariableObj);
                 }
                 else
                 {
-                    VariableBase = new VariableEntity<QString>;
-                    SetVariable<QString>(dynamic_cast<VariableEntity<QString>*>(VariableBase), VariableObj);
+                    SetVariable<QString>(VariableBase, VariableObj);
                 }
 
                 VariableBase->bShouldSave = bShouldSave;
@@ -146,22 +115,32 @@ void QSystemVariables::ReadConfig()
                 {
                     if (IsSigned == "true")
                     {
-                        VariableBase->DataType = EDataType::UInt32;
+                        VariableBase->DataType = ValueType::UInt;
                     }
                     else
                     {
-                        VariableBase->DataType = EDataType::Int32;
+                        VariableBase->DataType = ValueType::Int;
                     }
                 }
                 else if (Type == "float")
                 {
-                    VariableBase->DataType = EDataType::Double;
+                    VariableBase->DataType = ValueType::Double;
                 }
                 else if (Type == "string")
                 {
-                    VariableBase->DataType = EDataType::String;
+                    VariableBase->DataType = ValueType::String;
                 }
 
+                if (bShouldSave)
+                {
+                    auto VariableSaved = VariableSavedStruct{};
+                    VariableSaved.Namespace = NamespaceName;
+                    VariableSaved.Name = VariableName;
+                    VariableSaved.QVariableBase = VariableBase;
+                    VariableSaved.PreValue = "";
+
+                    NeedSaveVariables.append(VariableSaved);
+                }
 
                 if (!ValueTableJV.isUndefined())
                 {
@@ -224,27 +203,45 @@ void QSystemVariables::SetCurrentType(const CustomEnum::EFormType CurrentType)
     this->CurrentType = CurrentType;
 }
 
-QList<ValueTable> GetVariablesByNamespaceAndName(const QString& NamespaceAndName)
+bool QSystemVariables::IsValidNamespaceAndName(const QString& Namespace, const QString& Name)
+{
+    if (!Variables.contains(Namespace))
+    {
+        qDebug() << "Namespace:" << Namespace << "Not Found!";
+        return false;
+    }
+
+    if (!Variables.value(Namespace).Variables.contains(Name))
+    {
+        qDebug() << "Variable:" << Namespace << ":" << Name << "Not Found!";
+        return false;
+    }
+
+    return true;
+}
+
+QList<ValueTable> QSystemVariables::GetVariablesByNamespaceAndName(const QString& Namespace, const QString& Name)
 {
     QList<ValueTable> Result;
 
-    auto sre = NamespaceAndName.split(".");
-    const auto Namespace = sre[0];
-    const auto Name = sre[1];
-
-    if (!QSystemVariables::Variables.contains(Namespace))
+    if (const auto VariableBase = GetVariableBaseByNamespaceAndName(Namespace, Name))
     {
-        qDebug() << "Namespace:" << Namespace << "Not Found!";
-        return Result;
+        Result = VariableBase->ValueTables;
     }
 
-    if (!QSystemVariables::Variables.value(Namespace).Variables.contains(Name))
+    return Result;
+}
+
+QVariableBase* QSystemVariables::GetVariableBaseByNamespaceAndName(const QString& Namespace, const QString& Name)
+{
+    QVariableBase* Result = nullptr;
+
+    if (IsValidNamespaceAndName(Namespace, Name))
     {
-        qDebug() << "Variable:" << Namespace << ":" << Name << "Not Found!";
-        return Result;
+        Result = Variables.value(Namespace).Variables.value(Name);
     }
 
-    return QSystemVariables::Variables.value(Namespace).Variables.value(Name)->ValueTables;
+    return Result;
 }
 
 int GetTableValueByIndex(const QList<ValueTable>& InValueTable, const int Index)
