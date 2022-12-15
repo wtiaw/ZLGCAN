@@ -281,7 +281,7 @@ void ACR_E11_Form::InitTrigger()
                 hex_value = (Data.Data[6] << 8) | Data.Data[7];
 
                 const auto Variable = QSystemVariables::GetVariableBaseByNamespaceAndName("ACR_Probe", "I_A_CANWAKE_M");
-                Variable->SetCurrentValue(static_cast<double>(hex_value));
+                Variable->SetCurrentValue(hex_value);
                 
                 ui->CANW->setText(Variable->GetCurrentValue());
                 break;

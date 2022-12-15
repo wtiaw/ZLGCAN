@@ -96,7 +96,7 @@ void LoadVariablesWindow::ShowData()
             case ValueType::Int:
                 DisplayType = "int32";
                 break;
-                
+
             case ValueType::UInt:
                 DisplayType = "uint32";
                 break;
@@ -332,6 +332,27 @@ void LoadVariablesWindow::UpdateParentItem(const QTreeWidgetItem* item)
     }
 }
 
+QString LoadVariablesWindow::GetTopLevelItemDisplayName(const QTreeWidgetItem* CurrentItem)
+{
+    QString Res;
+    const QTreeWidgetItem* TopItem = CurrentItem;
+    while (TopItem->parent())
+    {
+        TopItem = TopItem->parent();
+    }
+
+    for (int i = 0; i < TopItem->treeWidget()->topLevelItemCount(); i++)
+    {
+        if (TopItem == TopItem->treeWidget()->topLevelItem(i))
+        {
+            Res = TopItem->text(0);
+            break;
+        }
+    }
+
+    return Res;
+}
+
 void LoadVariablesWindow::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
@@ -418,7 +439,6 @@ void LoadVariablesWindow::On_LoadVariablesClicked()
         }
 
 
-        QJsonObject Namespace;
         if (strList[0] == "namespace")
         {
             if (++NamespaceCount < 1) continue;
@@ -517,7 +537,7 @@ void LoadVariablesWindow::On_LoadVariablesClicked()
     // 将object设置为本文档的主要对象
     doc.setObject(RootObj);
 
-    ui->VariableViewer->header()->setSortIndicator(0, Qt::AscendingOrder);
+    // ui->VariableViewer->header()->setSortIndicator(0, Qt::AscendingOrder);
     mainWindow->SystemVariablesConfig->SaveConfig(doc);
     mainWindow->SystemVariablesConfig->ReadConfig();
 
@@ -553,13 +573,69 @@ void LoadVariablesWindow::ItemClicked(const QTreeWidgetItem* item)
 {
     const int cnt = item->childCount();
 
-    if (cnt >= 0 && !ui->VariableViewer->itemWidget(item->child(0), 0))
+    QJsonObject rootObj = QSystemVariables::doc.object();
+    const QJsonValue NamespaceValue = rootObj.value("namespace");
+    QJsonArray NamespaceArray = NamespaceValue.toArray();
+    QJsonObject Variable;
+    int Count = 0;
+    for (int i = 0; i < NamespaceArray.size(); i++)
+    {
+        if (auto temp = NamespaceArray[i].toObject(); temp["name"] == GetTopLevelItemDisplayName(item))
+        {
+            Count = i;
+            Variable = temp;
+        }
+    }
+    
+    if (Variable.isEmpty())
+    {
+        return;
+    }
+
+    QJsonArray Variables = Variable["variable"].toArray();
+
+    if (cnt > 0 && !ui->VariableViewer->itemWidget(item->child(0), 0))
     {
         for (int i = 0; i < cnt; i++)
         {
             item->child(i)->setCheckState(0, item->checkState(0));
+
+            QJsonObject Var = Variables[i].toObject();
+
+            Var["shouldSave"] = item->checkState(0) ? true : false;
+
+            Variables.replace(i, Var);
         }
     }
+    else
+    {
+        QJsonObject Var;
+        int RowCount = 0;
+        for (int i = 0 ; i < Variables.size(); i++)
+        {
+            if (auto temp = Variables[i].toObject(); temp["name"] == item->text(0))
+            {
+                RowCount = i;
+                Var = temp;
+            }
+        }
 
+        if (Var.isEmpty())
+        {
+            return;
+        }
+
+        Var["shouldSave"] = item->checkState(0) ? true : false;
+
+        Variables.replace(RowCount, Var);
+    }
+
+    Variable["variable"] = Variables;
+    NamespaceArray.replace(Count, Variable);
+    rootObj["namespace"] = NamespaceArray;
+    QSystemVariables::doc.setObject(rootObj);
+
+    MainWindow::SystemVariablesConfig->SaveConfig(QSystemVariables::doc);
+    MainWindow::SystemVariablesConfig->ReadConfig();
     UpdateParentItem(item);
 }

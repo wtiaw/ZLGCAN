@@ -1287,4 +1287,7 @@ void MainWindow::on_LoadVariables_triggered()
     {
         LoadVariablesWindowptr = new LoadVariablesWindow(this, Qt::Window);
     }
+
+    LoadVariablesWindowptr->show();
+    LoadVariablesWindowptr->activateWindow();
 }

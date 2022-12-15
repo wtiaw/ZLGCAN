@@ -4,6 +4,7 @@
 
 QMultiMap<QString, VariableNamespacePair> QSystemVariables::Variables;
 QList<VariableSavedStruct> QSystemVariables::NeedSaveVariables;
+QJsonDocument QSystemVariables::doc{};
 
 QSystemVariables::QSystemVariables([[maybe_unused]] QObject* parent)
 {
@@ -22,7 +23,7 @@ void QSystemVariables::ReadConfig()
     const QString str = ReadFileData(file);
 
     // 读取Json
-    QJsonDocument doc;
+    // QJsonDocument doc;
     if (!ReadJsonFile(str, doc)) return;
 
     QMultiMap<QString, VariableNamespacePair> temp;
@@ -183,8 +184,9 @@ void QSystemVariables::InitConfig()
     qDebug() << "Create File" << FullFilePath;
 }
 
-void QSystemVariables::SaveConfig(const QJsonDocument& doc) const
+void QSystemVariables::SaveConfig(const QJsonDocument& InDoc) const
 {
+    doc = InDoc;
     QFile file(FullFilePath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 

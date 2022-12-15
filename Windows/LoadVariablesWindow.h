@@ -44,6 +44,8 @@ private:
 
     void UpdateParentItem(const QTreeWidgetItem *item);
 
+    QString GetTopLevelItemDisplayName(const class QTreeWidgetItem* CurrentItem);
+
 private slots:
     void showEvent(QShowEvent* event) override;
     

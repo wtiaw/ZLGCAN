@@ -13,7 +13,7 @@ public:
     void ReadConfig() override;
     void InitConfig() override;
 
-    void SaveConfig(const QJsonDocument& doc) const;
+    void SaveConfig(const QJsonDocument& InDoc) const;
 
     [[nodiscard]] CustomEnum::EFormType GetCurrentType() const;
 
@@ -32,6 +32,8 @@ public:
     //静态
     static QMultiMap<QString, VariableNamespacePair> Variables;
     static QList<VariableSavedStruct> NeedSaveVariables;
+
+    static QJsonDocument doc;
     
 private:
     template <typename T>
