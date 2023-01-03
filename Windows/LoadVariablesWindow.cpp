@@ -70,6 +70,7 @@ void LoadVariablesWindow::ShowData()
 
     for (const auto& Key : QSystemVariables::Variables.keys())
     {
+        // auto model = new QStandardItemModel(ui->VariableViewer);
         auto* topItem = new QTreeWidgetItem(ui->VariableViewer);
         topItem->setText(NAME_COLUMN, Key);
         ui->VariableViewer->addTopLevelItem(topItem);

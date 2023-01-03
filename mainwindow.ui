@@ -600,6 +600,7 @@
     </property>
     <addaction name="LoadVariables"/>
     <addaction name="LoadDBC"/>
+    <addaction name="Automation"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_Tools"/>
@@ -623,6 +624,11 @@
   <action name="action_H53">
    <property name="text">
     <string>ACR(H53)</string>
+   </property>
+  </action>
+  <action name="Automation">
+   <property name="text">
+    <string>自动化</string>
    </property>
   </action>
  </widget>

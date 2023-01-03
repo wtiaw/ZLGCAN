@@ -18,6 +18,9 @@ msvc {
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Automation/AutomationNode.cpp \
+    Automation/AutomationNode_Loop.cpp \
+    Automation/AutomationSystem.cpp \
     CustomThread/PerformanceFrequency.cpp \
     CustomThread/QReceiveItem.cpp \
     CustomThread/QReceiveThread.cpp \
@@ -35,6 +38,7 @@ SOURCES += \
     Setting/QSettingConfigBase.cpp \
     Setting/QSystemVariables.cpp \
     Windows/AutoSendConfigWindow.cpp \
+    Windows/AutomationWindow.cpp \
     Windows/LoadDBCWindow.cpp \
     Windows/LoadVariablesWindow.cpp \
     Windows/Pannel/FormBase.cpp \
@@ -44,6 +48,9 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    Automation/AutomationNode.h \
+    Automation/AutomationNode_Loop.h \
+    Automation/AutomationSystem.h \
     CustomThread/PerformanceFrequency.h \
     CustomThread/QReceiveItem.h \
     CustomThread/QReceiveThread.h \
@@ -65,6 +72,7 @@ HEADERS += \
     Setting/QSettingConfigBase.h \
     Setting/QSystemVariables.h \
     Windows/AutoSendConfigWindow.h \
+    Windows/AutomationWindow.h \
     Windows/LoadDBCWindow.h \
     Windows/LoadVariablesWindow.h \
     Windows/Pannel/FormBase.h \
@@ -77,6 +85,7 @@ FORMS += \
     CustomWidget/ToolBox.ui \
     CustomWidget/ToolPage.ui \
     Windows/AutoSendConfigWindow.ui \
+    Windows/AutomationWindow.ui \
     Windows/LoadDBCWindow.ui \
     Windows/LoadVariablesWindow.ui \
     Windows/Pannel/ACR_E11_Form.ui \

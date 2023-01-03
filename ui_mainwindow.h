@@ -39,6 +39,7 @@ public:
     QAction *LoadVariables;
     QAction *LoadDBC;
     QAction *action_H53;
+    QAction *Automation;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_3;
     QGridLayout *gridLayout_3;
@@ -115,6 +116,8 @@ public:
         LoadDBC->setObjectName("LoadDBC");
         action_H53 = new QAction(MainWindow);
         action_H53->setObjectName("action_H53");
+        Automation = new QAction(MainWindow);
+        Automation->setObjectName("Automation");
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         verticalLayout_3 = new QVBoxLayout(centralwidget);
@@ -472,6 +475,7 @@ public:
         menu->addAction(action_H53);
         menu_Tools->addAction(LoadVariables);
         menu_Tools->addAction(LoadDBC);
+        menu_Tools->addAction(Automation);
 
         retranslateUi(MainWindow);
 
@@ -485,6 +489,7 @@ public:
         LoadVariables->setText(QCoreApplication::translate("MainWindow", "\345\212\240\350\275\275\345\217\230\351\207\217", nullptr));
         LoadDBC->setText(QCoreApplication::translate("MainWindow", "\345\212\240\350\275\275DBC", nullptr));
         action_H53->setText(QCoreApplication::translate("MainWindow", "ACR(H53)", nullptr));
+        Automation->setText(QCoreApplication::translate("MainWindow", "\350\207\252\345\212\250\345\214\226", nullptr));
         groupBox_5->setTitle(QCoreApplication::translate("MainWindow", "\345\217\202\346\225\260\351\205\215\347\275\256", nullptr));
         groupBox->setTitle(QCoreApplication::translate("MainWindow", "\350\256\276\345\244\207\351\200\211\346\213\251", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "\350\256\276\345\244\207\347\261\273\345\236\213", nullptr));

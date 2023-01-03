@@ -56,6 +56,18 @@
     <ClCompile Include="Windows\AutoSendConfigWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Automation\AutomationNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\AutomationNode_Loop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\AutomationSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\AutomationWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="CustomWidget\DataEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -128,6 +140,18 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Windows\AutoSendConfigWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Automation\AutomationNode.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Automation\AutomationNode_Loop.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Automation\AutomationSystem.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Windows\AutomationWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="Library\CircinalQueue.h">
@@ -250,12 +274,21 @@
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
+    
     
     
     
@@ -276,6 +309,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="Windows\AutoSendConfigWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Windows\AutomationWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="Windows\LoadDBCWindow.ui">

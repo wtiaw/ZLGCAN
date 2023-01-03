@@ -4,6 +4,8 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CppNaming/Abbreviations/=CANID/@EntryIndexedValue">CANID</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CppNaming/Abbreviations/=CPU/@EntryIndexedValue">CPU</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CppNaming/Abbreviations/=UI/@EntryIndexedValue">UI</s:String>
+	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">E:\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\amd64\MSBuild.exe</s:String>
+	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1048576</s:Int64>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=CANFD/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=CANID/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=QCAN/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

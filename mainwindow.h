@@ -149,13 +149,15 @@ private slots:
 
     void on_SaveLog_clicked(bool checked);
 
-    void on_LoadVariables_triggered();
-
-    void on_LoadDBC_triggered();
-
+    
     //WindowAction
     void on_action_E11_triggered();
     void on_action_H53_triggered();
+
+    //ToolAction
+    void on_LoadVariables_triggered();
+    void on_LoadDBC_triggered();
+    void on_Automation_triggered();
 
 public:
     class QReceiveThread* ReceiveThread{};
@@ -172,6 +174,7 @@ private:
 
     class LoadDBCWindow* LoadDbcWindowptr = nullptr;
     class LoadVariablesWindow* LoadVariablesWindowptr = nullptr;
+    class AutomationWindow* AutomationWindowptr = nullptr;
 
     QDeviceSettingConfig* DeviceSettingConfig;
 

@@ -19,6 +19,7 @@
 
 #include "Windows/LoadDBCWindow.h"
 #include "Windows/LoadVariablesWindow.h"
+#include "Windows/AutomationWindow.h"
 #include "Windows/Pannel/ACR_E11_Form.h"
 #include "Windows/Pannel/ACR_H53_Form.h"
 
@@ -1279,6 +1280,17 @@ void MainWindow::on_LoadDBC_triggered()
 
     LoadDbcWindowptr->show();
     LoadDbcWindowptr->activateWindow();
+}
+
+void MainWindow::on_Automation_triggered()
+{
+    if (!AutomationWindowptr)
+    {
+        AutomationWindowptr = new AutomationWindow(this, Qt::Window);
+    }
+
+    AutomationWindowptr->show();
+    AutomationWindowptr->activateWindow();
 }
 
 void MainWindow::on_LoadVariables_triggered()

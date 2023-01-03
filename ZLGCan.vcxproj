@@ -136,6 +136,10 @@
     <ClCompile Include="Windows\Pannel\ACR_E11_Form.cpp" />
     <ClCompile Include="Windows\Pannel\ACR_H53_Form.cpp" />
     <ClCompile Include="Windows\AutoSendConfigWindow.cpp" />
+    <ClCompile Include="Automation\AutomationNode.cpp" />
+    <ClCompile Include="Automation\AutomationNode_Loop.cpp" />
+    <ClCompile Include="Automation\AutomationSystem.cpp" />
+    <ClCompile Include="Windows\AutomationWindow.cpp" />
     <ClCompile Include="CustomWidget\DataEdit.cpp" />
     <ClCompile Include="Windows\Pannel\FormBase.cpp" />
     <ClCompile Include="Windows\LoadDBCWindow.cpp" />
@@ -180,6 +184,46 @@
       
     </QtMoc>
     <QtMoc Include="Windows\AutoSendConfigWindow.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="Automation\AutomationNode.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="Automation\AutomationNode_Loop.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="Automation\AutomationSystem.h">
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtMoc>
+    <QtMoc Include="Windows\AutomationWindow.h">
       
       
       
@@ -441,6 +485,14 @@
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -457,6 +509,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">release\moc_predefs.h;%(Outputs)</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CustomBuild>
+    
     
     
     
@@ -493,6 +546,17 @@
       
     </QtUic>
     <QtUic Include="Windows\AutoSendConfigWindow.ui">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </QtUic>
+    <QtUic Include="Windows\AutomationWindow.ui">
       
       
       
