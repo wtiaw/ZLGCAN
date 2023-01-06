@@ -44,9 +44,9 @@ public:
                                 void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     // void StopTimer() const;
-
-
+    
     void InitWindow() override;
+    
 protected:
     //Interface
     void InitButtonFunction() override;
@@ -59,8 +59,8 @@ signals:
 
 private:
     void InitTrigger();
-    
-    void InitReqButton();
+
+    void InitComboBox(QComboBox* ComboBox, const QString& Namespace, const QString& VariableName);
 
     template <typename Transmit_Data>
     void TransmitMessageByTimer(EMessageTimer InMessageTimerType, Transmit_Data* CANData,
@@ -74,14 +74,30 @@ private:
     void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func);
 
 private slots:
-    void on_pushButton_clicked();
+    void On_WakeUp();
 
-    void on_pushButton_2_clicked();
+    //发送请求读取FBL版本
+    void On_ReadVersion();
 
-    void on_pushButton_5_clicked();
+    void On_UnLock();
 
     void On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index);
 
+    //Req
+private:
+    void ReqReadFBL();
+    void ReqReadBSW_and_AnalyzingFBL(const CANData& Data);
+    void AnalyzingBSW(const CANData& Data);
+
+    void EnterExtendSession();
+    void ReqSeed(const CANData& Data);
+    void SendKey(const CANData& Data);
+    void ReqUnlockECU(const CANData& Data);
+    void ReqReadSV(const CANData& Data);
+    void ReadSV_and_ReadState(const CANData& Data);
+    
+    void AnalyzingUnderlyingData(const CANData& Data);
+    
 private:
     Ui::ACR_E11_Form* ui;
 
@@ -140,7 +156,7 @@ private:
     int Count_GW740 = 0;
 
     //Variable
-    
+    QList<QComboBox*> CB_PollingDataComboBoxes;
 };
 
 template <typename Transmit_Data>

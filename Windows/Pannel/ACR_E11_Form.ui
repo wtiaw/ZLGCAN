@@ -1,306 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ACRForm</class>
- <widget class="QWidget" name="ACRForm">
+ <class>ACR_E11_Form</class>
+ <widget class="QWidget" name="ACR_E11_Form">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>578</width>
-    <height>418</height>
+    <width>716</width>
+    <height>561</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>ACR_122</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>ACR_Key</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="ACR_Key">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>ACRCrcChk122</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>ACRCycCntr122</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="ACRCrcChk122">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="ACRCycCntr122">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Activation_Status</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="Activation_Status">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>ACR_121</string>
-       </property>
-       <layout class="QFormLayout" name="formLayout_3">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>ACR_Req_LH</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="ACR_Req_LH">
-          <item>
-           <property name="text">
-            <string>No Request</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Belt Park</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Belt Slack Remove</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Haptic Warning Level 1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Haptic Warning Level 2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Haptic Warning Level 3</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 3</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 4</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 5</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 6</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Retract Activation Level 7</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_5">
-       <property name="title">
-        <string>ACR_Probe</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>VHBH</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="VHBH_Phy"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_12">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>VHBL</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="VHBL_Phy"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_14">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>500</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Tem</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="Tem"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QLabel" name="label_15">
-              <property name="text">
-               <string>CANW</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="CANW"/>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="2" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -313,21 +27,21 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="BT_UnLock">
         <property name="text">
          <string>解锁</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="BT_ReadVersion">
         <property name="text">
-         <string>版本</string>
+         <string>读取版本</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="BT_WakeUp">
         <property name="text">
          <string>唤醒</string>
         </property>
@@ -337,9 +51,173 @@
     </widget>
    </item>
    <item row="1" column="1">
+    <widget class="QGroupBox" name="groupBox_6">
+     <property name="title">
+      <string>PTMP_Polling</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="5" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData3">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QComboBox" name="CB_PollingData3">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QComboBox" name="CB_PollingData2">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData4">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+        <property name="UnitType" stdset="0">
+         <enum>DataDisplayWidget::Null</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QComboBox" name="CB_PollingData4">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QComboBox" name="CB_PollingData5">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData2">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="CB_PollingData1">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData1">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData5">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>ACR_122</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="DataDisplayWidget" name="DD_ACR_Key">
+        <property name="DataDisplayName" stdset="0">
+         <string>ACR_Key</string>
+        </property>
+        <property name="DataDisplayAlignment" stdset="0">
+         <set>Qt::AlignLeading</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="DataDisplayWidget" name="DD_ACRCrcChk122">
+        <property name="DataDisplayName" stdset="0">
+         <string>ACRCrcChk122</string>
+        </property>
+        <property name="DataDisplayAlignment" stdset="0">
+         <set>Qt::AlignLeading</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="DataDisplayWidget" name="DD_ACRCycCntr122">
+        <property name="DataDisplayName" stdset="0">
+         <string>ACRCycCntr122</string>
+        </property>
+        <property name="DataDisplayAlignment" stdset="0">
+         <set>Qt::AlignLeading</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="DataDisplayWidget" name="DD_Activation_Status">
+        <property name="DataDisplayName" stdset="0">
+         <string>Activation_Status</string>
+        </property>
+        <property name="MaxLength" stdset="0">
+         <UInt>16777215</UInt>
+        </property>
+        <property name="DataDisplayAlignment" stdset="0">
+         <set>Qt::AlignLeading</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -347,116 +225,340 @@
      <property name="title">
       <string>软件版本</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="FBL">
+     <layout class="QGridLayout" name="gridLayout_6">
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="DataDisplayWidget" name="DD_BSW">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>300</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
+        <property name="DataDisplayName" stdset="0">
          <string>BSW</string>
         </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+        <property name="UnitType" stdset="0">
+         <enum>DataDisplayWidget::Null</enum>
+        </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="BSW">
+      <item row="1" column="0">
+       <widget class="DataDisplayWidget" name="DD_SV">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
+        <property name="DataDisplayName" stdset="0">
+         <string>SV   </string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+        <property name="UnitType" stdset="0">
+         <enum>DataDisplayWidget::Null</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="DataDisplayWidget" name="DD_FBL">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="DataDisplayName" stdset="0">
+         <string>FBL  </string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+        <property name="UnitType" stdset="0">
+         <enum>DataDisplayWidget::Null</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>300</width>
-          <height>16777215</height>
+          <width>20</width>
+          <height>40</height>
          </size>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="1" column="2">
-       <widget class="QLineEdit" name="SV">
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QGroupBox" name="groupBox_4">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
+        <property name="title">
+         <string>ACR_121</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_3">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>ACR_Req_LH</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="CB_ACR_Req_LH">
+           <item>
+            <property name="text">
+             <string>No Request</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Belt Park</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Belt Slack Remove</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Haptic Warning Level 1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Haptic Warning Level 2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Haptic Warning Level 3</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 3</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 4</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 5</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 6</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Retract Activation Level 7</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_5">
+        <property name="minimumSize">
          <size>
-          <width>300</width>
-          <height>16777215</height>
+          <width>330</width>
+          <height>0</height>
          </size>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+        <property name="title">
+         <string>ACR_Probe</string>
         </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="label_3">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>FBL</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="label_2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>SV</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>4</number>
+         </property>
+         <property name="rightMargin">
+          <number>4</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>6</number>
+         </property>
+         <item row="3" column="1">
+          <widget class="DataDisplayWidget" name="DD_HSPD_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>HSPD</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::RPM</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="DataDisplayWidget" name="DD_CANW_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>CANW</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="DataDisplayWidget" name="DD_VHBH_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>VHBH</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="DataDisplayWidget" name="DD_TEM_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>TEM</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::Celsius</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="DataDisplayWidget" name="DD_VHBL_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>VHBL</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="DataDisplayWidget" name="DD_VCC_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>VCC</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="DataDisplayWidget" name="DD_VBAT_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>VBAT</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="DataDisplayWidget" name="DD_CUR_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>CUR</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::Ampere</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -464,6 +566,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DataDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>DataDisplayWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

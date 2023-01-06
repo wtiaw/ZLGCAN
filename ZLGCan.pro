@@ -28,6 +28,7 @@ SOURCES += \
     CustomWidget/CheckBox/QDrawerCheckBox.cpp \
     CustomWidget/DataEdit.cpp \
     CustomWidget/Frame/QStackedWidget.cpp \
+    CustomWidget/LineEdit/UnitQLineEdit.cpp \
     CustomWidget/TableWidget/QMessageTableWidget.cpp \
     CustomWidget/ToolBox.cpp \
     CustomWidget/ToolPage.cpp \
@@ -58,6 +59,7 @@ HEADERS += \
     CustomWidget/CheckBox/QDrawerCheckBox.h \
     CustomWidget/DataEdit.h \
     CustomWidget/Frame/QStackedWidget.h \
+    CustomWidget/LineEdit/UnitQLineEdit.h \
     CustomWidget/TableWidget/QMessageTableWidget.h \
     CustomWidget/ToolBox.h \
     CustomWidget/ToolPage.h \
@@ -97,22 +99,21 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32: LIBS += -L$$PWD/zlgcan_x64/ -lzlgcan
-
-INCLUDEPATH += $$PWD/zlgcan_x64
-DEPENDPATH += $$PWD/zlgcan_x64
-
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/zlgcan_x64/zlgcan.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/zlgcan_x64/libzlgcan.a
-
-
-win32: LIBS += -L$$PWD/bl_x64/ -lbinlog
-
-INCLUDEPATH += $$PWD/bl_x64
-DEPENDPATH += $$PWD/bl_x64
-
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/bl_x64/binlog.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/bl_x64/libbinlog.a
 
 RESOURCES += \
     Icon.qrc
+
+win32: LIBS += -L$$PWD/include/bl_x64/ -lbinlog
+
+INCLUDEPATH += $$PWD/include/bl_x64
+DEPENDPATH += $$PWD/include/bl_x64
+
+win32: LIBS += -L$$PWD/include/DataDisplayWidget/ -lDataDisplayWidgetPlugin
+
+INCLUDEPATH += $$PWD/include/DataDisplayWidget
+DEPENDPATH += $$PWD/include/DataDisplayWidget
+
+win32: LIBS += -L$$PWD/include/zlgcan_x64/ -lzlgcan
+
+INCLUDEPATH += $$PWD/include/zlgcan_x64
+DEPENDPATH += $$PWD/include/zlgcan_x64

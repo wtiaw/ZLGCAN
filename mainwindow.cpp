@@ -24,7 +24,18 @@
 #include "Windows/Pannel/ACR_H53_Form.h"
 
 
+/**
+ * \brief 每1000000个数据保存一个log文件
+ */
 #define MAX_FILE_DATA_NUM 1000000
+/**
+ * \brief 页面显示5000条数据
+ */
+#define MAX_DATA_TABLE_COUNT_NUM 5000
+/**
+ * \brief 每500次写入一次log（如果数据没有变化的话）
+ */
+#define MAX_DATA_UPDATA_NUM 500
 
 QSystemVariables* MainWindow::SystemVariablesConfig = new QSystemVariables();
 
@@ -828,7 +839,7 @@ int MainWindow::AddTotalTableData(QMessageTableWidget* MessageTableWidget, const
     }
     MessageTableWidget->setItem(RowIndex, 5, new QTableWidgetItem(str.toUpper()));
 
-    if (MessageTableWidget->rowCount() >= 500)
+    if (MessageTableWidget->rowCount() >= MAX_DATA_TABLE_COUNT_NUM)
     {
         MessageTableWidget->removeRow(0);
     }
@@ -1105,7 +1116,7 @@ void MainWindow::SaveSystemVariable(const ULONGLONG& time)
     {
         if (Variable.PreValue == Variable.QVariableBase->GetCurrentValue())
         {
-            if (Variable.count++ < 500)
+            if (Variable.count++ < MAX_DATA_UPDATA_NUM)
             {
                 continue;
             }

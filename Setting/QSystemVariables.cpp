@@ -28,6 +28,7 @@ void QSystemVariables::ReadConfig()
 
     QMultiMap<QString, VariableNamespacePair> temp;
     Variables.swap(temp);
+    NeedSaveVariables.clear();
 
     const QJsonObject RootObject = doc.object();
     QJsonValue interestValue = RootObject.value("namespace");

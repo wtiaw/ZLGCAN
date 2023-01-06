@@ -20,6 +20,10 @@ public:
     void AddTrigger(QReceiveItem* NewItem);
     void AddTrigger(const QVector<QReceiveItem*>& NewItems);
 
+    void ClearTrigger();
+
+    int GetTriggerCount();
+
 private:
     void ReceiveData(const CHANNEL_HANDLE& ChannelHandle);
 

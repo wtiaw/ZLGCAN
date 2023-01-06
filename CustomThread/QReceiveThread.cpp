@@ -67,6 +67,16 @@ void QReceiveThread::AddTrigger(const QVector<QReceiveItem*>& NewItems)
     ReceiveItemContainer.append(NewItems);
 }
 
+void QReceiveThread::ClearTrigger()
+{
+    ReceiveItemContainer.clear();
+}
+
+int QReceiveThread::GetTriggerCount()
+{
+    return ReceiveItemContainer.size();
+}
+
 void QReceiveThread::ReceiveData(const CHANNEL_HANDLE& ChannelHandle)
 {
     if(UINT len = ZCAN_GetReceiveNum(ChannelHandle, TYPE_ALL_DATA))

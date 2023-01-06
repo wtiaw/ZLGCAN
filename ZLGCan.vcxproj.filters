@@ -125,6 +125,9 @@
     <ClCompile Include="CustomWidget\ToolPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CustomWidget\LineEdit\UnitQLineEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -220,6 +223,9 @@
     <QtMoc Include="CustomWidget\ToolPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="CustomWidget\LineEdit\UnitQLineEdit.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="Data\VariableStruct.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -228,6 +234,8 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    
+    
     
     
     
