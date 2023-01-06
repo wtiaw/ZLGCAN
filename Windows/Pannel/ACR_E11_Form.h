@@ -68,7 +68,7 @@ private:
 
     BYTE CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
-    void Send121();
+    
     void SendGW740();
 
     void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func);
@@ -85,6 +85,8 @@ private slots:
 
     //Req
 private:
+    void Send121(const CANData& Data);
+    
     void ReqReadFBL();
     void ReqReadBSW_and_AnalyzingFBL(const CANData& Data);
     void AnalyzingBSW(const CANData& Data);

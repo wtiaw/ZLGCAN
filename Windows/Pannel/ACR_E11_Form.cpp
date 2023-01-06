@@ -139,6 +139,8 @@ void ACR_E11_Form::InitTrigger()
         ui->DD_Activation_Status->SetDataDisplay(QString::number(Data.Data[1]));
     });
 
+    CreateItem(0x121, Temp, [this](auto&& PH1) { Send121(std::forward<decltype(PH1)>(PH1)); });
+
     //读FBL
     Temp = {0x07, 0x62, 0xFD, 0x01};
     CreateItem(0x748, Temp, [this](auto&& PH1) { ReqReadBSW_and_AnalyzingFBL(std::forward<decltype(PH1)>(PH1)); });
@@ -201,17 +203,20 @@ void ACR_E11_Form::Init()
     canfd_data_406.frame.can_id = MAKE_CAN_ID(0x406, 0, 0, 0);
     canfd_data_406.frame.len = 8;
     canfd_data_406.transmit_type = 0;
+    canfd_data_406.frame.flags |= TX_ECHO_FLAG;
 
     memset(&canfd_data_121, 0, sizeof(canfd_data_121));
     canfd_data_121.frame.can_id = MAKE_CAN_ID(0x121, 0, 0, 0);
     canfd_data_121.frame.len = 8;
     canfd_data_121.transmit_type = 0;
+    canfd_data_121.frame.flags |= TX_ECHO_FLAG;
     canfd_data_121.frame.data[1] = 0x20;
 
     memset(&canfd_data_1C2, 0, sizeof(canfd_data_1C2));
     canfd_data_1C2.frame.can_id = MAKE_CAN_ID(0x1C2, 0, 0, 0);
     canfd_data_1C2.frame.len = 64;
     canfd_data_1C2.transmit_type = 0;
+    canfd_data_1C2.frame.flags |= TX_ECHO_FLAG;
     canfd_data_1C2.frame.data[11] = 0x01;
     canfd_data_1C2.frame.data[15] = 0x04;
 
@@ -219,27 +224,32 @@ void ACR_E11_Form::Init()
     canfd_data_50.frame.can_id = MAKE_CAN_ID(0x50, 0, 0, 0);
     canfd_data_50.frame.len = 8;
     canfd_data_50.transmit_type = 0;
+    canfd_data_50.frame.flags |= TX_ECHO_FLAG;
 
     memset(&canfd_data_288, 0, sizeof(canfd_data_288));
     canfd_data_288.frame.can_id = MAKE_CAN_ID(0x288, 0, 0, 0);
     canfd_data_288.frame.len = 8;
     canfd_data_288.transmit_type = 0;
+    canfd_data_288.frame.flags |= TX_ECHO_FLAG;
     canfd_data_288.frame.data[5] = 0x08;
 
     memset(&canfd_data_2D2, 0, sizeof(canfd_data_2D2));
     canfd_data_2D2.frame.can_id = MAKE_CAN_ID(0x2D2, 0, 0, 0);
     canfd_data_2D2.frame.len = 64;
     canfd_data_2D2.transmit_type = 0;
+    canfd_data_2D2.frame.flags |= TX_ECHO_FLAG;
 
     memset(&canfd_data_2F7, 0, sizeof(canfd_data_2F7));
     canfd_data_2F7.frame.can_id = MAKE_CAN_ID(0x2F7, 0, 0, 0);
     canfd_data_2F7.frame.len = 64;
     canfd_data_2F7.transmit_type = 0;
+    canfd_data_2F7.frame.flags |= TX_ECHO_FLAG;
 
     memset(&canfd_data_GW740, 0, sizeof(canfd_data_GW740));
     canfd_data_GW740.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
     canfd_data_GW740.frame.len = 8;
     canfd_data_GW740.transmit_type = 0;
+    canfd_data_GW740.frame.flags |= TX_ECHO_FLAG;
     canfd_data_GW740.frame.data[0] = 0x07;
     canfd_data_GW740.frame.data[1] = 0x31;
     canfd_data_GW740.frame.data[2] = 0x01;
@@ -267,24 +277,6 @@ BYTE ACR_E11_Form::CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Lengt
     return static_cast<BYTE>(CANE2E_CRC8_STARTVALUE ^ CANE2E_CRC8_XORVALUE);
 }
 
-void ACR_E11_Form::Send121()
-{
-    QByteArray ba;
-
-    const auto VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName("VCU", "ACR_Req_LH");
-    canfd_data_121.frame.data[0] = VariableBase->GetCurrentValue().toInt();
-
-    Count_121 = (Count_121 + 1) % 16;
-    canfd_data_121.frame.data[6] = ba.setNum(Count_121, 16).toInt(nullptr, 16) << 4;
-
-    for (int i = 0; i < 7; i++)
-    {
-        txDataBuffer_temp[i] = canfd_data_121.frame.data[i];
-    }
-
-    canfd_data_121.frame.data[7] = CAN_E2E_CalcuelateCRC8(txDataBuffer_temp, 7);
-}
-
 void ACR_E11_Form::SendGW740()
 {
     if (++Count_GW740 == 7) Count_GW740++;
@@ -305,13 +297,76 @@ void ACR_E11_Form::On_WakeUp()
 {
     if (!mainWindow->IsOpenCAN()) return;
 
-    TransmitMessageByTimer(EMessageTimer::Message_121, &canfd_data_121, &ACR_E11_Form::Send121, 10, 10);
-    TransmitMessageByTimer(EMessageTimer::Message_1C2, &canfd_data_1C2, nullptr, 10, 10);
-    TransmitMessageByTimer(EMessageTimer::Message_50, &canfd_data_50, nullptr, 10, 500);
-    TransmitMessageByTimer(EMessageTimer::Message_288, &canfd_data_288, nullptr, 10, 40);
-    TransmitMessageByTimer(EMessageTimer::Message_2D2, &canfd_data_2D2, nullptr, 10, 100);
-    TransmitMessageByTimer(EMessageTimer::Message_2F7, &canfd_data_2F7, nullptr, 10, 100);
-    TransmitMessageByTimer(EMessageTimer::Message_406, &canfd_data_406, nullptr, 10, 700);
+    // TransmitMessageByTimer(EMessageTimer::Message_121, &canfd_data_121, &ACR_E11_Form::Send121, 10, 10);
+    // TransmitMessageByTimer(EMessageTimer::Message_1C2, &canfd_data_1C2, nullptr, 10, 10);
+    // TransmitMessageByTimer(EMessageTimer::Message_50, &canfd_data_50, nullptr, 10, 500);
+    // TransmitMessageByTimer(EMessageTimer::Message_288, &canfd_data_288, nullptr, 10, 40);
+    // TransmitMessageByTimer(EMessageTimer::Message_2D2, &canfd_data_2D2, nullptr, 10, 100);
+    // TransmitMessageByTimer(EMessageTimer::Message_2F7, &canfd_data_2F7, nullptr, 10, 100);
+    // TransmitMessageByTimer(EMessageTimer::Message_406, &canfd_data_406, nullptr, 10, 700);
+    
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_121 = {};
+    auto_canfd_121.index = 0; // 定时列表索引 2
+    auto_canfd_121.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_121.interval = 10;
+    auto_canfd_121.obj = canfd_data_121;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_121); // 设置定时发送
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_1C2 = {};
+    auto_canfd_1C2.index = 1; // 定时列表索引 2
+    auto_canfd_1C2.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_1C2.interval = 10;
+    auto_canfd_1C2.obj = canfd_data_1C2;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_1C2); // 设置定时发送
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_50 = {};
+    auto_canfd_50.index = 2; // 定时列表索引 2
+    auto_canfd_50.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_50.interval = 500;
+    auto_canfd_50.obj = canfd_data_50;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_50); // 设置定时发送
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_288 = {};
+    auto_canfd_288.index = 3; // 定时列表索引 2
+    auto_canfd_288.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_288.interval = 40;
+    auto_canfd_288.obj = canfd_data_288;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_288); // 设置定时发送
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_2D2 = {};
+    auto_canfd_2D2.index = 4; // 定时列表索引 2
+    auto_canfd_2D2.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_2D2.interval = 100;
+    auto_canfd_2D2.obj = canfd_data_2D2;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_2D2); // 设置定时发送
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_2F7 = {};
+    auto_canfd_2F7.index = 5; // 定时列表索引 2
+    auto_canfd_2F7.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_2F7.interval = 100;
+    auto_canfd_2F7.obj = canfd_data_2F7;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_2F7); // 设置定时发送
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_406 = {};
+    auto_canfd_406.index = 6; // 定时列表索引 2
+    auto_canfd_406.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_406.interval = 700;
+    auto_canfd_406.obj = canfd_data_406;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_406); // 设置定时发送
+
+
+    // delay_param.index = 0;                                     // 索引 0
+    // delay_param.type = 1;                                      // type 为 1 表示延时启动
+    // delay_param.value = 100;                                  // 延时 100ms
+    // mainWindow->GetProperty()->SetValue("0/auto_send_param", (const char*)&delay_param); // 设置发送延时
+    qDebug() << "apply_auto_send" << mainWindow->GetProperty()->SetValue("0/apply_auto_send", "0"); // 使能定时发送
 }
 
 
@@ -340,6 +395,32 @@ void ACR_E11_Form::On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index)
     // auto test = QSystemVariables::NeedSaveVariables.first();
     //
     // qDebug() << test.Namespace + "::" + test.Name<<GET_VARIABLE_NAME(test.Namespace,test.Name);
+}
+
+void ACR_E11_Form::Send121(const CANData& Data)
+{
+    QByteArray ba;
+
+    const auto VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName("VCU", "ACR_Req_LH");
+    canfd_data_121.frame.data[0] = VariableBase->GetCurrentValue().toInt();
+
+    Count_121 = (Count_121 + 1) % 16;
+    canfd_data_121.frame.data[6] = ba.setNum(Count_121, 16).toInt(nullptr, 16) << 4;
+
+    for (int i = 0; i < 7; i++)
+    {
+        txDataBuffer_temp[i] = canfd_data_121.frame.data[i];
+    }
+
+    canfd_data_121.frame.data[7] = CAN_E2E_CalcuelateCRC8(txDataBuffer_temp, 7);
+
+    ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_121 = {};
+    auto_canfd_121.index = 0; // 定时列表索引 2
+    auto_canfd_121.enable = 1; // 使能此索引，每条可单独设置
+    auto_canfd_121.interval = 10;
+    auto_canfd_121.obj = canfd_data_121;
+
+    mainWindow->GetProperty()->SetValue("0/auto_send_canfd", (const char*)&auto_canfd_121); // 设置定时发送
 }
 
 void ACR_E11_Form::ReqReadFBL()

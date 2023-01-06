@@ -33,9 +33,9 @@
  */
 #define MAX_DATA_TABLE_COUNT_NUM 5000
 /**
- * \brief 每500次写入一次log（如果数据没有变化的话）
+ * \brief 每100次写入一次log（如果数据没有变化的话）
  */
-#define MAX_DATA_UPDATA_NUM 500
+#define MAX_DATA_UPDATA_NUM 100
 
 QSystemVariables* MainWindow::SystemVariablesConfig = new QSystemVariables();
 
@@ -701,7 +701,7 @@ bool MainWindow::SetSendMode() const
     char path[50] = {0};
     sprintf_s(path, "%d/set_send_mode", ConfigChannel.ID);
 
-    return property->SetValue(path, "1");
+    return property->SetValue(path, "0");
 }
 
 void MainWindow::On_SendMessage()
@@ -1114,7 +1114,7 @@ void MainWindow::SaveSystemVariable(const ULONGLONG& time)
 {
     for (auto& Variable : QSystemVariables::NeedSaveVariables)
     {
-        if (Variable.PreValue == Variable.QVariableBase->GetCurrentValue())
+        if (Variable.PreValue == Variable.QVariableBase->GetCurrentValue() && time)
         {
             if (Variable.count++ < MAX_DATA_UPDATA_NUM)
             {

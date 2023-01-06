@@ -69,7 +69,7 @@ void QSystemVariables::ReadConfig()
                 QJsonValue CommentJV = VariableObj.value("comment");
                 QJsonValue ValueTableJV = VariableObj.value("valuetable");
 
-                QVariableBase* VariableBase = new QVariableBase;
+                auto* VariableBase = new QVariableBase;
                 if (Type == "int")
                 {
                     if (IsSigned == "true")
