@@ -1,6 +1,8 @@
 #ifndef ACRFORM_H
 #define ACRFORM_H
 
+#include <DataDisplayWidget.h>
+
 #include "CustomThread/PerformanceFrequency.h"
 #include "CustomThread/QReceiveItem.h"
 #include "mainwindow.h"
@@ -44,9 +46,9 @@ public:
                                 void (ACR_E11_Form::*Function)() = nullptr, uint delay = 1000, uint msec = 100);
 
     // void StopTimer() const;
-    
+
     void InitWindow() override;
-    
+
 protected:
     //Interface
     void InitButtonFunction() override;
@@ -68,10 +70,10 @@ private:
 
     BYTE CAN_E2E_CalcuelateCRC8(BYTE Crc8_DataArray[], BYTE Crc8_Length);
 
-    
+
     void SendGW740();
 
-    void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func);
+    void CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const & Func);
 
 private slots:
     void On_WakeUp();
@@ -81,12 +83,23 @@ private slots:
 
     void On_UnLock();
 
+    void On_Polling();
+
+    void On_CB_Polling1_CurrentIndexChanged(int index);
+    void On_CB_Polling2_CurrentIndexChanged(int index);
+    void On_CB_Polling3_CurrentIndexChanged(int index);
+    void On_CB_Polling4_CurrentIndexChanged(int index);
+    void On_CB_Polling5_CurrentIndexChanged(int index);
+
     void On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index);
+
+private:
+    void SetPollingUnit(DataDisplayWidget* DataDisplayWidget, int Value);
 
     //Req
 private:
     void Send121(const CANData& Data);
-    
+
     void ReqReadFBL();
     void ReqReadBSW_and_AnalyzingFBL(const CANData& Data);
     void AnalyzingBSW(const CANData& Data);
@@ -97,16 +110,16 @@ private:
     void ReqUnlockECU(const CANData& Data);
     void ReqReadSV(const CANData& Data);
     void ReadSV_and_ReadState(const CANData& Data);
-    
+
     void AnalyzingUnderlyingData(const CANData& Data);
-    
+
 private:
     Ui::ACR_E11_Form* ui;
 
     QVector<QReceiveItem*> Items;
 
     CHANNEL_HANDLE cHandle;
-    
+
 
     MainWindow* mainWindow;
 
@@ -153,7 +166,8 @@ private:
     ZCAN_TransmitFD_Data canfd_data_2F7;
     ZCAN_TransmitFD_Data canfd_data_GW740;
 
-    ZCAN_TransmitFD_Data canfd_data_Extended_Session;
+    ZCAN_TransmitFD_Data canfd_data_PollingDataBuffer;
+
     int Count_121 = 0;
     int Count_GW740 = 0;
 

@@ -122,6 +122,18 @@ void ACR_E11_Form::InitButtonFunction()
     connect(ui->BT_WakeUp, &QPushButton::clicked, this, &ACR_E11_Form::On_WakeUp, Qt::UniqueConnection);
     connect(ui->BT_ReadVersion, &QPushButton::clicked, this, &ACR_E11_Form::On_ReadVersion, Qt::UniqueConnection);
     connect(ui->BT_UnLock, &QPushButton::clicked, this, &ACR_E11_Form::On_UnLock, Qt::UniqueConnection);
+    connect(ui->BT_Polling, &QPushButton::clicked, this, &ACR_E11_Form::On_Polling, Qt::UniqueConnection);
+
+    connect(ui->CB_PollingData1, &QComboBox::currentIndexChanged, this,
+            &ACR_E11_Form::On_CB_Polling1_CurrentIndexChanged, Qt::UniqueConnection);
+    connect(ui->CB_PollingData2, &QComboBox::currentIndexChanged, this,
+            &ACR_E11_Form::On_CB_Polling2_CurrentIndexChanged, Qt::UniqueConnection);
+    connect(ui->CB_PollingData3, &QComboBox::currentIndexChanged, this,
+            &ACR_E11_Form::On_CB_Polling3_CurrentIndexChanged, Qt::UniqueConnection);
+    connect(ui->CB_PollingData4, &QComboBox::currentIndexChanged, this,
+            &ACR_E11_Form::On_CB_Polling4_CurrentIndexChanged, Qt::UniqueConnection);
+    connect(ui->CB_PollingData5, &QComboBox::currentIndexChanged, this,
+            &ACR_E11_Form::On_CB_Polling5_CurrentIndexChanged, Qt::UniqueConnection);
 }
 
 void ACR_E11_Form::InitTrigger()
@@ -255,6 +267,19 @@ void ACR_E11_Form::Init()
     canfd_data_GW740.frame.data[2] = 0x01;
     canfd_data_GW740.frame.data[3] = 0xCF;
     canfd_data_GW740.frame.data[4] = 0x81;
+
+    BYTE PollingDataBuffer[14] = {
+        0x0D, 0x31, 0x01, 0xCF, 0x81, 0x00, 0x00, 0xFE,
+        //五个字节对应Polling的五个信号
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+    };
+    memset(&canfd_data_PollingDataBuffer, 0, sizeof(canfd_data_PollingDataBuffer));
+    canfd_data_PollingDataBuffer.frame.can_id = MAKE_CAN_ID(0x740, 0, 0, 0);
+    canfd_data_PollingDataBuffer.frame.len = 13;
+    canfd_data_PollingDataBuffer.transmit_type = 0;
+    canfd_data_PollingDataBuffer.frame.flags |= TX_ECHO_FLAG;
+    std::copy(std::begin(PollingDataBuffer), std::end(PollingDataBuffer),
+              std::begin(canfd_data_PollingDataBuffer.frame.data));
 }
 
 void ACR_E11_Form::InitVariable()
@@ -285,7 +310,7 @@ void ACR_E11_Form::SendGW740()
     canfd_data_GW740.frame.data[7] = Count_GW740;
 }
 
-void ACR_E11_Form::CreateItem(uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const Func)
+void ACR_E11_Form::CreateItem(const uint Id, QVector<BYTE> FilterData, std::function<void (const CANData&)> const& Func)
 {
     auto* NewItem = new QReceiveItem;
     NewItem->ConstructTrigger(Id, std::move(FilterData), this, Func);
@@ -304,7 +329,7 @@ void ACR_E11_Form::On_WakeUp()
     // TransmitMessageByTimer(EMessageTimer::Message_2D2, &canfd_data_2D2, nullptr, 10, 100);
     // TransmitMessageByTimer(EMessageTimer::Message_2F7, &canfd_data_2F7, nullptr, 10, 100);
     // TransmitMessageByTimer(EMessageTimer::Message_406, &canfd_data_406, nullptr, 10, 700);
-    
+
     ZCANFD_AUTO_TRANSMIT_OBJ auto_canfd_121 = {};
     auto_canfd_121.index = 0; // 定时列表索引 2
     auto_canfd_121.enable = 1; // 使能此索引，每条可单独设置
@@ -384,6 +409,71 @@ void ACR_E11_Form::On_UnLock()
     EnterExtendSession();
 }
 
+void ACR_E11_Form::On_Polling()
+{
+    mainWindow->TransmitCANDataObj(canfd_data_PollingDataBuffer);
+}
+
+void ACR_E11_Form::On_CB_Polling1_CurrentIndexChanged(int index)
+{
+    QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName(
+        "PollingData", "PollingVariable_1");
+
+    if (!VariableBase) return;
+    const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
+
+    canfd_data_PollingDataBuffer.frame.data[8] = CurrentValue;
+    SetPollingUnit(ui->DD_PollingData1, CurrentValue);
+}
+
+void ACR_E11_Form::On_CB_Polling2_CurrentIndexChanged(int index)
+{
+    QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName(
+        "PollingData", "PollingVariable_1");
+
+    if (!VariableBase) return;
+    const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
+
+    canfd_data_PollingDataBuffer.frame.data[9] = CurrentValue;
+    SetPollingUnit(ui->DD_PollingData2, CurrentValue);
+}
+
+void ACR_E11_Form::On_CB_Polling3_CurrentIndexChanged(int index)
+{
+    QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName(
+        "PollingData", "PollingVariable_1");
+
+    if (!VariableBase) return;
+    const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
+
+    canfd_data_PollingDataBuffer.frame.data[10] = CurrentValue;
+    SetPollingUnit(ui->DD_PollingData3, CurrentValue);
+}
+
+void ACR_E11_Form::On_CB_Polling4_CurrentIndexChanged(int index)
+{
+    QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName(
+        "PollingData", "PollingVariable_1");
+
+    if (!VariableBase) return;
+    const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
+
+    canfd_data_PollingDataBuffer.frame.data[11] = CurrentValue;
+    SetPollingUnit(ui->DD_PollingData4, CurrentValue);
+}
+
+void ACR_E11_Form::On_CB_Polling5_CurrentIndexChanged(int index)
+{
+    QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName(
+        "PollingData", "PollingVariable_1");
+
+    if (!VariableBase) return;
+    const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
+
+    canfd_data_PollingDataBuffer.frame.data[12] = CurrentValue;
+    SetPollingUnit(ui->DD_PollingData5, CurrentValue);
+}
+
 void ACR_E11_Form::On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index)
 {
     QVariableBase* VariableBase = QSystemVariables::GetVariableBaseByNamespaceAndName("VCU", "ACR_Req_LH");
@@ -392,9 +482,56 @@ void ACR_E11_Form::On_ACR_Req_LH_ComboBox_CurrentIndexChanged(int index)
     const int CurrentValue = GetTableValueByIndex(VariableBase->ValueTables, index);
 
     VariableBase->SetCurrentValue(CurrentValue);
-    // auto test = QSystemVariables::NeedSaveVariables.first();
-    //
-    // qDebug() << test.Namespace + "::" + test.Name<<GET_VARIABLE_NAME(test.Namespace,test.Name);
+}
+
+void ACR_E11_Form::SetPollingUnit(DataDisplayWidget* DataDisplayWidget, int Value)
+{
+    switch (Value)
+    {
+    case 19:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::HallSteps);
+        break;
+        
+    case 20:
+    case 37:
+    case 46:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::RPM);
+        break;
+
+    case 21:
+    case 38:
+    case 62:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::Ampere);
+        break;
+
+    case 22:
+    case 39:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::Volt);
+        break;
+
+    case 23:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::Celsius);
+        break;
+
+    case 36:
+    case 40:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::FiveMS);
+        break;
+
+    case 41:
+    case 48:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::Percent);
+        break;
+
+    case 42:
+    case 43:
+    case 44:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::Acceleration);
+        break;
+    default:
+        DataDisplayWidget->SetUnitType(DataDisplayWidget::EUnitType::Null);
+        break;
+    }
 }
 
 void ACR_E11_Form::Send121(const CANData& Data)

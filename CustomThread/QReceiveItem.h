@@ -102,11 +102,11 @@ public:
 
     bool ContainedTrigger(const CANData& Data);
 
-    void ConstructTrigger(uint Id, QVector<BYTE> FilterData, QObject* context, std::function<void (const CANData &)> const Func);
+    void ConstructTrigger(uint Id, QVector<BYTE> FilterData, const QObject* context, std::function<void (const CANData &)> const Func);
 
     void On_Trigger(const CANData& Data);
 
-    void SetTrigger(uint Id, QVector<BYTE> FilterData);
+    void SetTrigger(uint Id, const QVector<BYTE> & FilterData);
 
 signals:
     void Trigger(const CANData& Data);

@@ -33,18 +33,7 @@ public:
     QPushButton *BT_UnLock;
     QPushButton *BT_ReadVersion;
     QPushButton *BT_WakeUp;
-    QGroupBox *groupBox_6;
-    QGridLayout *gridLayout_5;
-    DataDisplayWidget *DD_PollingData3;
-    QComboBox *CB_PollingData3;
-    QComboBox *CB_PollingData2;
-    DataDisplayWidget *DD_PollingData4;
-    QComboBox *CB_PollingData4;
-    QComboBox *CB_PollingData5;
-    DataDisplayWidget *DD_PollingData2;
-    QComboBox *CB_PollingData1;
-    DataDisplayWidget *DD_PollingData1;
-    DataDisplayWidget *DD_PollingData5;
+    QPushButton *BT_Polling;
     QGroupBox *groupBox_3;
     QGridLayout *gridLayout_4;
     DataDisplayWidget *DD_ACR_Key;
@@ -57,6 +46,18 @@ public:
     DataDisplayWidget *DD_SV;
     DataDisplayWidget *DD_FBL;
     QSpacerItem *verticalSpacer;
+    QGroupBox *groupBox_6;
+    QGridLayout *gridLayout_5;
+    DataDisplayWidget *DD_PollingData3;
+    QComboBox *CB_PollingData3;
+    QComboBox *CB_PollingData2;
+    DataDisplayWidget *DD_PollingData4;
+    QComboBox *CB_PollingData4;
+    QComboBox *CB_PollingData5;
+    DataDisplayWidget *DD_PollingData2;
+    QComboBox *CB_PollingData1;
+    DataDisplayWidget *DD_PollingData1;
+    DataDisplayWidget *DD_PollingData5;
     QWidget *widget;
     QVBoxLayout *verticalLayout;
     QGroupBox *groupBox_4;
@@ -65,21 +66,21 @@ public:
     QComboBox *CB_ACR_Req_LH;
     QGroupBox *groupBox_5;
     QGridLayout *gridLayout;
+    DataDisplayWidget *DD_VHBH_Phy;
     DataDisplayWidget *DD_HSPD_Phy;
     DataDisplayWidget *DD_CANW_Phy;
-    DataDisplayWidget *DD_VHBH_Phy;
-    DataDisplayWidget *DD_TEM_Phy;
     DataDisplayWidget *DD_VHBL_Phy;
-    DataDisplayWidget *DD_VCC_Phy;
+    DataDisplayWidget *DD_TEM_Phy;
     DataDisplayWidget *DD_VBAT_Phy;
-    DataDisplayWidget *DD_CUR_Phy;
     QSpacerItem *verticalSpacer_2;
+    DataDisplayWidget *DD_CUR_Phy;
+    DataDisplayWidget *DD_VCC_Phy;
 
     void setupUi(QWidget *ACR_E11_Form)
     {
         if (ACR_E11_Form->objectName().isEmpty())
             ACR_E11_Form->setObjectName("ACR_E11_Form");
-        ACR_E11_Form->resize(716, 561);
+        ACR_E11_Form->resize(700, 561);
         gridLayout_3 = new QGridLayout(ACR_E11_Form);
         gridLayout_3->setObjectName("gridLayout_3");
         groupBox = new QGroupBox(ACR_E11_Form);
@@ -106,71 +107,13 @@ public:
 
         gridLayout_2->addWidget(BT_WakeUp, 0, 0, 1, 1);
 
+        BT_Polling = new QPushButton(groupBox);
+        BT_Polling->setObjectName("BT_Polling");
+
+        gridLayout_2->addWidget(BT_Polling, 1, 1, 1, 1);
+
 
         gridLayout_3->addWidget(groupBox, 2, 0, 1, 1);
-
-        groupBox_6 = new QGroupBox(ACR_E11_Form);
-        groupBox_6->setObjectName("groupBox_6");
-        gridLayout_5 = new QGridLayout(groupBox_6);
-        gridLayout_5->setObjectName("gridLayout_5");
-        DD_PollingData3 = new DataDisplayWidget(groupBox_6);
-        DD_PollingData3->setObjectName("DD_PollingData3");
-
-        gridLayout_5->addWidget(DD_PollingData3, 5, 0, 1, 1);
-
-        CB_PollingData3 = new QComboBox(groupBox_6);
-        CB_PollingData3->setObjectName("CB_PollingData3");
-        CB_PollingData3->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-        gridLayout_5->addWidget(CB_PollingData3, 4, 0, 1, 1);
-
-        CB_PollingData2 = new QComboBox(groupBox_6);
-        CB_PollingData2->setObjectName("CB_PollingData2");
-        CB_PollingData2->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-        gridLayout_5->addWidget(CB_PollingData2, 2, 0, 1, 1);
-
-        DD_PollingData4 = new DataDisplayWidget(groupBox_6);
-        DD_PollingData4->setObjectName("DD_PollingData4");
-        DD_PollingData4->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::Null));
-
-        gridLayout_5->addWidget(DD_PollingData4, 7, 0, 1, 1);
-
-        CB_PollingData4 = new QComboBox(groupBox_6);
-        CB_PollingData4->setObjectName("CB_PollingData4");
-        CB_PollingData4->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-        gridLayout_5->addWidget(CB_PollingData4, 6, 0, 1, 1);
-
-        CB_PollingData5 = new QComboBox(groupBox_6);
-        CB_PollingData5->setObjectName("CB_PollingData5");
-        CB_PollingData5->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-        gridLayout_5->addWidget(CB_PollingData5, 8, 0, 1, 1);
-
-        DD_PollingData2 = new DataDisplayWidget(groupBox_6);
-        DD_PollingData2->setObjectName("DD_PollingData2");
-
-        gridLayout_5->addWidget(DD_PollingData2, 3, 0, 1, 1);
-
-        CB_PollingData1 = new QComboBox(groupBox_6);
-        CB_PollingData1->setObjectName("CB_PollingData1");
-        CB_PollingData1->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-        gridLayout_5->addWidget(CB_PollingData1, 0, 0, 1, 1);
-
-        DD_PollingData1 = new DataDisplayWidget(groupBox_6);
-        DD_PollingData1->setObjectName("DD_PollingData1");
-
-        gridLayout_5->addWidget(DD_PollingData1, 1, 0, 1, 1);
-
-        DD_PollingData5 = new DataDisplayWidget(groupBox_6);
-        DD_PollingData5->setObjectName("DD_PollingData5");
-
-        gridLayout_5->addWidget(DD_PollingData5, 9, 0, 1, 1);
-
-
-        gridLayout_3->addWidget(groupBox_6, 1, 1, 1, 1);
 
         groupBox_3 = new QGroupBox(ACR_E11_Form);
         groupBox_3->setObjectName("groupBox_3");
@@ -250,6 +193,70 @@ public:
 
         gridLayout_3->addWidget(groupBox_2, 0, 0, 1, 1);
 
+        groupBox_6 = new QGroupBox(ACR_E11_Form);
+        groupBox_6->setObjectName("groupBox_6");
+        gridLayout_5 = new QGridLayout(groupBox_6);
+        gridLayout_5->setObjectName("gridLayout_5");
+        DD_PollingData3 = new DataDisplayWidget(groupBox_6);
+        DD_PollingData3->setObjectName("DD_PollingData3");
+
+        gridLayout_5->addWidget(DD_PollingData3, 5, 0, 1, 1);
+
+        CB_PollingData3 = new QComboBox(groupBox_6);
+        CB_PollingData3->setObjectName("CB_PollingData3");
+        CB_PollingData3->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+        gridLayout_5->addWidget(CB_PollingData3, 4, 0, 1, 1);
+
+        CB_PollingData2 = new QComboBox(groupBox_6);
+        CB_PollingData2->setObjectName("CB_PollingData2");
+        CB_PollingData2->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+        gridLayout_5->addWidget(CB_PollingData2, 2, 0, 1, 1);
+
+        DD_PollingData4 = new DataDisplayWidget(groupBox_6);
+        DD_PollingData4->setObjectName("DD_PollingData4");
+        DD_PollingData4->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::Null));
+
+        gridLayout_5->addWidget(DD_PollingData4, 7, 0, 1, 1);
+
+        CB_PollingData4 = new QComboBox(groupBox_6);
+        CB_PollingData4->setObjectName("CB_PollingData4");
+        CB_PollingData4->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+        gridLayout_5->addWidget(CB_PollingData4, 6, 0, 1, 1);
+
+        CB_PollingData5 = new QComboBox(groupBox_6);
+        CB_PollingData5->setObjectName("CB_PollingData5");
+        CB_PollingData5->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+        gridLayout_5->addWidget(CB_PollingData5, 8, 0, 1, 1);
+
+        DD_PollingData2 = new DataDisplayWidget(groupBox_6);
+        DD_PollingData2->setObjectName("DD_PollingData2");
+
+        gridLayout_5->addWidget(DD_PollingData2, 3, 0, 1, 1);
+
+        CB_PollingData1 = new QComboBox(groupBox_6);
+        CB_PollingData1->setObjectName("CB_PollingData1");
+        CB_PollingData1->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+        gridLayout_5->addWidget(CB_PollingData1, 0, 0, 1, 1);
+
+        DD_PollingData1 = new DataDisplayWidget(groupBox_6);
+        DD_PollingData1->setObjectName("DD_PollingData1");
+        DD_PollingData1->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::Null));
+
+        gridLayout_5->addWidget(DD_PollingData1, 1, 0, 1, 1);
+
+        DD_PollingData5 = new DataDisplayWidget(groupBox_6);
+        DD_PollingData5->setObjectName("DD_PollingData5");
+
+        gridLayout_5->addWidget(DD_PollingData5, 9, 0, 1, 1);
+
+
+        gridLayout_3->addWidget(groupBox_6, 1, 0, 1, 1);
+
         widget = new QWidget(ACR_E11_Form);
         widget->setObjectName("widget");
         verticalLayout = new QVBoxLayout(widget);
@@ -294,10 +301,16 @@ public:
         groupBox_5 = new QGroupBox(widget);
         groupBox_5->setObjectName("groupBox_5");
         groupBox_5->setMinimumSize(QSize(330, 0));
+        groupBox_5->setFlat(false);
         gridLayout = new QGridLayout(groupBox_5);
         gridLayout->setObjectName("gridLayout");
-        gridLayout->setHorizontalSpacing(6);
-        gridLayout->setContentsMargins(4, -1, 4, -1);
+        DD_VHBH_Phy = new DataDisplayWidget(groupBox_5);
+        DD_VHBH_Phy->setObjectName("DD_VHBH_Phy");
+        DD_VHBH_Phy->setProperty("MaxLength", QVariant(70u));
+        DD_VHBH_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
+
+        gridLayout->addWidget(DD_VHBH_Phy, 1, 0, 1, 1);
+
         DD_HSPD_Phy = new DataDisplayWidget(groupBox_5);
         DD_HSPD_Phy->setObjectName("DD_HSPD_Phy");
         DD_HSPD_Phy->setProperty("MaxLength", QVariant(70u));
@@ -312,12 +325,12 @@ public:
 
         gridLayout->addWidget(DD_CANW_Phy, 3, 0, 1, 1);
 
-        DD_VHBH_Phy = new DataDisplayWidget(groupBox_5);
-        DD_VHBH_Phy->setObjectName("DD_VHBH_Phy");
-        DD_VHBH_Phy->setProperty("MaxLength", QVariant(70u));
-        DD_VHBH_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
+        DD_VHBL_Phy = new DataDisplayWidget(groupBox_5);
+        DD_VHBL_Phy->setObjectName("DD_VHBL_Phy");
+        DD_VHBL_Phy->setProperty("MaxLength", QVariant(70u));
+        DD_VHBL_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
 
-        gridLayout->addWidget(DD_VHBH_Phy, 1, 0, 1, 1);
+        gridLayout->addWidget(DD_VHBL_Phy, 2, 0, 1, 1);
 
         DD_TEM_Phy = new DataDisplayWidget(groupBox_5);
         DD_TEM_Phy->setObjectName("DD_TEM_Phy");
@@ -326,26 +339,16 @@ public:
 
         gridLayout->addWidget(DD_TEM_Phy, 1, 1, 1, 1);
 
-        DD_VHBL_Phy = new DataDisplayWidget(groupBox_5);
-        DD_VHBL_Phy->setObjectName("DD_VHBL_Phy");
-        DD_VHBL_Phy->setProperty("MaxLength", QVariant(70u));
-        DD_VHBL_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
-
-        gridLayout->addWidget(DD_VHBL_Phy, 2, 0, 1, 1);
-
-        DD_VCC_Phy = new DataDisplayWidget(groupBox_5);
-        DD_VCC_Phy->setObjectName("DD_VCC_Phy");
-        DD_VCC_Phy->setProperty("MaxLength", QVariant(70u));
-        DD_VCC_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
-
-        gridLayout->addWidget(DD_VCC_Phy, 0, 0, 1, 1);
-
         DD_VBAT_Phy = new DataDisplayWidget(groupBox_5);
         DD_VBAT_Phy->setObjectName("DD_VBAT_Phy");
         DD_VBAT_Phy->setProperty("MaxLength", QVariant(70u));
         DD_VBAT_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
 
         gridLayout->addWidget(DD_VBAT_Phy, 0, 1, 1, 1);
+
+        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        gridLayout->addItem(verticalSpacer_2, 4, 0, 1, 1);
 
         DD_CUR_Phy = new DataDisplayWidget(groupBox_5);
         DD_CUR_Phy->setObjectName("DD_CUR_Phy");
@@ -354,15 +357,18 @@ public:
 
         gridLayout->addWidget(DD_CUR_Phy, 2, 1, 1, 1);
 
-        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        DD_VCC_Phy = new DataDisplayWidget(groupBox_5);
+        DD_VCC_Phy->setObjectName("DD_VCC_Phy");
+        DD_VCC_Phy->setProperty("MaxLength", QVariant(70u));
+        DD_VCC_Phy->setProperty("UnitType", QVariant::fromValue(DataDisplayWidget::MilliVolt));
 
-        gridLayout->addItem(verticalSpacer_2, 4, 0, 1, 1);
+        gridLayout->addWidget(DD_VCC_Phy, 0, 0, 1, 1);
 
 
         verticalLayout->addWidget(groupBox_5);
 
 
-        gridLayout_3->addWidget(widget, 1, 0, 1, 1);
+        gridLayout_3->addWidget(widget, 1, 1, 1, 1);
 
 
         retranslateUi(ACR_E11_Form);
@@ -377,17 +383,7 @@ public:
         BT_UnLock->setText(QCoreApplication::translate("ACR_E11_Form", "\350\247\243\351\224\201", nullptr));
         BT_ReadVersion->setText(QCoreApplication::translate("ACR_E11_Form", "\350\257\273\345\217\226\347\211\210\346\234\254", nullptr));
         BT_WakeUp->setText(QCoreApplication::translate("ACR_E11_Form", "\345\224\244\351\206\222", nullptr));
-        groupBox_6->setTitle(QCoreApplication::translate("ACR_E11_Form", "PTMP_Polling", nullptr));
-        DD_PollingData3->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
-        DD_PollingData3->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
-        DD_PollingData4->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
-        DD_PollingData4->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
-        DD_PollingData2->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
-        DD_PollingData2->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
-        DD_PollingData1->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
-        DD_PollingData1->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
-        DD_PollingData5->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
-        DD_PollingData5->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
+        BT_Polling->setText(QCoreApplication::translate("ACR_E11_Form", "Polling", nullptr));
         groupBox_3->setTitle(QCoreApplication::translate("ACR_E11_Form", "ACR_122", nullptr));
         DD_ACR_Key->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "ACR_Key", nullptr)));
         DD_ACRCrcChk122->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "ACRCrcChk122", nullptr)));
@@ -400,6 +396,17 @@ public:
         DD_SV->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
         DD_FBL->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "FBL  ", nullptr)));
         DD_FBL->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
+        groupBox_6->setTitle(QCoreApplication::translate("ACR_E11_Form", "PTMP_Polling", nullptr));
+        DD_PollingData3->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
+        DD_PollingData3->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
+        DD_PollingData4->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
+        DD_PollingData4->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
+        DD_PollingData2->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
+        DD_PollingData2->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
+        DD_PollingData1->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
+        DD_PollingData1->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
+        DD_PollingData5->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "Polling Data", nullptr)));
+        DD_PollingData5->setProperty("DataDisplay", QVariant(QCoreApplication::translate("ACR_E11_Form", "---", nullptr)));
         groupBox_4->setTitle(QCoreApplication::translate("ACR_E11_Form", "ACR_121", nullptr));
         label_11->setText(QCoreApplication::translate("ACR_E11_Form", "ACR_Req_LH", nullptr));
         CB_ACR_Req_LH->setItemText(0, QCoreApplication::translate("ACR_E11_Form", "No Request", nullptr));
@@ -417,14 +424,14 @@ public:
         CB_ACR_Req_LH->setItemText(12, QCoreApplication::translate("ACR_E11_Form", "Retract Activation Level 7", nullptr));
 
         groupBox_5->setTitle(QCoreApplication::translate("ACR_E11_Form", "ACR_Probe", nullptr));
+        DD_VHBH_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "VHBH", nullptr)));
         DD_HSPD_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "HSPD", nullptr)));
         DD_CANW_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "CANW", nullptr)));
-        DD_VHBH_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "VHBH", nullptr)));
-        DD_TEM_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "TEM", nullptr)));
         DD_VHBL_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "VHBL", nullptr)));
-        DD_VCC_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "VCC", nullptr)));
+        DD_TEM_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "TEM", nullptr)));
         DD_VBAT_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "VBAT", nullptr)));
         DD_CUR_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "CUR", nullptr)));
+        DD_VCC_Phy->setProperty("DataDisplayName", QVariant(QCoreApplication::translate("ACR_E11_Form", "VCC", nullptr)));
     } // retranslateUi
 
 };

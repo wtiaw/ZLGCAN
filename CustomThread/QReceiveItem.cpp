@@ -1,4 +1,6 @@
 #include "QReceiveItem.h"
+
+#include <utility>
 #include "qdebug.h"
 
 QReceiveItem::QReceiveItem(QObject *parent)
@@ -19,9 +21,9 @@ bool QReceiveItem::ContainedTrigger(const CANData &Data)
     return true;
 }
 
-void QReceiveItem::ConstructTrigger(uint Id, QVector<BYTE> FilterData, QObject* context, const std::function<void (const CANData &)> Func)
+void QReceiveItem::ConstructTrigger(const uint Id, QVector<BYTE> FilterData, const QObject* context, const std::function<void (const CANData &)> Func)
 {
-    SetTrigger(Id, FilterData);
+    SetTrigger(Id, std::move(FilterData));
     if(context)
         connect(this, &QReceiveItem::Trigger, context, Func);
 }
@@ -37,7 +39,7 @@ void QReceiveItem::On_Trigger(const CANData &Data)
     emit Trigger(Data);
 }
 
-void QReceiveItem::SetTrigger(uint Id, QVector<BYTE> FilterData)
+void QReceiveItem::SetTrigger(const uint Id, const QVector<BYTE> & FilterData)
 {
     this->FrameId    = Id;
     this->FilterData = FilterData;

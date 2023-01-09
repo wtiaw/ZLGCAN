@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>716</width>
+    <width>700</width>
     <height>561</height>
    </rect>
   </property>
@@ -47,100 +47,10 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QGroupBox" name="groupBox_6">
-     <property name="title">
-      <string>PTMP_Polling</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <item row="5" column="0">
-       <widget class="DataDisplayWidget" name="DD_PollingData3">
-        <property name="DataDisplayName" stdset="0">
-         <string>Polling Data</string>
-        </property>
-        <property name="DataDisplay" stdset="0">
-         <string>---</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QComboBox" name="CB_PollingData3">
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QComboBox" name="CB_PollingData2">
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="DataDisplayWidget" name="DD_PollingData4">
-        <property name="DataDisplayName" stdset="0">
-         <string>Polling Data</string>
-        </property>
-        <property name="DataDisplay" stdset="0">
-         <string>---</string>
-        </property>
-        <property name="UnitType" stdset="0">
-         <enum>DataDisplayWidget::Null</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QComboBox" name="CB_PollingData4">
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QComboBox" name="CB_PollingData5">
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="DataDisplayWidget" name="DD_PollingData2">
-        <property name="DataDisplayName" stdset="0">
-         <string>Polling Data</string>
-        </property>
-        <property name="DataDisplay" stdset="0">
-         <string>---</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="CB_PollingData1">
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="DataDisplayWidget" name="DD_PollingData1">
-        <property name="DataDisplayName" stdset="0">
-         <string>Polling Data</string>
-        </property>
-        <property name="DataDisplay" stdset="0">
-         <string>---</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="DataDisplayWidget" name="DD_PollingData5">
-        <property name="DataDisplayName" stdset="0">
-         <string>Polling Data</string>
-        </property>
-        <property name="DataDisplay" stdset="0">
-         <string>---</string>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="BT_Polling">
+        <property name="text">
+         <string>Polling</string>
         </property>
        </widget>
       </item>
@@ -312,6 +222,106 @@
     </widget>
    </item>
    <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_6">
+     <property name="title">
+      <string>PTMP_Polling</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="5" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData3">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QComboBox" name="CB_PollingData3">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QComboBox" name="CB_PollingData2">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData4">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+        <property name="UnitType" stdset="0">
+         <enum>DataDisplayWidget::Null</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QComboBox" name="CB_PollingData4">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QComboBox" name="CB_PollingData5">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData2">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="CB_PollingData1">
+        <property name="sizeAdjustPolicy">
+         <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData1">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+        <property name="UnitType" stdset="0">
+         <enum>DataDisplayWidget::Null</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="DataDisplayWidget" name="DD_PollingData5">
+        <property name="DataDisplayName" stdset="0">
+         <string>Polling Data</string>
+        </property>
+        <property name="DataDisplay" stdset="0">
+         <string>---</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="1">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
@@ -431,16 +441,23 @@
         <property name="title">
          <string>ACR_Probe</string>
         </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
         <layout class="QGridLayout" name="gridLayout">
-         <property name="leftMargin">
-          <number>4</number>
-         </property>
-         <property name="rightMargin">
-          <number>4</number>
-         </property>
-         <property name="horizontalSpacing">
-          <number>6</number>
-         </property>
+         <item row="1" column="0">
+          <widget class="DataDisplayWidget" name="DD_VHBH_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>VHBH</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
+         </item>
          <item row="3" column="1">
           <widget class="DataDisplayWidget" name="DD_HSPD_Phy">
            <property name="DataDisplayName" stdset="0">
@@ -467,10 +484,10 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="DataDisplayWidget" name="DD_VHBH_Phy">
+         <item row="2" column="0">
+          <widget class="DataDisplayWidget" name="DD_VHBL_Phy">
            <property name="DataDisplayName" stdset="0">
-            <string>VHBH</string>
+            <string>VHBL</string>
            </property>
            <property name="MaxLength" stdset="0">
             <UInt>70</UInt>
@@ -493,32 +510,6 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="DataDisplayWidget" name="DD_VHBL_Phy">
-           <property name="DataDisplayName" stdset="0">
-            <string>VHBL</string>
-           </property>
-           <property name="MaxLength" stdset="0">
-            <UInt>70</UInt>
-           </property>
-           <property name="UnitType" stdset="0">
-            <enum>DataDisplayWidget::MilliVolt</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="DataDisplayWidget" name="DD_VCC_Phy">
-           <property name="DataDisplayName" stdset="0">
-            <string>VCC</string>
-           </property>
-           <property name="MaxLength" stdset="0">
-            <UInt>70</UInt>
-           </property>
-           <property name="UnitType" stdset="0">
-            <enum>DataDisplayWidget::MilliVolt</enum>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="1">
           <widget class="DataDisplayWidget" name="DD_VBAT_Phy">
            <property name="DataDisplayName" stdset="0">
@@ -529,19 +520,6 @@
            </property>
            <property name="UnitType" stdset="0">
             <enum>DataDisplayWidget::MilliVolt</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="DataDisplayWidget" name="DD_CUR_Phy">
-           <property name="DataDisplayName" stdset="0">
-            <string>CUR</string>
-           </property>
-           <property name="MaxLength" stdset="0">
-            <UInt>70</UInt>
-           </property>
-           <property name="UnitType" stdset="0">
-            <enum>DataDisplayWidget::Ampere</enum>
            </property>
           </widget>
          </item>
@@ -557,6 +535,32 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item row="2" column="1">
+          <widget class="DataDisplayWidget" name="DD_CUR_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>CUR</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::Ampere</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="DataDisplayWidget" name="DD_VCC_Phy">
+           <property name="DataDisplayName" stdset="0">
+            <string>VCC</string>
+           </property>
+           <property name="MaxLength" stdset="0">
+            <UInt>70</UInt>
+           </property>
+           <property name="UnitType" stdset="0">
+            <enum>DataDisplayWidget::MilliVolt</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

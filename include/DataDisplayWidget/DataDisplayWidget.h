@@ -31,6 +31,10 @@ public:
 
         Celsius,
         RPM,
+        HallSteps,
+        FiveMS,
+        Percent,
+        Acceleration,
     };
     Q_ENUM(EUnitType)
 
